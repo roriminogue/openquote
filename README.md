@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OpenQuote
 
-## Getting Started
+Open-source, AI-powered quoting and job management for trades businesses. Describe a job by voice, text, photos
+or plans, and get a priced, editable quote built from your own rates. Then send it, track it and invoice it.
 
-First, run the development server:
+> Working name. Product spec, data model and roadmap: [SPEC.md](SPEC.md).
+
+## Stack
+
+Next.js (App Router, TypeScript, Tailwind) · Postgres + Drizzle ORM (pgvector image) · MinIO (S3) · Mailpit
+(dev email) · Vitest · Claude for estimating (coming next).
+
+## Getting started
+
+Prerequisites: Node 22+, Docker Desktop running.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # already matches docker-compose defaults
+npm install
+npm run db:up                # postgres, minio, mailpit
+npm run db:migrate           # apply drizzle/ migrations
+npm run db:seed              # synthetic demo org, rates and an estimate
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Service | URL |
+|---|---|
+| App | http://localhost:3000 |
+| Mail inbox (sent proposals) | http://localhost:8025 |
+| MinIO console | http://localhost:9001 (openquote / openquote-dev) |
+| DB browser | `npm run db:studio` |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Script | What it does |
+|---|---|
+| `npm test` | Unit tests (Vitest) |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run db:generate` | New migration from `src/db/schema.ts` changes |
+| `npm run db:migrate` | Apply migrations |
 
-## Learn More
+## Layout
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/            Next.js routes
+  db/schema.ts    MVP data model (SPEC.md §4)
+  db/seed.ts      Synthetic demo data
+  lib/pricing.ts  Deterministic pricing: markup resolution, GST, margin
+drizzle/          Generated SQL migrations
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Design principles
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Money is integer cents, ex-GST.** GST is applied once, on the document total.
+- **The LLM proposes, code prices.** The model outputs structured line items; all arithmetic lives in
+  `lib/pricing.ts`.
+- **Every change is a version.** AI and user edits write an `estimate_versions` snapshot, so they can be undone
+  and you can see what each client saw.
 
-## Deploy on Vercel
+## Disclaimer
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+An independent project inspired by commercial trades-quoting tools. It contains no code, prompts or assets from
+any of them.
