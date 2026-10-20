@@ -26,6 +26,13 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
 
   const path = request.nextUrl.pathname;
+  // The app's front door: estimates when signed in, sign-in otherwise.
+  if (path === "/") {
+    const to = request.nextUrl.clone();
+    to.pathname = data?.claims ? "/estimates" : "/login";
+    to.search = "";
+    return NextResponse.redirect(to);
+  }
   const isPublic = PUBLIC_PATHS.some((p) => path === p || (p !== "/" && path.startsWith(`${p}/`)));
   // API routes check auth themselves and answer 401 JSON; a redirect to an HTML page would confuse callers.
   const isApi = path.startsWith("/api/");

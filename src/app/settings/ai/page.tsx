@@ -1,27 +1,28 @@
 import { and, eq, gte, sql } from "drizzle-orm";
-import Link from "next/link";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { db, schema } from "@/db";
 import { requireMember } from "@/lib/auth";
 import { PROVIDER_INFO } from "@/lib/ai/providers";
 import { removeAiKey } from "./actions";
-import { AiSettingsForm } from "./form";
+import { Money } from "@/components/money";
+import { Rule } from "@/components/ui";
+import { AiSettingsForm, RemoveKey } from "./form";
+
+export const metadata: Metadata = { title: "AI settings" };
 
 export default function AiSettingsPage() {
   return (
-    <main className="mx-auto w-full max-w-xl flex-1 px-4 py-16">
-      <Link href="/" className="text-sm text-zinc-500 underline">
-        ← Home
-      </Link>
-      <h1 className="mt-4 text-2xl font-semibold tracking-tight">AI settings</h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-        OpenQuote uses your own AI provider account. Your key is encrypted, stays on the server, and you pay the
+    <div className="max-w-xl">
+      <h1 className="text-[1.75rem] font-bold leading-tight tracking-[-0.01em]">AI settings</h1>
+      <p className="mt-2 text-[1.0625rem] text-ink-2">
+        OpenQuote uses your own AI provider account. Your key is encrypted, never leaves the server, and you pay the
         provider directly.
       </p>
       <Suspense>
         <AiSettings />
       </Suspense>
-    </main>
+    </div>
   );
 }
 
@@ -55,31 +56,32 @@ async function AiSettings() {
 
   return (
     <>
-      <section className="mt-8 rounded-lg border border-zinc-200 p-4 text-sm dark:border-zinc-800">
-        <dl className="space-y-1">
-          <div className="flex justify-between gap-4">
-            <dt className="text-zinc-500">Provider</dt>
-            <dd>{info.label}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-zinc-500">Key</dt>
-            <dd>{keyStatus}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-zinc-500">This month</dt>
-            <dd className="tabular-nums">
-              {usage.calls} calls · {usage.tokens.toLocaleString("en-AU")} tokens · US$
-              {(Number(usage.costMicroUsd) / 1_000_000).toFixed(2)}
-            </dd>
-          </div>
-        </dl>
-        {canEdit && settings?.apiKeyLast4 && (
-          <form action={removeAiKey} className="mt-3">
-            <button className="text-red-600 underline">Remove key</button>
-          </form>
-        )}
-      </section>
+      <dl className="mt-8 divide-y divide-hairline border-y border-hairline text-[1.0625rem]">
+        <div className="flex justify-between gap-4 py-3">
+          <dt className="text-ink-2">Provider</dt>
+          <dd className="font-semibold">{info.label}</dd>
+        </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3">
+          <dt className="text-ink-2">Key</dt>
+          <dd className="flex items-baseline gap-3 font-semibold">
+            <span className={keyStatus.startsWith("No key") ? "text-mark" : undefined}>{keyStatus}</span>
+            {canEdit && settings?.apiKeyLast4 && (
+              <RemoveKey action={removeAiKey} />
+            )}
+          </dd>
+        </div>
+        <div className="flex justify-between gap-4 py-3">
+          <dt className="text-ink-2">This month</dt>
+          <dd className="figures text-right font-semibold">
+            {usage.calls} {usage.calls === 1 ? "call" : "calls"} · {usage.tokens.toLocaleString("en-AU")} tokens ·{" "}
+            <span className="whitespace-nowrap">
+              US<Money cents={Math.round(Number(usage.costMicroUsd) / 10_000)} />
+            </span>
+          </dd>
+        </div>
+      </dl>
 
+      <Rule className="mt-12" />
       {canEdit ? (
         <AiSettingsForm
           initial={{
@@ -92,7 +94,7 @@ async function AiSettings() {
           }}
         />
       ) : (
-        <p className="mt-8 text-sm text-zinc-500">Only owners and admins can change AI settings.</p>
+        <p className="mt-8 text-ink-3">Only owners and admins can change AI settings.</p>
       )}
     </>
   );

@@ -27,5 +27,5 @@ export async function createOrganisation(formData: FormData) {
       .insert(schema.users)
       .values({ id: user.id, orgId: org.id, name: input.data.name, email: user.email!, role: "owner" });
   });
-  redirect("/");
+  redirect("/estimates");
 }

@@ -51,7 +51,9 @@ const WET_AREA = /\b(bathroom|ensuite|shower|laundry|wet area)\b/i;
 const WATERPROOF = /waterproof|membrane/i;
 
 /** Warnings for the tradie to review. Never silently changes the estimate. */
-export function validateEstimate(description: string, groups: PricedGroup[]): string[] {
+type CheckedLine = Pick<PricedLine, "description" | "type" | "unitCostCents">;
+
+export function validateEstimate(description: string, groups: { lines: CheckedLine[] }[]): string[] {
   const warnings: string[] = [];
   const lines = groups.flatMap((g) => g.lines);
 
