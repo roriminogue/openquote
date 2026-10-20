@@ -13,11 +13,17 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/db/seed.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "ai:try": "tsx scripts/try-estimate.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.84",
+    "@ai-sdk/google": "^4.0.101",
+    "@ai-sdk/openai": "^4.0.98",
+    "@ai-sdk/openai-compatible": "^3.0.74",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
+    "ai": "^7.0.146",
     "drizzle-orm": "^0.45.4",
     "next": "16.4.2",
     "postgres": "^3.4.9",
