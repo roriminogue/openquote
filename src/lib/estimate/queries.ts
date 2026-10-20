@@ -60,12 +60,18 @@ export async function getOrg(orgId: string) {
   return org;
 }
 
-export async function listEstimates(orgId: string) {
+export async function listEstimates(orgId: string, filter: { projectId?: string; clientId?: string } = {}) {
   const org = await getOrg(orgId);
   const estimates = await db
     .select()
     .from(schema.estimates)
-    .where(eq(schema.estimates.orgId, orgId))
+    .where(
+      and(
+        eq(schema.estimates.orgId, orgId),
+        filter.projectId ? eq(schema.estimates.projectId, filter.projectId) : undefined,
+        filter.clientId ? eq(schema.estimates.clientId, filter.clientId) : undefined,
+      ),
+    )
     .orderBy(desc(schema.estimates.createdAt))
     .limit(100);
   if (!estimates.length) return [];
