@@ -1,26 +1,144 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* OpenQuote: the estimate is read like a steel tape. See PRODUCT.md and DESIGN.md. */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root {
+  --ground: #f3f3f0; /* concrete-light page */
+  --surface: #ffffff;
+  --surface-2: #ebebe6; /* second neutral layer: header, table heads */
+  --ink: #161510;
+  --ink-2: #47463f;
+  --ink-3: #66645c;
+  --hairline: #d8d7d0;
+  --hairline-strong: #b4b3ab;
+  --blade: #f5c400; /* tape-blade yellow: the one committed accent */
+  --blade-press: #dcb000;
+  --blade-wash: #fff3bf;
+  --on-blade: #161510;
+  --case: #161510; /* the tape case: reversed plate */
+  --on-case: #f7f6ef;
+  --mark: #c8281e; /* stud-mark red: warnings and errors only */
+  --mark-wash: #fbe8e5;
+  --ok: #1c6a43;
+  --focus: #161510;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --ground: #11110f;
+    --surface: #1a1a17;
+    --surface-2: #23231f;
+    --ink: #f2f1ea;
+    --ink-2: #c4c2b8;
+    --ink-3: #96948a;
+    --hairline: #313029;
+    --hairline-strong: #4a4942;
+    --blade-press: #ffd633;
+    --blade-wash: #3a320f;
+    --case: #2a2925;
+    --mark: #ff7468;
+    --mark-wash: #3b1b17;
+    --ok: #5fc48c;
+    --focus: #f5c400;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-blade: var(--blade);
+  --color-blade-press: var(--blade-press);
+  --color-blade-wash: var(--blade-wash);
+  --color-on-blade: var(--on-blade);
+  --color-case: var(--case);
+  --color-on-case: var(--on-case);
+  --color-mark: var(--mark);
+  --color-mark-wash: var(--mark-wash);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-cond: var(--font-barlow-cond), var(--font-barlow), ui-sans-serif, sans-serif;
+  --radius-tape: 4px;
 }
+
+html {
+  color-scheme: light dark;
+  scroll-padding-top: 7rem; /* keep focused elements clear of the sticky header */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--hairline-strong) transparent;
+}
+
+body {
+  touch-action: manipulation;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--ink);
+}
+
+::selection {
+  background: var(--blade);
+  color: var(--on-blade);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+a {
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+/* Blade printing: condensed, upper-case, tabular. Used for labels and numbers. */
+@utility label {
+  font-family: var(--font-cond);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+@utility figures {
+  font-family: var(--font-cond);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* The graduated blade: minor ticks every 4px, major every 20px, printed along the top edge. */
+@utility graduations {
+  background-image:
+    linear-gradient(to right, var(--on-blade) 1px, transparent 1px),
+    linear-gradient(to right, var(--on-blade) 1px, transparent 1px);
+  background-size:
+    20px 45%,
+    4px 22%;
+  background-repeat: repeat-x;
+  background-position: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
