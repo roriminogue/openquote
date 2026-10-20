@@ -79,11 +79,28 @@ export async function listEstimates(orgId: string) {
         .where(inArray(schema.lineItems.groupId, groups.map((g) => g.id)))
     : [];
 
+  const clientIds = [...new Set(estimates.map((e) => e.clientId).filter((x): x is string => !!x))];
+  const clientNames = new Map(
+    clientIds.length
+      ? (
+          await db
+            .select({ id: schema.clients.id, name: schema.clients.name })
+            .from(schema.clients)
+            .where(and(eq(schema.clients.orgId, orgId), inArray(schema.clients.id, clientIds)))
+        ).map((c) => [c.id, c.name])
+      : [],
+  );
+
   return estimates.map((e) => {
     const eg = groups.filter((g) => g.estimateId === e.id);
     const groupIds = new Set(eg.map((g) => g.id));
     const view = buildView(org, e, eg, lines.filter((l) => groupIds.has(l.groupId)));
-    return { estimate: e, lineCount: view.groups.reduce((s, g) => s + g.lines.length, 0), ...view };
+    return {
+      estimate: e,
+      clientName: e.clientId ? (clientNames.get(e.clientId) ?? null) : null,
+      lineCount: view.groups.reduce((s, g) => s + g.lines.length, 0),
+      ...view,
+    };
   });
 }
 
@@ -106,5 +123,24 @@ export async function getEstimate(orgId: string, estimateId: string) {
         .from(schema.lineItems)
         .where(inArray(schema.lineItems.groupId, groups.map((g) => g.id)))
     : [];
-  return { estimate, org, ...buildView(org, estimate, groups, lines) };
+  return { estimate, org, context: await estimateContext(orgId, estimate), ...buildView(org, estimate, groups, lines) };
+}
+
+export type EstimateContext = { projectName: string | null; projectNumber: number | null; clientName: string | null };
+
+/** The project and client an estimate belongs to, for headers. */
+async function estimateContext(orgId: string, e: Estimate): Promise<EstimateContext> {
+  const [project] = e.projectId
+    ? await db
+        .select({ name: schema.projects.name, number: schema.projects.number })
+        .from(schema.projects)
+        .where(and(eq(schema.projects.id, e.projectId), eq(schema.projects.orgId, orgId)))
+    : [];
+  const [client] = e.clientId
+    ? await db
+        .select({ name: schema.clients.name })
+        .from(schema.clients)
+        .where(and(eq(schema.clients.id, e.clientId), eq(schema.clients.orgId, orgId)))
+    : [];
+  return { projectName: project?.name ?? null, projectNumber: project?.number ?? null, clientName: client?.name ?? null };
 }

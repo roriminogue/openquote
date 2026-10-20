@@ -23,7 +23,7 @@ export async function loadGenerationInputs(orgId: string) {
 /** Creates the empty draft estimate (so the client gets its id and number straight away). */
 export async function createPendingEstimate(
   orgId: string,
-  input: { description: string; clientId?: string | null; siteAddress?: string | null },
+  input: { description: string; clientId?: string | null; projectId?: string | null; siteAddress?: string | null },
 ) {
   return db.transaction(async (tx) => {
     // Atomically take the next estimate number for this org.
@@ -39,6 +39,7 @@ export async function createPendingEstimate(
         number,
         description: input.description,
         clientId: input.clientId ?? null,
+        projectId: input.projectId ?? null,
         siteAddress: input.siteAddress ?? null,
         generationMode: "quick",
       })

@@ -4,6 +4,7 @@ import { requireMember } from "@/lib/auth";
 import { resolveAiConfig } from "@/lib/ai/config";
 import { PROVIDER_INFO } from "@/lib/ai/providers";
 import { getOrg, gstRatePct, markupSettings } from "@/lib/estimate/queries";
+import { listClients, listProjects } from "@/lib/projects";
 import { NewEstimate } from "./new-estimate";
 
 export const metadata: Metadata = { title: "New estimate" };
@@ -21,12 +22,22 @@ export default function NewEstimatePage({ searchParams }: PageProps<"/estimates/
 
 async function Loader({ searchParams }: Pick<PageProps<"/estimates/new">, "searchParams">) {
   const member = await requireMember();
-  const [org, ai, sp] = await Promise.all([getOrg(member.orgId), resolveAiConfig(member.orgId), searchParams]);
+  const [org, ai, sp, projects, clients] = await Promise.all([
+    getOrg(member.orgId),
+    resolveAiConfig(member.orgId),
+    searchParams,
+    listProjects(member.orgId),
+    listClients(member.orgId),
+  ]);
   const describe = typeof sp.describe === "string" ? sp.describe.slice(0, 500) : "";
+  const initialProject = typeof sp.project === "string" ? (projects.find((p) => p.id === sp.project) ?? null) : null;
 
   return (
     <NewEstimate
       initialDescription={describe}
+      projects={projects}
+      clients={clients}
+      initialProject={initialProject}
       markup={markupSettings(org)}
       gstRatePct={gstRatePct(org)}
       ai={

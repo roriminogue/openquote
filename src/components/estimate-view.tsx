@@ -4,7 +4,8 @@ import { Money } from "@/components/money";
 import { Rule } from "@/components/ui";
 import { StickyReading } from "@/components/sticky-reading";
 import { validateEstimate } from "@/lib/estimate/price";
-import type { GroupView, LineView } from "@/lib/estimate/queries";
+import type { EstimateContext, GroupView, LineView } from "@/lib/estimate/queries";
+import { formatProjectNo } from "@/lib/project-schema";
 import { formatAud, formatEstimateNo, type EstimateTotals } from "@/lib/pricing";
 import type { schema } from "@/db";
 
@@ -23,7 +24,9 @@ export function EstimateView({
   gstRatePct,
   groups,
   totals,
+  context,
 }: {
+  context?: EstimateContext;
   estimate: typeof schema.estimates.$inferSelect;
   gstRatePct: number;
   groups: GroupView[];
@@ -42,6 +45,17 @@ export function EstimateView({
           {formatEstimateNo(e.number)} · {dateFmt.format(e.createdAt)} · Draft
         </p>
       </header>
+      {(context?.clientName || context?.projectName || e.siteAddress) && (
+        <p className="mt-1.5 text-[1.0625rem] text-ink-2">
+          {[
+            context?.clientName,
+            context?.projectName && `${context.projectName} (${formatProjectNo(context.projectNumber!)})`,
+            e.siteAddress,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+      )}
 
       <StickyReading
         watch="reading"

@@ -36,6 +36,13 @@
       "when": 1792489545872,
       "tag": "0004_estimate_ai_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792496684523,
+      "tag": "0005_projects_clients",
+      "breakpoints": true
     }
   ]
 }

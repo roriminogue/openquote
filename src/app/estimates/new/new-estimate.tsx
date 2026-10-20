@@ -9,6 +9,8 @@ import { Money } from "@/components/money";
 import { WashLine } from "@/components/wash-line";
 import { Button, Field, Input, Notice, Textarea } from "@/components/ui";
 import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
+import type { ClientOption, ProjectOption } from "@/lib/project-schema";
+import { ProjectField } from "./project-flow";
 
 type PartialLine = { description?: string; type?: LineType; qty?: number; unit?: string; unitCost?: number };
 export type PartialDraft = { title?: string; groups?: { name?: string; lines?: PartialLine[] }[] };
@@ -38,13 +40,26 @@ function previewGroups(draft: PartialDraft, markup: MarkupSettings) {
     });
 }
 
+const EXAMPLES = [
+  ["Deck", "Build a 4 × 3 m merbau deck, 600 mm high, two steps down to the lawn, oil finish"],
+  ["Bathroom", "Retile a 2.4 × 2 m bathroom floor to ceiling, walk-in shower, new vanity and toilet, same layout"],
+  ["Fence", "Replace 20 m of 1.8 m paling fence, reuse the posts, treated pine palings and capping"],
+  ["Pergola", "Freestanding 4 × 4 m treated pine pergola on concrete footings, Colorbond roof"],
+] as const;
+
 export function NewEstimate({
   initialDescription,
+  projects,
+  clients,
+  initialProject,
   markup,
   gstRatePct,
   ai,
 }: {
   initialDescription: string;
+  projects: ProjectOption[];
+  clients: ClientOption[];
+  initialProject: ProjectOption | null;
   markup: MarkupSettings;
   gstRatePct: number;
   ai: { provider: string; model: string; canEdit: boolean } | null;
@@ -52,6 +67,7 @@ export function NewEstimate({
   const router = useRouter();
   const [description, setDescription] = useState(initialDescription);
   const [siteAddress, setSiteAddress] = useState("");
+  const [project, setProject] = useState<ProjectOption | null>(initialProject);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const abortRef = useRef<AbortController | null>(null);
   const previewRef = useRef<HTMLElement>(null);
@@ -70,7 +86,7 @@ export function NewEstimate({
       const res = await fetch("/api/estimates/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ description, siteAddress: siteAddress || null }),
+        body: JSON.stringify({ description, projectId: project?.id ?? null, siteAddress: project?.siteAddress ? null : siteAddress || null }),
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
@@ -115,7 +131,7 @@ export function NewEstimate({
   }
 
   return (
-    <div className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-12">
+    <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-12">
       <form onSubmit={generate} className="space-y-5">
         {!ai && (
           <Notice tone="info">
@@ -125,6 +141,7 @@ export function NewEstimate({
             </Link>
           </Notice>
         )}
+        <ProjectField projects={projects} clients={clients} value={project} onChange={setProject} disabled={busy} />
         <Field
           id="description"
           label="Describe the job"
@@ -143,16 +160,32 @@ export function NewEstimate({
             placeholder="e.g. Build a 4 × 3 m merbau deck at the back, about 600 mm off the ground, two steps down to the lawn, oil finish…"
           />
         </Field>
-        <Field id="siteAddress" label="Site address" hint="Optional. Helps with travel and local pricing.">
-          <Input
-            id="siteAddress"
-            name="siteAddress"
-            autoComplete="street-address"
-            value={siteAddress}
-            onChange={(e) => setSiteAddress(e.target.value)}
-            disabled={busy}
-          />
-        </Field>
+        {!description.trim() && !busy && (
+          <div className="-mt-1 flex flex-wrap gap-2" aria-label="Start from an example">
+            {EXAMPLES.map(([label, text]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setDescription(text)}
+                className="h-9 rounded-tape border border-hairline-strong bg-surface px-3 text-[0.9375rem] font-semibold text-ink-2 transition-colors hover:border-ink hover:text-ink"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+        {!project?.siteAddress && (
+          <Field id="siteAddress" label="Site address" hint="Optional. Helps with travel and local pricing.">
+            <Input
+              id="siteAddress"
+              name="siteAddress"
+              autoComplete="off"
+              value={siteAddress}
+              onChange={(e) => setSiteAddress(e.target.value)}
+              disabled={busy}
+            />
+          </Field>
+        )}
 
         {busy ? (
           <Button type="button" variant="secondary" size="lg" className="w-full" onClick={() => abortRef.current?.abort()}>

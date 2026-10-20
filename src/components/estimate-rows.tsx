@@ -11,7 +11,7 @@ export function EstimateRows({ rows }: { rows: Awaited<ReturnType<typeof listEst
   const max = Math.max(...rows.map((r) => r.totals.totalCents));
   return (
     <ul className="mt-6 divide-y divide-hairline border-y border-hairline">
-      {rows.map(({ estimate: e, groups, totals, lineCount }) => (
+      {rows.map(({ estimate: e, groups, totals, lineCount, clientName }) => (
         <li key={e.id}>
           <Link
             href={`/estimates/${e.id}`}
@@ -21,12 +21,14 @@ export function EstimateRows({ rows }: { rows: Awaited<ReturnType<typeof listEst
               {formatEstimateNo(e.number)}
               <span className="sm:hidden">
                 {" "}
-                · {dateFmt.format(e.createdAt)} · {lineCount} lines
+                · {clientName ? `${clientName} · ` : ""}
+                {dateFmt.format(e.createdAt)}
               </span>
             </span>
             <span className="order-1 min-w-0 sm:order-none">
               <span className="block truncate text-[1.0625rem] font-semibold text-ink group-hover:underline">{e.title}</span>
               <span className="mt-0.5 hidden text-sm text-ink-3 sm:block">
+                {clientName ? `${clientName} · ` : ""}
                 {dateFmt.format(e.createdAt)} · {lineCount} lines · {groups.length} stages
               </span>
             </span>
