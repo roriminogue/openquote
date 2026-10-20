@@ -7,28 +7,33 @@ or plans, and get a priced, editable quote built from your own rates. Then send 
 
 ## Stack
 
-Next.js (App Router, TypeScript, Tailwind) · Postgres + Drizzle ORM (pgvector image) · MinIO (S3) · Mailpit
-(dev email) · Vitest · Claude for estimating (coming next).
+Next.js (App Router, TypeScript, Tailwind) · Supabase (Postgres + Auth + Storage) with Drizzle ORM · Mailpit
+(dev email) · Vitest · bring-your-own-key AI, Claude by default (coming next).
 
 ## Getting started
 
-Prerequisites: Node 22+, Docker Desktop running.
+Prerequisites: Node 22+, a free [Supabase](https://supabase.com) project, and Docker if you want Mailpit.
+
+1. In Supabase → your project → **Connect**, copy the API URL, the publishable key, and the
+   **Transaction pooler** connection string (fill in your database password).
+2. Set up env and the database:
 
 ```bash
-cp .env.example .env.local   # already matches docker-compose defaults
+cp .env.example .env.local     # paste the values from step 1
+openssl rand -base64 32        # paste as ENCRYPTION_KEY
 npm install
-npm run db:up                # postgres, minio, mailpit
-npm run db:migrate           # apply drizzle/ migrations
-npm run db:seed              # synthetic demo org, rates and an estimate
-npm run dev                  # http://localhost:3000
+npm run db:migrate             # tables, RLS policies, storage buckets
+npm run dev                    # http://localhost:3000
 ```
 
-| Service | URL |
-|---|---|
-| App | http://localhost:3000 |
-| Mail inbox (sent proposals) | http://localhost:8025 |
-| MinIO console | http://localhost:9001 (openquote / openquote-dev) |
-| DB browser | `npm run db:studio` |
+3. Sign in at `/login` with an email link, then create your business at `/onboarding`.
+   For demo data: `SEED_EMAIL=you@example.com npm run db:seed`.
+
+Optional: `npm run mail:up` starts Mailpit (http://localhost:8025) to catch outgoing proposal emails.
+To use Google sign-in, enable the Google provider in Supabase → Authentication.
+
+AI features use your own provider key, set either in Settings → AI or as `ANTHROPIC_API_KEY` for the whole
+install. See [SPEC.md §7a](SPEC.md).
 
 ## Scripts
 

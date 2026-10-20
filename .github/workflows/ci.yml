@@ -34,3 +34,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Placeholders so modules load at build time; nothing connects during the build.
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci
