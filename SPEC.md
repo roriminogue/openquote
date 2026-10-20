@@ -161,8 +161,31 @@ inputs ──► 1. Ingest ──► 2. Classify ──► 3. Clarify ──► 
 7. **Validate.** Sanity checks (zero/negative qty, labour hours vs scope, missing waterproofing for wet areas,
    etc.). Produces warnings, not silent fixes.
 
-**Chat refinement** is a tool-using agent with tools such as `add_line`, `update_line`, `remove_line`,
-`apply_kit`, `find_supplier_item` and `set_markup`. Each turn creates a new `EstimateVersion` so it can be undone.
+**Delivery.**
+- **Streamed.** Generate streams one structured JSON document over SSE. The client parses the partial JSON
+  so groups and lines appear as they arrive, with a status line per step ("Pricing subframe…").
+- **Saved on the server.** The route handler validates the final document, runs Price, writes groups and
+  lines with Drizzle and creates version 1, all in one transaction. The browser never writes estimate rows.
+- **Alternatives.** Generate also returns 2–3 upgrade and 2–3 cost-saving alternatives (short + long
+  description) that the user can apply in one click.
+- **Thorough runs in the background.** Clarify → Plan → per-phase Generate runs as a pg-boss job. The job
+  publishes progress (`phases[{name, status, itemCount}]`, current phase) and the UI subscribes to it. Phases
+  run in order so later phases can see earlier ones. Clarifying questions are multiple choice with a
+  recommended default and an "Other" free-text option, at most 2 rounds, and always state "if you skip, we
+  assume…".
+- **Plan card.** Shows phases with assumptions and exclusions, plus job-type risks the user can toggle
+  (e.g. AS 3740 waterproofing certificate, pre-1990 asbestos, subfloor rot, long-lead items). Deterministic
+  guards check the LLM's classification (e.g. ignore a size it invented).
+
+**Chat refinement** is a tool-using agent over small, typed operations: `add_line`, `update_line`,
+`remove_line`, `move_line`, `add_group`, `rename_group`, `set_markup`, `lock_lines`, `apply_kit`,
+`find_supplier_item`, `update_scope`, `get_totals`.
+- Tool arguments are validated with zod. A failed call returns the error to the model so it can retry.
+- IDs are minted in code and returned to the model, never invented by it.
+- Totals come from `lib/pricing.ts` through `get_totals`, never from the model's arithmetic.
+- Locked lines can't be changed.
+- Each turn first snapshots an `EstimateVersion`, so it can be undone and diffed ("See changes").
+- Two chat modes: **Adjust** (may edit) and **Ask** (read-only Q&A).
 
 **Learning from past quotes** (v1): extract line items from uploaded PDFs/XLSX, then propose rate rules, kits and
 AI instructions for the user to confirm. Everything is stored as explicit, editable data, with no fine-tuning.
@@ -175,7 +198,7 @@ within ±X%, and structure. Run it in CI on prompt changes.
 1. Onboarding: business details → trades/postcode/markup → (optional) upload old quotes
 2. Home / pipeline: board or table of estimates and invoices with column totals
 3. New estimate: description box, mic, attach files, mode picker, Generate
-4. Estimate detail: line editor (left) + Sammy-style chat panel (right); tabs: Estimate · Takeoff · Plan · Messages
+4. Estimate detail: line editor (left) + chat panel (right); tabs: Estimate · Takeoff · Plan · Messages
 5. Send proposal dialog: recipient, message, display options, follow-ups toggle, pre-send checklist
 6. Public proposal page (`/p/:token`): branded, mobile-first, Accept / Decline / Request changes, PDF
 7. Clients: list + detail with contacts and activity timeline
@@ -186,29 +209,71 @@ within ±X%, and structure. Run it in CI on prompt changes.
 | Layer | Choice | Why |
 |---|---|---|
 | App | Next.js (App Router) + TypeScript + Tailwind + shadcn/ui | One repo for app and public proposal pages; PWA for mobile |
-| DB | Postgres + Drizzle ORM, `pgvector` for rate/supplier matching | Relational data with embeddings in one place |
-| Auth | Better-Auth or Auth.js (email OTP + Google) | |
-| AI | Claude (Sonnet for generation/chat, Haiku for classify/extract) via the Anthropic SDK with tool use + structured output | |
-| Speech | Whisper (OpenAI API or local whisper.cpp) | |
-| Files | S3-compatible storage (MinIO locally) | |
+| DB | Supabase Postgres + Drizzle ORM, `pgvector` for rate/supplier matching; RLS isolates each organisation | Relational data with embeddings in one place; RLS protects any direct client access |
+| Auth | Supabase Auth (email magic link/OTP + Google) | Built in, no auth code to maintain |
+| AI | Bring your own key, multi-provider via the Vercel AI SDK (streaming, tool calls, structured output). Default Anthropic: Claude Sonnet for generation/chat, Claude Haiku for classify/extract. See §7a | Open source: each business pays its own provider |
+| Speech | Optional: OpenAI Whisper (own key), local whisper.cpp, or off | |
+| Files | Supabase Storage (`logos` public; `attachments`, `documents` private; paths prefixed by org id) | |
 | Jobs | Postgres-backed queue (pg-boss) for follow-ups, reminders, ingestion | No extra infra |
 | Email | Resend / SMTP; inbound webhook for reply detection | |
 | PDF | React-PDF or Playwright print-to-PDF | |
-| Dev | Docker Compose (postgres, minio, mailpit), Vitest, Playwright E2E | Easy `docker compose up` for reviewers |
+| Dev | A Supabase project (or `supabase start` locally), Mailpit via Docker Compose, Vitest, Playwright E2E | |
+
+## 7a. AI configuration (bring your own key)
+
+OpenQuote ships no AI credits. Each install or business brings its own provider key.
+
+**Where the key comes from** (first match wins)
+1. **Business key:** pasted in Settings → AI. Stored per organisation in `ai_settings`.
+2. **Instance key:** `ANTHROPIC_API_KEY` (or another provider's env var) set by whoever self-hosts.
+3. **None:** AI actions are disabled, with a link to Settings → AI. Everything else keeps working.
+
+**Security**
+- Every LLM call runs on the server (route handlers / jobs). Keys never reach the browser.
+- Keys are encrypted at rest with AES-256-GCM using `ENCRYPTION_KEY` from env
+  (`api_key_ciphertext` = base64 of iv | tag | ciphertext).
+- `ai_settings` has RLS on and no policies, so it is only readable server-side.
+- The UI only ever shows the last 4 characters, with Replace / Remove actions.
+- Saving a key makes a cheap test call and reports a clear error (invalid key, no credit, model unavailable).
+- Keys and prompts are never logged or sent to error reporting.
+
+**Providers**
+- All providers go through one interface (Vercel AI SDK).
+- Supported at launch: Anthropic (default), OpenAI, Google.
+- Advanced: OpenRouter and Ollama (custom `base_url`), with a warning that quality depends on the model's
+  tool-use support.
+- Each business picks a **smart** model (generate, refine, plan) and a **fast** model (classify, extract,
+  summarise). Defaults are set per provider.
+- Required capabilities: streaming, tool calling and JSON-schema output. A model without them is rejected
+  when it is saved.
+
+**Usage**
+- Every call writes an `ai_usage` row: org, estimate, operation, provider, model, input/output tokens, and
+  estimated cost when the model's price is known.
+- Settings → AI shows spend by month and per estimate. Members can read their own organisation's usage.
+
+**Transcription** is a separate setting: off (default), OpenAI Whisper (uses the OpenAI key), or local
+whisper.cpp for self-hosters.
+
+**Evals per provider.** The eval suite (§5) runs against each supported provider/model, and the README
+publishes a small quality-and-cost table to help users choose.
 
 ## 8. MVP definition of done
 
 A tradie can sign up, set their trade, markup and a few rate rules, dictate "build a 4×3 merbau deck…", get a
 grouped and priced estimate in under a minute, tweak it in chat, send a branded proposal link, see when it's
-viewed, have the client accept with their name, and convert it to an invoice PDF. All of this runs locally with
-`docker compose up` and has an eval suite and E2E tests.
+viewed, have the client accept with their name, and convert it to an invoice PDF, using their own AI key. Anyone
+can run it against a free Supabase project with documented setup, and it has an eval suite and E2E tests.
 
-## 9. Open questions (worth answering with REA observation of the live app, if ToS allow)
+## 9. Open questions
 
-- Does generation stream line items progressively, or return them all at once? (Affects UX design.)
-- How is the chat refinement surfaced: whole-estimate diffs or per-line operations?
-- What does the proposal page's event tracking look like (pixel, polling, explicit API events)?
-- Client tech stack (framework, state management, realtime transport). Useful for comparison only.
+Resolved 2026-10-20 by observing market behaviour (notes kept outside this repo). The decisions are folded into §5:
+- Generation streams progressively → stream structured JSON and render partial results.
+- Refinement uses per-line operations, not whole-estimate diffs → typed tool ops, one version per turn.
+- Proposal tracking uses explicit API events → the public page calls `trackView` on load, and
+  accept / decline / request changes are separate actions. Signed copies are generated asynchronously and
+  the page polls until ready.
+- Long multi-phase generation runs as a durable background job with progress the UI subscribes to.
 
 ## 10. Legal / ethics guardrails for the repo
 

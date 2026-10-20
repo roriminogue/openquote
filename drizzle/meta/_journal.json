@@ -8,6 +8,27 @@
       "when": 1792476541236,
       "tag": "0000_oval_wendigo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792482490599,
+      "tag": "0001_supabase_auth_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792482491100,
+      "tag": "0002_supabase_policies_storage",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792486262281,
+      "tag": "0003_ai_byok",
+      "breakpoints": true
     }
   ]
 }

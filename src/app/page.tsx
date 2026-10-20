@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { Suspense } from "react";
+import { getAuthUser } from "@/lib/auth";
 import { estimateTotals, formatAud } from "@/lib/pricing";
 
 // Placeholder home: renders a sample estimate through the real pricing engine.
@@ -29,6 +32,10 @@ export default function Home() {
         Describe the job. Get a priced quote. Scaffold is running.
       </p>
 
+      <Suspense>
+        <Account />
+      </Suspense>
+
       <section className="mt-10 rounded-lg border border-zinc-200 p-6 dark:border-zinc-800">
         <h2 className="font-medium">Sample: Merbau deck 4×3m</h2>
         <ul className="mt-4 space-y-2 text-sm">
@@ -59,5 +66,20 @@ export default function Home() {
         </dl>
       </section>
     </main>
+  );
+}
+
+// Reads the session cookie, so it streams in behind a Suspense boundary.
+async function Account() {
+  const user = await getAuthUser();
+  return user ? (
+    <form action="/auth/signout" method="post" className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+      Signed in as {user.email}.{" "}
+      <button className="underline">Sign out</button>
+    </form>
+  ) : (
+    <Link href="/login" className="mt-4 inline-block text-sm underline">
+      Sign in
+    </Link>
   );
 }

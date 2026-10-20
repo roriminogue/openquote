@@ -2,6 +2,9 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
+import { eq } from "drizzle-orm";
+import { authUsers } from "drizzle-orm/supabase";
+
 async function main() {
   const { db, schema } = await import("./index");
   const s = schema;
@@ -20,7 +23,17 @@ async function main() {
     })
     .returning();
 
-  await db.insert(s.users).values({ orgId: org.id, name: "Alex Demo", email: "alex@coastal.example" });
+  // users.id must be a Supabase Auth user. Sign in once, then run with SEED_EMAIL=<your email>
+  // to attach your account to the demo org.
+  const seedEmail = process.env.SEED_EMAIL;
+  if (seedEmail) {
+    const [authUser] = await db
+      .select({ id: authUsers.id })
+      .from(authUsers)
+      .where(eq(authUsers.email, seedEmail));
+    if (!authUser) throw new Error(`No Supabase Auth user with email ${seedEmail}. Sign in once first.`);
+    await db.insert(s.users).values({ id: authUser.id, orgId: org.id, name: "Alex Demo", email: seedEmail });
+  }
 
   await db.insert(s.rateRules).values([
     { orgId: org.id, title: "Qualified carpenter", rateCents: 9500, unit: "hour", type: "labour" },
