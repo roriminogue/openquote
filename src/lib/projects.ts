@@ -97,3 +97,43 @@ export async function getProject(orgId: string, projectId: string) {
     .where(and(eq(schema.projects.id, projectId), eq(schema.projects.orgId, orgId)));
   return row ?? null;
 }
+
+export async function updateClient(orgId: string, clientId: string, input: z.output<typeof ClientInput>) {
+  const [client] = await db
+    .update(schema.clients)
+    .set(input)
+    .where(and(eq(schema.clients.id, clientId), eq(schema.clients.orgId, orgId)))
+    .returning();
+  return client ?? null;
+}
+
+export async function updateProject(orgId: string, projectId: string, input: z.output<typeof ProjectInput>) {
+  return db.transaction(async (tx) => {
+    const [owner] = await tx
+      .select({ id: schema.clients.id })
+      .from(schema.clients)
+      .where(and(eq(schema.clients.id, input.clientId), eq(schema.clients.orgId, orgId)));
+    if (!owner) throw new Error("Client not found");
+    const [project] = await tx
+      .update(schema.projects)
+      .set({ ...input, updatedAt: new Date() })
+      .where(and(eq(schema.projects.id, projectId), eq(schema.projects.orgId, orgId)))
+      .returning();
+    // Keep the project's estimates pointing at its current client.
+    if (project) {
+      await tx
+        .update(schema.estimates)
+        .set({ clientId: input.clientId })
+        .where(and(eq(schema.estimates.projectId, projectId), eq(schema.estimates.orgId, orgId)));
+    }
+    return project ?? null;
+  });
+}
+
+export async function getClient(orgId: string, clientId: string) {
+  const [row] = await db
+    .select()
+    .from(schema.clients)
+    .where(and(eq(schema.clients.id, clientId), eq(schema.clients.orgId, orgId)));
+  return row ?? null;
+}

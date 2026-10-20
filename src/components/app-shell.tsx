@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { getAuthUser } from "@/lib/auth";
 import { LinkButton } from "./ui";
-import { ActiveNavLinks, NavLinks } from "./nav-links";
+import { ActiveBottomNav, ActiveNavLinks, BottomNav, NavLinks } from "./nav-links";
 
 /** Mark: a tape case with the blade run out. Authored, one stroke weight. */
 export function Mark({ className = "" }: { className?: string }) {
@@ -47,7 +47,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-6 outline-none sm:pt-10">{children}</main>
+      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-5xl flex-1 px-4 pb-32 pt-6 outline-none sm:pb-24 sm:pt-10">{children}</main>
+      <Suspense fallback={<BottomNav pathname="" />}>
+        <ActiveBottomNav />
+      </Suspense>
     </>
   );
 }
