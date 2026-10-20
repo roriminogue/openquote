@@ -75,7 +75,10 @@ async function Account() {
   return user ? (
     <form action="/auth/signout" method="post" className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
       Signed in as {user.email}.{" "}
-      <button className="underline">Sign out</button>
+      <Link href="/settings/ai" className="underline">
+        AI settings
+      </Link>{" "}
+      · <button className="underline">Sign out</button>
     </form>
   ) : (
     <Link href="/login" className="mt-4 inline-block text-sm underline">
