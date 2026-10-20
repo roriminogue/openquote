@@ -43,6 +43,7 @@ install. See [SPEC.md §7a](SPEC.md).
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run db:generate` | New migration from `src/db/schema.ts` changes |
 | `npm run db:migrate` | Apply migrations |
+| `npm run ai:try -- "job description"` | Run the AI estimate pipeline once with `ANTHROPIC_API_KEY` (no database) |
 
 ## Layout
 

@@ -1,10 +1,13 @@
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { db, schema } from "@/db";
 import { createClient } from "@/lib/supabase/server";
 
 /** The signed-in Supabase Auth user, or null. Verified against the Auth server's signing keys. */
 export async function getAuthUser() {
+  // Session checks compare token expiry with the current time, so they must only run at request time.
+  await connection();
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;

@@ -199,6 +199,9 @@ export type DisplayOptions = {
   pricesIncGst: boolean;
 };
 
+/** An upgrade or cost-saving option the client can be offered alongside the main estimate. */
+export type EstimateAlternative = { kind: "upgrade" | "saving"; title: string; detail: string };
+
 export const estimates = pgTable(
   "estimates",
   {
@@ -215,6 +218,12 @@ export const estimates = pgTable(
     gstExempt: boolean("gst_exempt").notNull().default(false),
     currentVersion: integer("current_version").notNull().default(1),
     displayOptions: jsonb("display_options").$type<DisplayOptions>(),
+    // Filled by AI generation (SPEC.md §5); all editable afterwards.
+    summary: text("summary"),
+    scope: jsonb("scope").$type<string[]>(),
+    assumptions: jsonb("assumptions").$type<string[]>(),
+    exclusions: jsonb("exclusions").$type<string[]>(),
+    alternatives: jsonb("alternatives").$type<EstimateAlternative[]>(),
     createdAt: createdAt(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

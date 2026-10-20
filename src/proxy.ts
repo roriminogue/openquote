@@ -27,7 +27,9 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path === p || (p !== "/" && path.startsWith(`${p}/`)));
-  if (!data?.claims && !isPublic) {
+  // API routes check auth themselves and answer 401 JSON; a redirect to an HTML page would confuse callers.
+  const isApi = path.startsWith("/api/");
+  if (!data?.claims && !isPublic && !isApi) {
     const login = request.nextUrl.clone();
     login.pathname = "/login";
     login.search = "";
