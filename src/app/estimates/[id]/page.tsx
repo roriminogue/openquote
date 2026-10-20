@@ -30,7 +30,7 @@ async function EstimateDetail({ params }: Pick<PageProps<"/estimates/[id]">, "pa
   const data = await getEstimate(member.orgId, id);
   if (!data) notFound();
 
-  return <EstimateView estimate={data.estimate} gstRatePct={data.org.gstRate} groups={data.groups} totals={data.totals} />;
+  return <EstimateView estimate={data.estimate} gstRatePct={data.org.gstRate} groups={data.groups} totals={data.totals} context={data.context} />;
 }
 
 function DetailSkeleton() {

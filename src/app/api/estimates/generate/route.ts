@@ -16,10 +16,11 @@ import {
 import { priceDraft, validateEstimate } from "@/lib/estimate/price";
 import { buildGenerationPrompt } from "@/lib/estimate/prompt";
 import { estimateTotals } from "@/lib/pricing";
+import { getProject } from "@/lib/projects";
 
 const Body = z.object({
   description: z.string().trim().min(10, "Describe the job in a bit more detail.").max(8000),
-  clientId: z.uuid().nullish(),
+  projectId: z.uuid().nullish(),
   siteAddress: z.string().trim().max(300).nullish(),
 });
 
@@ -50,18 +51,28 @@ export async function POST(request: Request) {
     throw e;
   }
 
+  // A project supplies the client and, unless one was typed, the site address. It must belong to this org.
+  const project = body.data.projectId ? await getProject(member.orgId, body.data.projectId) : null;
+  if (body.data.projectId && !project) return Response.json({ error: "That project wasn't found." }, { status: 404 });
+  const siteAddress = body.data.siteAddress || project?.siteAddress || null;
+
   const { org, rateRules, instructions } = await loadGenerationInputs(member.orgId);
   // Short aliases (R1, R2…) are easier for the model to copy exactly than UUIDs.
   const aliased = rateRules.map((r, i) => ({ ...r, id: `R${i + 1}`, dbId: r.id }));
   const { system, prompt } = buildGenerationPrompt({
     description: body.data.description,
-    siteAddress: body.data.siteAddress,
+    siteAddress,
     org,
     rateRules: aliased,
     instructions,
   });
 
-  const estimate = await createPendingEstimate(member.orgId, body.data);
+  const estimate = await createPendingEstimate(member.orgId, {
+    description: body.data.description,
+    projectId: project?.id ?? null,
+    clientId: project?.clientId ?? null,
+    siteAddress,
+  });
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({

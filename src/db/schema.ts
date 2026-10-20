@@ -51,6 +51,8 @@ export const scheduledEmailKind = pgEnum("scheduled_email_kind", ["follow_up", "
 export const scheduledEmailStatus = pgEnum("scheduled_email_status", ["pending", "sent", "cancelled"]);
 export const invoiceStatus = pgEnum("invoice_status", ["draft", "sent", "paid", "void"]);
 export const aiProvider = pgEnum("ai_provider", ["anthropic", "openai", "google", "openrouter", "ollama"]);
+export const clientKind = pgEnum("client_kind", ["individual", "company"]);
+export const projectStatus = pgEnum("project_status", ["quoting", "active", "on_hold", "completed", "cancelled"]);
 export const transcriptionMode = pgEnum("transcription_mode", ["off", "openai", "local"]);
 
 // ── Organisation & users ────────────────────────────────────────────────────
@@ -75,6 +77,7 @@ export const organisations = pgTable("organisations", {
   markupOtherPct: pct("markup_other_pct"),
   termsMd: text("terms_md"),
   nextEstimateNo: integer("next_estimate_no").notNull().default(1001),
+  nextProjectNo: integer("next_project_no").notNull().default(1),
   nextInvoiceNo: integer("next_invoice_no").notNull().default(1),
   defaultDueDays: integer("default_due_days").notNull().default(14),
   createdAt: createdAt(),
@@ -165,7 +168,10 @@ export const clients = pgTable(
   {
     id: id(),
     orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
+    kind: clientKind("kind").notNull().default("individual"),
+    name: text("name").notNull(), // person's name, or business name for a company
+    contactName: text("contact_name"), // company's main contact
+    abn: text("abn"),
     email: text("email"),
     phone: text("phone"),
     address: text("address"),
@@ -188,6 +194,28 @@ export const clientContacts = pgTable(
   (t) => [index("client_contacts_client_id_idx").on(t.clientId)],
 ).enableRLS();
 
+// A job site: groups the estimates, invoices and (later) job for one piece of work for one client.
+export const projects = pgTable(
+  "projects",
+  {
+    id: id(),
+    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
+    number: integer("number").notNull(), // rendered as PRJ-0001
+    name: text("name").notNull(),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "restrict" }),
+    siteAddress: text("site_address"),
+    status: projectStatus("status").notNull().default("quoting"),
+    startDate: date("start_date"),
+    endDate: date("end_date"),
+    notes: text("notes"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("projects_org_number_idx").on(t.orgId, t.number), index("projects_client_id_idx").on(t.clientId)],
+).enableRLS();
+
 // ── Estimates ───────────────────────────────────────────────────────────────
 export type DisplayOptions = {
   detail: "total" | "groups" | "full";
@@ -208,6 +236,7 @@ export const estimates = pgTable(
     id: id(),
     orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
     clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
+    projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
     number: integer("number").notNull(), // rendered as EST-1001
     title: text("title").notNull().default("Untitled estimate"),
     siteAddress: text("site_address"),
@@ -230,6 +259,7 @@ export const estimates = pgTable(
   (t) => [
     uniqueIndex("estimates_org_number_idx").on(t.orgId, t.number),
     index("estimates_client_id_idx").on(t.clientId),
+    index("estimates_project_id_idx").on(t.projectId),
   ],
 ).enableRLS();
 
