@@ -6,22 +6,22 @@ import { requireMember } from "@/lib/auth";
 import { PROVIDER_INFO } from "@/lib/ai/providers";
 import { removeAiKey } from "./actions";
 import { Money } from "@/components/money";
-import { GroupTitle, PageTitle, Panel, Row, Rows } from "@/components/ui";
+import { GroupTitle, Panel, Row, Rows } from "@/components/ui";
 import { AiSettingsForm, RemoveKey } from "./form";
 
 export const metadata: Metadata = { title: "AI settings" };
 
 export default function AiSettingsPage() {
   return (
-    <div className="max-w-[56rem]">
-      <PageTitle
-        title="AI settings"
-        description="OpenQuote uses your own AI provider account. Your key is encrypted, never leaves the server, and you pay the provider directly."
-      />
+    <>
+      <p className="mt-6 max-w-[68ch] text-sm text-ink-3">
+        OpenQuote uses your own AI provider account. Your key is encrypted, never leaves the server, and you pay the
+        provider directly.
+      </p>
       <Suspense>
         <AiSettings />
       </Suspense>
-    </div>
+    </>
   );
 }
 
@@ -55,7 +55,7 @@ async function AiSettings() {
 
   return (
     <>
-      <section aria-label="This month" className="mt-8 grid grid-cols-3 gap-0">
+      <section aria-label="This month" className="mt-6 grid grid-cols-3 gap-0">
         {[
           ["Calls this month", usage.calls.toLocaleString("en-AU"), "Estimates and edits"],
           ["Tokens", usage.tokens.toLocaleString("en-AU"), "Input and output"],

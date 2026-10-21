@@ -160,7 +160,7 @@ export function Row({
         </Label>
         {hint && <p className="mt-0.5 text-sm text-ink-3">{hint}</p>}
       </div>
-      {children && <div className={stack ? "" : "shrink-0 sm:max-w-[22rem] sm:min-w-[14rem]"}>{children}</div>}
+      {children && <div className={stack ? "" : "shrink-0 sm:flex sm:min-w-[14rem] sm:max-w-[22rem] sm:justify-end"}>{children}</div>}
     </div>
   );
 }

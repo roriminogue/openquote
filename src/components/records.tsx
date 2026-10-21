@@ -42,7 +42,7 @@ export function PageHeader({ title, description, action }: { title: string; desc
 }
 
 /** Filters as text tabs on a hairline: the current one is ink with an underline, counts sit beside each. */
-export function FilterTabs({ items, label }: { items: { href: string; label: string; count: number; on: boolean }[]; label: string }) {
+export function FilterTabs({ items, label }: { items: { href: string; label: string; count?: number; on: boolean }[]; label: string }) {
   return (
     <nav aria-label={label} className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
       <ul className="flex min-w-max gap-5 border-b border-border">
