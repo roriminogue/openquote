@@ -192,7 +192,7 @@ export function ClientForm({
  * Two or three mutually exclusive choices. Concentric radii (track 10px, thumb 7px, 3px inset), no shadow; arrow
  * keys move the choice, as a radio group should.
  */
-function Segmented<T extends string>({
+export function Segmented<T extends string>({
   value,
   onChange,
   options,

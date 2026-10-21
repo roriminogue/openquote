@@ -1,0 +1,19 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import { FilterTabs } from "@/components/records";
+
+const TABS = [
+  ["/settings/rates", "Rates and pricing"],
+  ["/settings/ai", "AI"],
+] as const;
+
+/** The tabs for a known path; also the Suspense fallback. */
+export function SettingsTabsFor({ pathname }: { pathname: string }) {
+  return <FilterTabs label="Settings" items={TABS.map(([href, label]) => ({ href, label, on: pathname.startsWith(href) }))} />;
+}
+
+/** Settings sections as text tabs. Reads the URL, so it renders inside Suspense. */
+export function SettingsTabs() {
+  return <SettingsTabsFor pathname={usePathname()} />;
+}

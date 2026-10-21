@@ -9,7 +9,7 @@ const main = [
   { href: "/projects", label: "Projects", icon: FolderOpen },
   { href: "/clients", label: "Clients", icon: Users },
 ];
-const settings = { href: "/settings/ai", label: "Settings", icon: Settings, section: "/settings" };
+const settings = { href: "/settings/rates", label: "Settings", icon: Settings, section: "/settings" };
 
 type NavLink = (typeof main)[number] & { section?: string };
 
