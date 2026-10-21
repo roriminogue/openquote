@@ -66,7 +66,7 @@ export function Sheet({
         noValidate
         className="flex min-h-0 flex-1 flex-col"
       >
-        <header className="flex h-14 shrink-0 items-center gap-1 border-b border-border px-2 sm:px-4">
+        <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-border px-2 pt-[env(safe-area-inset-top)] sm:h-14 sm:px-4 sm:pt-0">
           {onBack ? (
             <button
               type="button"
