@@ -89,7 +89,7 @@ export function EstimateView({
             ))}
           </p>
         </div>
-        <EstimateActions text={text} />
+        <EstimateActions text={text} editHref={`/estimates/${e.id}/edit`} />
       </header>
 
       <section aria-label="Totals" className="mt-8 grid gap-6 sm:grid-cols-3 sm:gap-0">

@@ -1,11 +1,12 @@
 "use client";
 
-import { Check, Copy, Printer } from "lucide-react";
+import { Check, Copy, Pencil, Printer } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button } from "./ui";
+import { Button, buttonClass } from "./ui";
 
-/** Copy the estimate as text, or print it (the browser's print dialog also saves a PDF). */
-export function EstimateActions({ text }: { text: string }) {
+/** Edit the lines, copy the estimate as text, or print it (the browser's print dialog also saves a PDF). */
+export function EstimateActions({ text, editHref }: { text: string; editHref?: string }) {
   const [copied, setCopied] = useState<"ok" | "failed" | null>(null);
 
   useEffect(() => {
@@ -24,7 +25,13 @@ export function EstimateActions({ text }: { text: string }) {
   }
 
   return (
-    <div className="no-print flex shrink-0 gap-2">
+    <div className="no-print flex shrink-0 flex-wrap gap-2">
+      {editHref && (
+        <Link href={editHref} className={buttonClass("primary", "md")}>
+          <Pencil className="size-3.5" aria-hidden />
+          Edit
+        </Link>
+      )}
       <Button variant="secondary" onClick={copy} aria-live="polite">
         {copied === "ok" ? <Check className="size-4 text-ok" aria-hidden /> : <Copy className="size-4" aria-hidden />}
         {copied === "ok" ? "Copied" : copied === "failed" ? "Couldn’t copy" : "Copy as text"}
