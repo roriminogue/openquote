@@ -1,28 +1,28 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-20T11:16:37+00:00",
+  "generatedAt": "2026-10-21T10:47:19+00:00",
   "title": "Design System: OpenQuote",
   "extensions": {
     "colorMeta": {
-      "ground": {
+      "bg": {
         "role": "neutral",
-        "displayName": "Concrete Ground",
-        "canonical": "#f3f3f0",
-        "oklch": "oklch(96.3% 0.004 106.5)",
+        "displayName": "Paper",
+        "canonical": "#fcfcfc",
+        "oklch": "oklch(99.1% 0.000 89.9)",
         "tonalRamp": [
-          "oklch(15% 0.004 106.5)",
-          "oklch(25% 0.004 106.5)",
-          "oklch(35% 0.004 106.5)",
-          "oklch(48% 0.004 106.5)",
-          "oklch(60% 0.004 106.5)",
-          "oklch(72% 0.004 106.5)",
-          "oklch(84% 0.004 106.5)",
-          "oklch(95% 0.004 106.5)"
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(48% 0.000 89.9)",
+          "oklch(60% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
         ]
       },
       "surface": {
         "role": "neutral",
-        "displayName": "Work Surface",
+        "displayName": "Surface White",
         "canonical": "#ffffff",
         "oklch": "oklch(100.0% 0.000 89.9)",
         "tonalRamp": [
@@ -36,572 +36,883 @@
           "oklch(95% 0.000 89.9)"
         ]
       },
-      "surface-2": {
+      "sidebar": {
         "role": "neutral",
-        "displayName": "Second Layer",
-        "canonical": "#ebebe6",
-        "oklch": "oklch(93.9% 0.007 106.5)",
+        "displayName": "Sidebar (page colour)",
+        "canonical": "#fcfcfc",
+        "oklch": "oklch(99.1% 0.000 89.9)",
         "tonalRamp": [
-          "oklch(15% 0.007 106.5)",
-          "oklch(25% 0.007 106.5)",
-          "oklch(35% 0.007 106.5)",
-          "oklch(48% 0.007 106.5)",
-          "oklch(60% 0.007 106.5)",
-          "oklch(72% 0.007 106.5)",
-          "oklch(84% 0.007 106.5)",
-          "oklch(95% 0.007 106.5)"
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(48% 0.000 89.9)",
+          "oklch(60% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
+        ]
+      },
+      "subtle": {
+        "role": "neutral",
+        "displayName": "Subtle Grey",
+        "canonical": "#f4f4f5",
+        "oklch": "oklch(96.7% 0.001 286.4)",
+        "tonalRamp": [
+          "oklch(15% 0.001 286.4)",
+          "oklch(25% 0.001 286.4)",
+          "oklch(35% 0.001 286.4)",
+          "oklch(48% 0.001 286.4)",
+          "oklch(60% 0.001 286.4)",
+          "oklch(72% 0.001 286.4)",
+          "oklch(84% 0.001 286.4)",
+          "oklch(95% 0.001 286.4)"
+        ]
+      },
+      "hover": {
+        "role": "neutral",
+        "displayName": "Hover Grey",
+        "canonical": "#f4f4f5",
+        "oklch": "oklch(96.7% 0.001 286.4)",
+        "tonalRamp": [
+          "oklch(15% 0.001 286.4)",
+          "oklch(25% 0.001 286.4)",
+          "oklch(35% 0.001 286.4)",
+          "oklch(48% 0.001 286.4)",
+          "oklch(60% 0.001 286.4)",
+          "oklch(72% 0.001 286.4)",
+          "oklch(84% 0.001 286.4)",
+          "oklch(95% 0.001 286.4)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#ebebf1",
+        "oklch": "oklch(94.2% 0.008 286.2)",
+        "tonalRamp": [
+          "oklch(15% 0.008 286.2)",
+          "oklch(25% 0.008 286.2)",
+          "oklch(35% 0.008 286.2)",
+          "oklch(48% 0.008 286.2)",
+          "oklch(60% 0.008 286.2)",
+          "oklch(72% 0.008 286.2)",
+          "oklch(84% 0.008 286.2)",
+          "oklch(95% 0.008 286.2)"
+        ]
+      },
+      "border-strong": {
+        "role": "neutral",
+        "displayName": "Hairline Strong",
+        "canonical": "#e2e2e8",
+        "oklch": "oklch(91.5% 0.008 286.2)",
+        "tonalRamp": [
+          "oklch(15% 0.008 286.2)",
+          "oklch(25% 0.008 286.2)",
+          "oklch(35% 0.008 286.2)",
+          "oklch(48% 0.008 286.2)",
+          "oklch(60% 0.008 286.2)",
+          "oklch(72% 0.008 286.2)",
+          "oklch(84% 0.008 286.2)",
+          "oklch(95% 0.008 286.2)"
         ]
       },
       "ink": {
         "role": "neutral",
         "displayName": "Ink",
-        "canonical": "#161510",
-        "oklch": "oklch(19.5% 0.010 97.9)",
+        "canonical": "#18191b",
+        "oklch": "oklch(21.3% 0.004 264.5)",
         "tonalRamp": [
-          "oklch(15% 0.010 97.9)",
-          "oklch(25% 0.010 97.9)",
-          "oklch(35% 0.010 97.9)",
-          "oklch(48% 0.010 97.9)",
-          "oklch(60% 0.010 97.9)",
-          "oklch(72% 0.010 97.9)",
-          "oklch(84% 0.010 97.9)",
-          "oklch(95% 0.010 97.9)"
+          "oklch(15% 0.004 264.5)",
+          "oklch(25% 0.004 264.5)",
+          "oklch(35% 0.004 264.5)",
+          "oklch(48% 0.004 264.5)",
+          "oklch(60% 0.004 264.5)",
+          "oklch(72% 0.004 264.5)",
+          "oklch(84% 0.004 264.5)",
+          "oklch(95% 0.004 264.5)"
         ]
       },
       "ink-2": {
         "role": "neutral",
         "displayName": "Ink 2",
-        "canonical": "#47463f",
-        "oklch": "oklch(39.3% 0.012 100.3)",
+        "canonical": "#3f3f46",
+        "oklch": "oklch(37.0% 0.012 285.8)",
         "tonalRamp": [
-          "oklch(15% 0.012 100.3)",
-          "oklch(25% 0.012 100.3)",
-          "oklch(35% 0.012 100.3)",
-          "oklch(48% 0.012 100.3)",
-          "oklch(60% 0.012 100.3)",
-          "oklch(72% 0.012 100.3)",
-          "oklch(84% 0.012 100.3)",
-          "oklch(95% 0.012 100.3)"
+          "oklch(15% 0.012 285.8)",
+          "oklch(25% 0.012 285.8)",
+          "oklch(35% 0.012 285.8)",
+          "oklch(48% 0.012 285.8)",
+          "oklch(60% 0.012 285.8)",
+          "oklch(72% 0.012 285.8)",
+          "oklch(84% 0.012 285.8)",
+          "oklch(95% 0.012 285.8)"
         ]
       },
       "ink-3": {
         "role": "neutral",
         "displayName": "Ink 3",
-        "canonical": "#66645c",
-        "oklch": "oklch(50.3% 0.013 95.3)",
+        "canonical": "#6b6b74",
+        "oklch": "oklch(53.1% 0.014 285.9)",
         "tonalRamp": [
-          "oklch(15% 0.013 95.3)",
-          "oklch(25% 0.013 95.3)",
-          "oklch(35% 0.013 95.3)",
-          "oklch(48% 0.013 95.3)",
-          "oklch(60% 0.013 95.3)",
-          "oklch(72% 0.013 95.3)",
-          "oklch(84% 0.013 95.3)",
-          "oklch(95% 0.013 95.3)"
+          "oklch(15% 0.014 285.9)",
+          "oklch(25% 0.014 285.9)",
+          "oklch(35% 0.014 285.9)",
+          "oklch(48% 0.014 285.9)",
+          "oklch(60% 0.014 285.9)",
+          "oklch(72% 0.014 285.9)",
+          "oklch(84% 0.014 285.9)",
+          "oklch(95% 0.014 285.9)"
         ]
       },
-      "hairline": {
+      "ink-4": {
         "role": "neutral",
-        "displayName": "Hairline",
-        "canonical": "#d8d7d0",
-        "oklch": "oklch(87.8% 0.010 100.0)",
+        "displayName": "Ink 4 (decoration)",
+        "canonical": "#a1a1aa",
+        "oklch": "oklch(71.2% 0.013 286.1)",
         "tonalRamp": [
-          "oklch(15% 0.010 100.0)",
-          "oklch(25% 0.010 100.0)",
-          "oklch(35% 0.010 100.0)",
-          "oklch(48% 0.010 100.0)",
-          "oklch(60% 0.010 100.0)",
-          "oklch(72% 0.010 100.0)",
-          "oklch(84% 0.010 100.0)",
-          "oklch(95% 0.010 100.0)"
+          "oklch(15% 0.013 286.1)",
+          "oklch(25% 0.013 286.1)",
+          "oklch(35% 0.013 286.1)",
+          "oklch(48% 0.013 286.1)",
+          "oklch(60% 0.013 286.1)",
+          "oklch(72% 0.013 286.1)",
+          "oklch(84% 0.013 286.1)",
+          "oklch(95% 0.013 286.1)"
         ]
       },
-      "hairline-strong": {
+      "label": {
         "role": "neutral",
-        "displayName": "Hairline Strong",
-        "canonical": "#b4b3ab",
-        "oklch": "oklch(76.5% 0.011 100.9)",
+        "displayName": "Group Label Grey",
+        "canonical": "#5a5b5e",
+        "oklch": "oklch(47.1% 0.005 271.3)",
         "tonalRamp": [
-          "oklch(15% 0.011 100.9)",
-          "oklch(25% 0.011 100.9)",
-          "oklch(35% 0.011 100.9)",
-          "oklch(48% 0.011 100.9)",
-          "oklch(60% 0.011 100.9)",
-          "oklch(72% 0.011 100.9)",
-          "oklch(84% 0.011 100.9)",
-          "oklch(95% 0.011 100.9)"
+          "oklch(15% 0.005 271.3)",
+          "oklch(25% 0.005 271.3)",
+          "oklch(35% 0.005 271.3)",
+          "oklch(48% 0.005 271.3)",
+          "oklch(60% 0.005 271.3)",
+          "oklch(72% 0.005 271.3)",
+          "oklch(84% 0.005 271.3)",
+          "oklch(95% 0.005 271.3)"
         ]
       },
-      "blade": {
+      "primary": {
         "role": "primary",
-        "displayName": "Tape-Blade Yellow",
-        "canonical": "#f5c400",
-        "oklch": "oklch(84.0% 0.172 90.4)",
+        "displayName": "Workbench Black",
+        "canonical": "#262626",
+        "oklch": "oklch(26.9% 0.000 89.9)",
         "tonalRamp": [
-          "oklch(15% 0.170 90.4)",
-          "oklch(25% 0.170 90.4)",
-          "oklch(35% 0.170 90.4)",
-          "oklch(48% 0.170 90.4)",
-          "oklch(60% 0.170 90.4)",
-          "oklch(72% 0.170 90.4)",
-          "oklch(84% 0.170 90.4)",
-          "oklch(95% 0.170 90.4)"
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(48% 0.000 89.9)",
+          "oklch(60% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
         ]
       },
-      "blade-press": {
+      "primary-top": {
         "role": "primary",
-        "displayName": "Pressed Blade",
-        "canonical": "#dcb000",
-        "oklch": "oklch(77.5% 0.158 90.6)",
+        "displayName": "Workbench Black Top",
+        "canonical": "#404040",
+        "oklch": "oklch(37.1% 0.000 89.9)",
         "tonalRamp": [
-          "oklch(15% 0.158 90.6)",
-          "oklch(25% 0.158 90.6)",
-          "oklch(35% 0.158 90.6)",
-          "oklch(48% 0.158 90.6)",
-          "oklch(60% 0.158 90.6)",
-          "oklch(72% 0.158 90.6)",
-          "oklch(84% 0.158 90.6)",
-          "oklch(95% 0.158 90.6)"
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(48% 0.000 89.9)",
+          "oklch(60% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
         ]
       },
-      "blade-wash": {
+      "primary-hover": {
         "role": "primary",
-        "displayName": "Blade Wash",
-        "canonical": "#fff3bf",
-        "oklch": "oklch(96.1% 0.068 96.6)",
+        "displayName": "Workbench Black Hover",
+        "canonical": "#333333",
+        "oklch": "oklch(32.1% 0.000 89.9)",
         "tonalRamp": [
-          "oklch(15% 0.068 96.6)",
-          "oklch(25% 0.068 96.6)",
-          "oklch(35% 0.068 96.6)",
-          "oklch(48% 0.068 96.6)",
-          "oklch(60% 0.068 96.6)",
-          "oklch(72% 0.068 96.6)",
-          "oklch(84% 0.068 96.6)",
-          "oklch(95% 0.068 96.6)"
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(48% 0.000 89.9)",
+          "oklch(60% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
         ]
       },
-      "on-blade": {
+      "on-primary": {
         "role": "primary",
-        "displayName": "On-Blade",
-        "canonical": "#161510",
-        "oklch": "oklch(19.5% 0.010 97.9)",
+        "displayName": "On Primary",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
         "tonalRamp": [
-          "oklch(15% 0.010 97.9)",
-          "oklch(25% 0.010 97.9)",
-          "oklch(35% 0.010 97.9)",
-          "oklch(48% 0.010 97.9)",
-          "oklch(60% 0.010 97.9)",
-          "oklch(72% 0.010 97.9)",
-          "oklch(84% 0.010 97.9)",
-          "oklch(95% 0.010 97.9)"
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(48% 0.000 89.9)",
+          "oklch(60% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
         ]
       },
-      "case": {
-        "role": "neutral",
-        "displayName": "Case Black",
-        "canonical": "#161510",
-        "oklch": "oklch(19.5% 0.010 97.9)",
+      "accent": {
+        "role": "primary",
+        "displayName": "Hi-Vis Orange",
+        "canonical": "#f26b1d",
+        "oklch": "oklch(68.4% 0.185 44.9)",
         "tonalRamp": [
-          "oklch(15% 0.010 97.9)",
-          "oklch(25% 0.010 97.9)",
-          "oklch(35% 0.010 97.9)",
-          "oklch(48% 0.010 97.9)",
-          "oklch(60% 0.010 97.9)",
-          "oklch(72% 0.010 97.9)",
-          "oklch(84% 0.010 97.9)",
-          "oklch(95% 0.010 97.9)"
+          "oklch(15% 0.185 44.9)",
+          "oklch(25% 0.185 44.9)",
+          "oklch(35% 0.185 44.9)",
+          "oklch(48% 0.185 44.9)",
+          "oklch(60% 0.185 44.9)",
+          "oklch(72% 0.185 44.9)",
+          "oklch(84% 0.185 44.9)",
+          "oklch(95% 0.185 44.9)"
         ]
       },
-      "on-case": {
-        "role": "neutral",
-        "displayName": "On-Case",
-        "canonical": "#f7f6ef",
-        "oklch": "oklch(97.2% 0.009 100.0)",
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Hi-Vis Orange Deep",
+        "canonical": "#e05d12",
+        "oklch": "oklch(63.7% 0.180 43.7)",
         "tonalRamp": [
-          "oklch(15% 0.009 100.0)",
-          "oklch(25% 0.009 100.0)",
-          "oklch(35% 0.009 100.0)",
-          "oklch(48% 0.009 100.0)",
-          "oklch(60% 0.009 100.0)",
-          "oklch(72% 0.009 100.0)",
-          "oklch(84% 0.009 100.0)",
-          "oklch(95% 0.009 100.0)"
+          "oklch(15% 0.180 43.7)",
+          "oklch(25% 0.180 43.7)",
+          "oklch(35% 0.180 43.7)",
+          "oklch(48% 0.180 43.7)",
+          "oklch(60% 0.180 43.7)",
+          "oklch(72% 0.180 43.7)",
+          "oklch(84% 0.180 43.7)",
+          "oklch(95% 0.180 43.7)"
         ]
       },
-      "mark": {
-        "role": "secondary",
-        "displayName": "Stud-Mark Red",
-        "canonical": "#c8281e",
-        "oklch": "oklch(54.1% 0.197 29.1)",
+      "on-accent": {
+        "role": "primary",
+        "displayName": "On Accent",
+        "canonical": "#18181b",
+        "oklch": "oklch(21.0% 0.006 285.9)",
         "tonalRamp": [
-          "oklch(15% 0.170 29.1)",
-          "oklch(25% 0.170 29.1)",
-          "oklch(35% 0.170 29.1)",
-          "oklch(48% 0.170 29.1)",
-          "oklch(60% 0.170 29.1)",
-          "oklch(72% 0.170 29.1)",
-          "oklch(84% 0.170 29.1)",
-          "oklch(95% 0.170 29.1)"
+          "oklch(15% 0.006 285.9)",
+          "oklch(25% 0.006 285.9)",
+          "oklch(35% 0.006 285.9)",
+          "oklch(48% 0.006 285.9)",
+          "oklch(60% 0.006 285.9)",
+          "oklch(72% 0.006 285.9)",
+          "oklch(84% 0.006 285.9)",
+          "oklch(95% 0.006 285.9)"
         ]
       },
-      "mark-wash": {
-        "role": "secondary",
-        "displayName": "Stud-Mark Wash",
-        "canonical": "#fbe8e5",
-        "oklch": "oklch(94.5% 0.021 28.3)",
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Orange Wash",
+        "canonical": "#fff2ea",
+        "oklch": "oklch(96.9% 0.018 54.0)",
         "tonalRamp": [
-          "oklch(15% 0.021 28.3)",
-          "oklch(25% 0.021 28.3)",
-          "oklch(35% 0.021 28.3)",
-          "oklch(48% 0.021 28.3)",
-          "oklch(60% 0.021 28.3)",
-          "oklch(72% 0.021 28.3)",
-          "oklch(84% 0.021 28.3)",
-          "oklch(95% 0.021 28.3)"
+          "oklch(15% 0.018 54.0)",
+          "oklch(25% 0.018 54.0)",
+          "oklch(35% 0.018 54.0)",
+          "oklch(48% 0.018 54.0)",
+          "oklch(60% 0.018 54.0)",
+          "oklch(72% 0.018 54.0)",
+          "oklch(84% 0.018 54.0)",
+          "oklch(95% 0.018 54.0)"
+        ]
+      },
+      "accent-ink": {
+        "role": "primary",
+        "displayName": "Orange Ink",
+        "canonical": "#c2410c",
+        "oklch": "oklch(55.3% 0.174 38.4)",
+        "tonalRamp": [
+          "oklch(15% 0.174 38.4)",
+          "oklch(25% 0.174 38.4)",
+          "oklch(35% 0.174 38.4)",
+          "oklch(48% 0.174 38.4)",
+          "oklch(60% 0.174 38.4)",
+          "oklch(72% 0.174 38.4)",
+          "oklch(84% 0.174 38.4)",
+          "oklch(95% 0.174 38.4)"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Danger",
+        "canonical": "#c81e1e",
+        "oklch": "oklch(53.5% 0.203 27.6)",
+        "tonalRamp": [
+          "oklch(15% 0.203 27.6)",
+          "oklch(25% 0.203 27.6)",
+          "oklch(35% 0.203 27.6)",
+          "oklch(48% 0.203 27.6)",
+          "oklch(60% 0.203 27.6)",
+          "oklch(72% 0.203 27.6)",
+          "oklch(84% 0.203 27.6)",
+          "oklch(95% 0.203 27.6)"
+        ]
+      },
+      "danger-soft": {
+        "role": "semantic",
+        "displayName": "Danger Wash",
+        "canonical": "#fef1f1",
+        "oklch": "oklch(96.8% 0.014 17.4)",
+        "tonalRamp": [
+          "oklch(15% 0.014 17.4)",
+          "oklch(25% 0.014 17.4)",
+          "oklch(35% 0.014 17.4)",
+          "oklch(48% 0.014 17.4)",
+          "oklch(60% 0.014 17.4)",
+          "oklch(72% 0.014 17.4)",
+          "oklch(84% 0.014 17.4)",
+          "oklch(95% 0.014 17.4)"
         ]
       },
       "ok": {
-        "role": "tertiary",
-        "displayName": "Level Green",
-        "canonical": "#1c6a43",
-        "oklch": "oklch(46.7% 0.098 156.9)",
+        "role": "semantic",
+        "displayName": "OK",
+        "canonical": "#15803d",
+        "oklch": "oklch(52.7% 0.137 150.1)",
         "tonalRamp": [
-          "oklch(15% 0.098 156.9)",
-          "oklch(25% 0.098 156.9)",
-          "oklch(35% 0.098 156.9)",
-          "oklch(48% 0.098 156.9)",
-          "oklch(60% 0.098 156.9)",
-          "oklch(72% 0.098 156.9)",
-          "oklch(84% 0.098 156.9)",
-          "oklch(95% 0.098 156.9)"
+          "oklch(15% 0.137 150.1)",
+          "oklch(25% 0.137 150.1)",
+          "oklch(35% 0.137 150.1)",
+          "oklch(48% 0.137 150.1)",
+          "oklch(60% 0.137 150.1)",
+          "oklch(72% 0.137 150.1)",
+          "oklch(84% 0.137 150.1)",
+          "oklch(95% 0.137 150.1)"
+        ]
+      },
+      "ok-soft": {
+        "role": "semantic",
+        "displayName": "OK Wash",
+        "canonical": "#effbf3",
+        "oklch": "oklch(97.7% 0.016 156.9)",
+        "tonalRamp": [
+          "oklch(15% 0.016 156.9)",
+          "oklch(25% 0.016 156.9)",
+          "oklch(35% 0.016 156.9)",
+          "oklch(48% 0.016 156.9)",
+          "oklch(60% 0.016 156.9)",
+          "oklch(72% 0.016 156.9)",
+          "oklch(84% 0.016 156.9)",
+          "oklch(95% 0.016 156.9)"
         ]
       },
       "focus": {
         "role": "neutral",
         "displayName": "Focus",
-        "canonical": "#161510",
-        "oklch": "oklch(19.5% 0.010 97.9)",
+        "canonical": "#18191b",
+        "oklch": "oklch(21.3% 0.004 264.5)",
         "tonalRamp": [
-          "oklch(15% 0.010 97.9)",
-          "oklch(25% 0.010 97.9)",
-          "oklch(35% 0.010 97.9)",
-          "oklch(48% 0.010 97.9)",
-          "oklch(60% 0.010 97.9)",
-          "oklch(72% 0.010 97.9)",
-          "oklch(84% 0.010 97.9)",
-          "oklch(95% 0.010 97.9)"
+          "oklch(15% 0.004 264.5)",
+          "oklch(25% 0.004 264.5)",
+          "oklch(35% 0.004 264.5)",
+          "oklch(48% 0.004 264.5)",
+          "oklch(60% 0.004 264.5)",
+          "oklch(72% 0.004 264.5)",
+          "oklch(84% 0.004 264.5)",
+          "oklch(95% 0.004 264.5)"
         ]
       },
-      "ground-dark": {
+      "bg-dark": {
         "role": "neutral",
-        "displayName": "Concrete Ground (dark)",
-        "canonical": "#11110f",
-        "oklch": "oklch(17.7% 0.004 106.8)",
+        "displayName": "Paper (dark)",
+        "canonical": "#0f0f10",
+        "oklch": "oklch(16.9% 0.002 286.2)",
         "tonalRamp": [
-          "oklch(15% 0.004 106.8)",
-          "oklch(25% 0.004 106.8)",
-          "oklch(35% 0.004 106.8)",
-          "oklch(48% 0.004 106.8)",
-          "oklch(60% 0.004 106.8)",
-          "oklch(72% 0.004 106.8)",
-          "oklch(84% 0.004 106.8)",
-          "oklch(95% 0.004 106.8)"
+          "oklch(15% 0.002 286.2)",
+          "oklch(25% 0.002 286.2)",
+          "oklch(35% 0.002 286.2)",
+          "oklch(48% 0.002 286.2)",
+          "oklch(60% 0.002 286.2)",
+          "oklch(72% 0.002 286.2)",
+          "oklch(84% 0.002 286.2)",
+          "oklch(95% 0.002 286.2)"
         ]
       },
       "surface-dark": {
         "role": "neutral",
-        "displayName": "Work Surface (dark)",
-        "canonical": "#1a1a17",
-        "oklch": "oklch(21.7% 0.006 106.9)",
+        "displayName": "Surface White (dark)",
+        "canonical": "#161618",
+        "oklch": "oklch(20.1% 0.004 286.0)",
         "tonalRamp": [
-          "oklch(15% 0.006 106.9)",
-          "oklch(25% 0.006 106.9)",
-          "oklch(35% 0.006 106.9)",
-          "oklch(48% 0.006 106.9)",
-          "oklch(60% 0.006 106.9)",
-          "oklch(72% 0.006 106.9)",
-          "oklch(84% 0.006 106.9)",
-          "oklch(95% 0.006 106.9)"
+          "oklch(15% 0.004 286.0)",
+          "oklch(25% 0.004 286.0)",
+          "oklch(35% 0.004 286.0)",
+          "oklch(48% 0.004 286.0)",
+          "oklch(60% 0.004 286.0)",
+          "oklch(72% 0.004 286.0)",
+          "oklch(84% 0.004 286.0)",
+          "oklch(95% 0.004 286.0)"
         ]
       },
-      "surface-2-dark": {
+      "sidebar-dark": {
         "role": "neutral",
-        "displayName": "Second Layer (dark)",
-        "canonical": "#23231f",
-        "oklch": "oklch(25.5% 0.007 106.9)",
+        "displayName": "Sidebar (page colour) (dark)",
+        "canonical": "#0f0f10",
+        "oklch": "oklch(16.9% 0.002 286.2)",
         "tonalRamp": [
-          "oklch(15% 0.007 106.9)",
-          "oklch(25% 0.007 106.9)",
-          "oklch(35% 0.007 106.9)",
-          "oklch(48% 0.007 106.9)",
-          "oklch(60% 0.007 106.9)",
-          "oklch(72% 0.007 106.9)",
-          "oklch(84% 0.007 106.9)",
-          "oklch(95% 0.007 106.9)"
+          "oklch(15% 0.002 286.2)",
+          "oklch(25% 0.002 286.2)",
+          "oklch(35% 0.002 286.2)",
+          "oklch(48% 0.002 286.2)",
+          "oklch(60% 0.002 286.2)",
+          "oklch(72% 0.002 286.2)",
+          "oklch(84% 0.002 286.2)",
+          "oklch(95% 0.002 286.2)"
+        ]
+      },
+      "subtle-dark": {
+        "role": "neutral",
+        "displayName": "Subtle Grey (dark)",
+        "canonical": "#1a1a1d",
+        "oklch": "oklch(21.9% 0.006 285.9)",
+        "tonalRamp": [
+          "oklch(15% 0.006 285.9)",
+          "oklch(25% 0.006 285.9)",
+          "oklch(35% 0.006 285.9)",
+          "oklch(48% 0.006 285.9)",
+          "oklch(60% 0.006 285.9)",
+          "oklch(72% 0.006 285.9)",
+          "oklch(84% 0.006 285.9)",
+          "oklch(95% 0.006 285.9)"
+        ]
+      },
+      "hover-dark": {
+        "role": "neutral",
+        "displayName": "Hover Grey (dark)",
+        "canonical": "#1f1f23",
+        "oklch": "oklch(24.1% 0.008 285.8)",
+        "tonalRamp": [
+          "oklch(15% 0.008 285.8)",
+          "oklch(25% 0.008 285.8)",
+          "oklch(35% 0.008 285.8)",
+          "oklch(48% 0.008 285.8)",
+          "oklch(60% 0.008 285.8)",
+          "oklch(72% 0.008 285.8)",
+          "oklch(84% 0.008 285.8)",
+          "oklch(95% 0.008 285.8)"
+        ]
+      },
+      "border-dark": {
+        "role": "neutral",
+        "displayName": "Hairline (dark)",
+        "canonical": "#232328",
+        "oklch": "oklch(25.8% 0.009 285.7)",
+        "tonalRamp": [
+          "oklch(15% 0.009 285.7)",
+          "oklch(25% 0.009 285.7)",
+          "oklch(35% 0.009 285.7)",
+          "oklch(48% 0.009 285.7)",
+          "oklch(60% 0.009 285.7)",
+          "oklch(72% 0.009 285.7)",
+          "oklch(84% 0.009 285.7)",
+          "oklch(95% 0.009 285.7)"
+        ]
+      },
+      "border-strong-dark": {
+        "role": "neutral",
+        "displayName": "Hairline Strong (dark)",
+        "canonical": "#2e2e34",
+        "oklch": "oklch(30.4% 0.011 285.7)",
+        "tonalRamp": [
+          "oklch(15% 0.011 285.7)",
+          "oklch(25% 0.011 285.7)",
+          "oklch(35% 0.011 285.7)",
+          "oklch(48% 0.011 285.7)",
+          "oklch(60% 0.011 285.7)",
+          "oklch(72% 0.011 285.7)",
+          "oklch(84% 0.011 285.7)",
+          "oklch(95% 0.011 285.7)"
         ]
       },
       "ink-dark": {
         "role": "neutral",
         "displayName": "Ink (dark)",
-        "canonical": "#f2f1ea",
-        "oklch": "oklch(95.7% 0.009 100.0)",
+        "canonical": "#f4f4f5",
+        "oklch": "oklch(96.7% 0.001 286.4)",
         "tonalRamp": [
-          "oklch(15% 0.009 100.0)",
-          "oklch(25% 0.009 100.0)",
-          "oklch(35% 0.009 100.0)",
-          "oklch(48% 0.009 100.0)",
-          "oklch(60% 0.009 100.0)",
-          "oklch(72% 0.009 100.0)",
-          "oklch(84% 0.009 100.0)",
-          "oklch(95% 0.009 100.0)"
+          "oklch(15% 0.001 286.4)",
+          "oklch(25% 0.001 286.4)",
+          "oklch(35% 0.001 286.4)",
+          "oklch(48% 0.001 286.4)",
+          "oklch(60% 0.001 286.4)",
+          "oklch(72% 0.001 286.4)",
+          "oklch(84% 0.001 286.4)",
+          "oklch(95% 0.001 286.4)"
         ]
       },
       "ink-2-dark": {
         "role": "neutral",
         "displayName": "Ink 2 (dark)",
-        "canonical": "#c4c2b8",
-        "oklch": "oklch(81.3% 0.014 97.5)",
+        "canonical": "#d4d4d8",
+        "oklch": "oklch(87.1% 0.005 286.3)",
         "tonalRamp": [
-          "oklch(15% 0.014 97.5)",
-          "oklch(25% 0.014 97.5)",
-          "oklch(35% 0.014 97.5)",
-          "oklch(48% 0.014 97.5)",
-          "oklch(60% 0.014 97.5)",
-          "oklch(72% 0.014 97.5)",
-          "oklch(84% 0.014 97.5)",
-          "oklch(95% 0.014 97.5)"
+          "oklch(15% 0.005 286.3)",
+          "oklch(25% 0.005 286.3)",
+          "oklch(35% 0.005 286.3)",
+          "oklch(48% 0.005 286.3)",
+          "oklch(60% 0.005 286.3)",
+          "oklch(72% 0.005 286.3)",
+          "oklch(84% 0.005 286.3)",
+          "oklch(95% 0.005 286.3)"
         ]
       },
       "ink-3-dark": {
         "role": "neutral",
         "displayName": "Ink 3 (dark)",
-        "canonical": "#96948a",
-        "oklch": "oklch(66.5% 0.015 97.5)",
+        "canonical": "#a1a1aa",
+        "oklch": "oklch(71.2% 0.013 286.1)",
         "tonalRamp": [
-          "oklch(15% 0.015 97.5)",
-          "oklch(25% 0.015 97.5)",
-          "oklch(35% 0.015 97.5)",
-          "oklch(48% 0.015 97.5)",
-          "oklch(60% 0.015 97.5)",
-          "oklch(72% 0.015 97.5)",
-          "oklch(84% 0.015 97.5)",
-          "oklch(95% 0.015 97.5)"
+          "oklch(15% 0.013 286.1)",
+          "oklch(25% 0.013 286.1)",
+          "oklch(35% 0.013 286.1)",
+          "oklch(48% 0.013 286.1)",
+          "oklch(60% 0.013 286.1)",
+          "oklch(72% 0.013 286.1)",
+          "oklch(84% 0.013 286.1)",
+          "oklch(95% 0.013 286.1)"
         ]
       },
-      "hairline-dark": {
+      "ink-4-dark": {
         "role": "neutral",
-        "displayName": "Hairline (dark)",
-        "canonical": "#313029",
-        "oklch": "oklch(30.8% 0.012 100.4)",
+        "displayName": "Ink 4 (decoration) (dark)",
+        "canonical": "#52525b",
+        "oklch": "oklch(44.2% 0.015 285.8)",
         "tonalRamp": [
-          "oklch(15% 0.012 100.4)",
-          "oklch(25% 0.012 100.4)",
-          "oklch(35% 0.012 100.4)",
-          "oklch(48% 0.012 100.4)",
-          "oklch(60% 0.012 100.4)",
-          "oklch(72% 0.012 100.4)",
-          "oklch(84% 0.012 100.4)",
-          "oklch(95% 0.012 100.4)"
+          "oklch(15% 0.015 285.8)",
+          "oklch(25% 0.015 285.8)",
+          "oklch(35% 0.015 285.8)",
+          "oklch(48% 0.015 285.8)",
+          "oklch(60% 0.015 285.8)",
+          "oklch(72% 0.015 285.8)",
+          "oklch(84% 0.015 285.8)",
+          "oklch(95% 0.015 285.8)"
         ]
       },
-      "hairline-strong-dark": {
+      "label-dark": {
         "role": "neutral",
-        "displayName": "Hairline Strong (dark)",
-        "canonical": "#4a4942",
-        "oklch": "oklch(40.4% 0.012 100.3)",
+        "displayName": "Group Label Grey (dark)",
+        "canonical": "#a1a1aa",
+        "oklch": "oklch(71.2% 0.013 286.1)",
         "tonalRamp": [
-          "oklch(15% 0.012 100.3)",
-          "oklch(25% 0.012 100.3)",
-          "oklch(35% 0.012 100.3)",
-          "oklch(48% 0.012 100.3)",
-          "oklch(60% 0.012 100.3)",
-          "oklch(72% 0.012 100.3)",
-          "oklch(84% 0.012 100.3)",
-          "oklch(95% 0.012 100.3)"
+          "oklch(15% 0.013 286.1)",
+          "oklch(25% 0.013 286.1)",
+          "oklch(35% 0.013 286.1)",
+          "oklch(48% 0.013 286.1)",
+          "oklch(60% 0.013 286.1)",
+          "oklch(72% 0.013 286.1)",
+          "oklch(84% 0.013 286.1)",
+          "oklch(95% 0.013 286.1)"
         ]
       },
-      "blade-press-dark": {
+      "primary-dark": {
         "role": "primary",
-        "displayName": "Pressed Blade (dark)",
-        "canonical": "#ffd633",
-        "oklch": "oklch(88.6% 0.170 93.6)",
+        "displayName": "Workbench Black (dark)",
+        "canonical": "#e4e4e7",
+        "oklch": "oklch(92.0% 0.004 286.3)",
         "tonalRamp": [
-          "oklch(15% 0.170 93.6)",
-          "oklch(25% 0.170 93.6)",
-          "oklch(35% 0.170 93.6)",
-          "oklch(48% 0.170 93.6)",
-          "oklch(60% 0.170 93.6)",
-          "oklch(72% 0.170 93.6)",
-          "oklch(84% 0.170 93.6)",
-          "oklch(95% 0.170 93.6)"
+          "oklch(15% 0.004 286.3)",
+          "oklch(25% 0.004 286.3)",
+          "oklch(35% 0.004 286.3)",
+          "oklch(48% 0.004 286.3)",
+          "oklch(60% 0.004 286.3)",
+          "oklch(72% 0.004 286.3)",
+          "oklch(84% 0.004 286.3)",
+          "oklch(95% 0.004 286.3)"
         ]
       },
-      "blade-wash-dark": {
+      "primary-top-dark": {
         "role": "primary",
-        "displayName": "Blade Wash (dark)",
-        "canonical": "#3a320f",
-        "oklch": "oklch(31.8% 0.053 96.4)",
+        "displayName": "Workbench Black Top (dark)",
+        "canonical": "#fafafa",
+        "oklch": "oklch(98.5% 0.000 89.9)",
         "tonalRamp": [
-          "oklch(15% 0.053 96.4)",
-          "oklch(25% 0.053 96.4)",
-          "oklch(35% 0.053 96.4)",
-          "oklch(48% 0.053 96.4)",
-          "oklch(60% 0.053 96.4)",
-          "oklch(72% 0.053 96.4)",
-          "oklch(84% 0.053 96.4)",
-          "oklch(95% 0.053 96.4)"
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(48% 0.000 89.9)",
+          "oklch(60% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
         ]
       },
-      "case-dark": {
-        "role": "neutral",
-        "displayName": "Case Black (dark)",
-        "canonical": "#2a2925",
-        "oklch": "oklch(28.1% 0.007 95.3)",
+      "primary-hover-dark": {
+        "role": "primary",
+        "displayName": "Workbench Black Hover (dark)",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
         "tonalRamp": [
-          "oklch(15% 0.007 95.3)",
-          "oklch(25% 0.007 95.3)",
-          "oklch(35% 0.007 95.3)",
-          "oklch(48% 0.007 95.3)",
-          "oklch(60% 0.007 95.3)",
-          "oklch(72% 0.007 95.3)",
-          "oklch(84% 0.007 95.3)",
-          "oklch(95% 0.007 95.3)"
+          "oklch(15% 0.000 89.9)",
+          "oklch(25% 0.000 89.9)",
+          "oklch(35% 0.000 89.9)",
+          "oklch(48% 0.000 89.9)",
+          "oklch(60% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
         ]
       },
-      "mark-dark": {
-        "role": "secondary",
-        "displayName": "Stud-Mark Red (dark)",
-        "canonical": "#ff7468",
-        "oklch": "oklch(72.3% 0.172 27.1)",
+      "on-primary-dark": {
+        "role": "primary",
+        "displayName": "On Primary (dark)",
+        "canonical": "#18181b",
+        "oklch": "oklch(21.0% 0.006 285.9)",
         "tonalRamp": [
-          "oklch(15% 0.170 27.1)",
-          "oklch(25% 0.170 27.1)",
-          "oklch(35% 0.170 27.1)",
-          "oklch(48% 0.170 27.1)",
-          "oklch(60% 0.170 27.1)",
-          "oklch(72% 0.170 27.1)",
-          "oklch(84% 0.170 27.1)",
-          "oklch(95% 0.170 27.1)"
+          "oklch(15% 0.006 285.9)",
+          "oklch(25% 0.006 285.9)",
+          "oklch(35% 0.006 285.9)",
+          "oklch(48% 0.006 285.9)",
+          "oklch(60% 0.006 285.9)",
+          "oklch(72% 0.006 285.9)",
+          "oklch(84% 0.006 285.9)",
+          "oklch(95% 0.006 285.9)"
         ]
       },
-      "mark-wash-dark": {
-        "role": "secondary",
-        "displayName": "Stud-Mark Wash (dark)",
-        "canonical": "#3b1b17",
-        "oklch": "oklch(26.7% 0.051 28.4)",
+      "accent-hover-dark": {
+        "role": "primary",
+        "displayName": "Hi-Vis Orange Deep (dark)",
+        "canonical": "#ff7a2e",
+        "oklch": "oklch(72.5% 0.182 46.2)",
         "tonalRamp": [
-          "oklch(15% 0.051 28.4)",
-          "oklch(25% 0.051 28.4)",
-          "oklch(35% 0.051 28.4)",
-          "oklch(48% 0.051 28.4)",
-          "oklch(60% 0.051 28.4)",
-          "oklch(72% 0.051 28.4)",
-          "oklch(84% 0.051 28.4)",
-          "oklch(95% 0.051 28.4)"
+          "oklch(15% 0.182 46.2)",
+          "oklch(25% 0.182 46.2)",
+          "oklch(35% 0.182 46.2)",
+          "oklch(48% 0.182 46.2)",
+          "oklch(60% 0.182 46.2)",
+          "oklch(72% 0.182 46.2)",
+          "oklch(84% 0.182 46.2)",
+          "oklch(95% 0.182 46.2)"
+        ]
+      },
+      "accent-soft-dark": {
+        "role": "primary",
+        "displayName": "Orange Wash (dark)",
+        "canonical": "#2a170b",
+        "oklch": "oklch(22.7% 0.037 52.1)",
+        "tonalRamp": [
+          "oklch(15% 0.037 52.1)",
+          "oklch(25% 0.037 52.1)",
+          "oklch(35% 0.037 52.1)",
+          "oklch(48% 0.037 52.1)",
+          "oklch(60% 0.037 52.1)",
+          "oklch(72% 0.037 52.1)",
+          "oklch(84% 0.037 52.1)",
+          "oklch(95% 0.037 52.1)"
+        ]
+      },
+      "accent-ink-dark": {
+        "role": "primary",
+        "displayName": "Orange Ink (dark)",
+        "canonical": "#ff9a5c",
+        "oklch": "oklch(77.9% 0.144 50.8)",
+        "tonalRamp": [
+          "oklch(15% 0.144 50.8)",
+          "oklch(25% 0.144 50.8)",
+          "oklch(35% 0.144 50.8)",
+          "oklch(48% 0.144 50.8)",
+          "oklch(60% 0.144 50.8)",
+          "oklch(72% 0.144 50.8)",
+          "oklch(84% 0.144 50.8)",
+          "oklch(95% 0.144 50.8)"
+        ]
+      },
+      "danger-dark": {
+        "role": "semantic",
+        "displayName": "Danger (dark)",
+        "canonical": "#f87171",
+        "oklch": "oklch(71.1% 0.166 22.2)",
+        "tonalRamp": [
+          "oklch(15% 0.166 22.2)",
+          "oklch(25% 0.166 22.2)",
+          "oklch(35% 0.166 22.2)",
+          "oklch(48% 0.166 22.2)",
+          "oklch(60% 0.166 22.2)",
+          "oklch(72% 0.166 22.2)",
+          "oklch(84% 0.166 22.2)",
+          "oklch(95% 0.166 22.2)"
+        ]
+      },
+      "danger-soft-dark": {
+        "role": "semantic",
+        "displayName": "Danger Wash (dark)",
+        "canonical": "#2a1213",
+        "oklch": "oklch(21.8% 0.040 18.3)",
+        "tonalRamp": [
+          "oklch(15% 0.040 18.3)",
+          "oklch(25% 0.040 18.3)",
+          "oklch(35% 0.040 18.3)",
+          "oklch(48% 0.040 18.3)",
+          "oklch(60% 0.040 18.3)",
+          "oklch(72% 0.040 18.3)",
+          "oklch(84% 0.040 18.3)",
+          "oklch(95% 0.040 18.3)"
         ]
       },
       "ok-dark": {
-        "role": "tertiary",
-        "displayName": "Level Green (dark)",
-        "canonical": "#5fc48c",
-        "oklch": "oklch(74.5% 0.126 157.1)",
+        "role": "semantic",
+        "displayName": "OK (dark)",
+        "canonical": "#4ade80",
+        "oklch": "oklch(80.0% 0.182 151.7)",
         "tonalRamp": [
-          "oklch(15% 0.126 157.1)",
-          "oklch(25% 0.126 157.1)",
-          "oklch(35% 0.126 157.1)",
-          "oklch(48% 0.126 157.1)",
-          "oklch(60% 0.126 157.1)",
-          "oklch(72% 0.126 157.1)",
-          "oklch(84% 0.126 157.1)",
-          "oklch(95% 0.126 157.1)"
+          "oklch(15% 0.182 151.7)",
+          "oklch(25% 0.182 151.7)",
+          "oklch(35% 0.182 151.7)",
+          "oklch(48% 0.182 151.7)",
+          "oklch(60% 0.182 151.7)",
+          "oklch(72% 0.182 151.7)",
+          "oklch(84% 0.182 151.7)",
+          "oklch(95% 0.182 151.7)"
+        ]
+      },
+      "ok-soft-dark": {
+        "role": "semantic",
+        "displayName": "OK Wash (dark)",
+        "canonical": "#0f2416",
+        "oklch": "oklch(23.8% 0.038 153.3)",
+        "tonalRamp": [
+          "oklch(15% 0.038 153.3)",
+          "oklch(25% 0.038 153.3)",
+          "oklch(35% 0.038 153.3)",
+          "oklch(48% 0.038 153.3)",
+          "oklch(60% 0.038 153.3)",
+          "oklch(72% 0.038 153.3)",
+          "oklch(84% 0.038 153.3)",
+          "oklch(95% 0.038 153.3)"
         ]
       },
       "focus-dark": {
         "role": "neutral",
         "displayName": "Focus (dark)",
-        "canonical": "#f5c400",
-        "oklch": "oklch(84.0% 0.172 90.4)",
+        "canonical": "#f4f4f5",
+        "oklch": "oklch(96.7% 0.001 286.4)",
         "tonalRamp": [
-          "oklch(15% 0.170 90.4)",
-          "oklch(25% 0.170 90.4)",
-          "oklch(35% 0.170 90.4)",
-          "oklch(48% 0.170 90.4)",
-          "oklch(60% 0.170 90.4)",
-          "oklch(72% 0.170 90.4)",
-          "oklch(84% 0.170 90.4)",
-          "oklch(95% 0.170 90.4)"
+          "oklch(15% 0.001 286.4)",
+          "oklch(25% 0.001 286.4)",
+          "oklch(35% 0.001 286.4)",
+          "oklch(48% 0.001 286.4)",
+          "oklch(60% 0.001 286.4)",
+          "oklch(72% 0.001 286.4)",
+          "oklch(84% 0.001 286.4)",
+          "oklch(95% 0.001 286.4)"
         ]
       }
     },
     "typographyMeta": {
-      "reading": {
-        "displayName": "Reading",
-        "purpose": "The total in the case window only; 2.5rem on phones, 3.25rem from sm. Cents at 0.5em in blade yellow."
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "The estimate total inc GST, once per page; Geist 600, tabular figures."
       },
-      "headline": {
-        "displayName": "Headline",
-        "purpose": "Page titles; auth pages 2rem."
-      },
-      "headline-detail": {
-        "displayName": "Estimate title",
-        "purpose": "Estimate title on desktop (1.75rem on phones)."
+      "stat": {
+        "displayName": "Stat",
+        "purpose": "Secondary stat columns, Settings usage figures and the live running total."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Stage headings with ink-3 stage numbers, section headings, stage prices."
+        "purpose": "Figtree page, record and auth-card titles."
       },
-      "body-lg": {
-        "displayName": "Body large",
-        "purpose": "Line-item descriptions, summaries (68ch, relaxed), list-row titles at 600."
+      "headline-sm": {
+        "displayName": "Headline Small",
+        "purpose": "Figtree greeting subline, live-preview title, empty-estimates card title."
+      },
+      "sheet-title": {
+        "displayName": "Sheet Title",
+        "purpose": "Figtree sheet header titles."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Default text; field labels at 600."
-      },
-      "meta": {
-        "displayName": "Meta",
-        "purpose": "Line build-up (qty × unit cost · type · source · markup), docket and date lines, in ink-3."
-      },
-      "figures": {
-        "displayName": "Figures",
-        "purpose": "Every money value; cents at 0.82em."
+        "purpose": "Default UI text, list rows, schedule lines, descriptions, inputs from 640px."
       },
       "label": {
-        "displayName": "Blade printing",
-        "purpose": "Upper-case condensed captions printed on the instrument: case caption, segment names (0.6875rem), inline 'or' divider. Never a kicker."
+        "displayName": "Label",
+        "purpose": "Field and row labels, nav items, table headers and group titles (ink-3), key-value values."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Hints, stat labels and sublines, meta, badges and stamps, compact button labels."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Bottom-bar tab labels and the kbd hint only."
       }
     },
-    "shadows": [],
+    "shadows": [
+      {
+        "name": "shadow-card",
+        "value": "0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.02), 0 3px 3px -1.5px rgb(0 0 0 / 0.015), 0 6px 6px -3px rgb(0 0 0 / 0.015)",
+        "darkValue": "0 0 0 1px var(--border-strong)",
+        "purpose": "Card: Panels and the live preview card."
+      },
+      {
+        "name": "shadow-raised",
+        "value": "0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.03), 0 3px 3px -1.5px rgb(0 0 0 / 0.03), 0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02)",
+        "darkValue": "0 0 0 1px var(--border-strong), 0 8px 24px -12px rgb(0 0 0 / 0.6)",
+        "purpose": "Raised: composer, auth card, empty-estimates card, account menu."
+      },
+      {
+        "name": "shadow-lg",
+        "value": "0 12px 32px -12px rgb(24 24 27 / 0.22), 0 2px 6px rgb(24 24 27 / 0.06)",
+        "darkValue": "0 16px 40px -12px rgb(0 0 0 / 0.7)",
+        "purpose": "Sheet overlay from 640px only, over a 20% ink backdrop."
+      },
+      {
+        "name": "button-highlight",
+        "value": "inset 0 1px 0 rgb(255 255 255 / 0.16)",
+        "purpose": "Top edge of primary gradient buttons and the New tile; 0.22 on accent."
+      },
+      {
+        "name": "focus-halo",
+        "value": "0 0 0 3px color-mix(in oklab, var(--ink) 5%, transparent)",
+        "purpose": "Input focus with border to ink-4; the composer uses 4px on focus-within."
+      }
+    ],
     "motion": [
       {
-        "name": "blade-run",
-        "value": "width 700ms cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "Blade extent growing as stages stream in."
-      },
-      {
-        "name": "wash-settle",
-        "value": "background-color 700ms ease-out, after 1.5s at 90% visibility",
-        "purpose": "Unseen AI line settling once read."
-      },
-      {
-        "name": "control",
+        "name": "state",
         "value": "150ms ease-out",
-        "purpose": "Button/input colour and border transitions; 1px press nudge on active."
+        "purpose": "Hover, border, colour and press (brightness 95%) transitions."
       },
       {
-        "name": "strip-fade",
-        "value": "opacity 150ms ease-out",
-        "purpose": "Sticky case strip in/out."
+        "name": "ease-enter",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All entrances."
       },
       {
-        "name": "live-end",
-        "value": "animate-pulse",
-        "purpose": "On-blade bar at the growing end of a live blade."
+        "name": "rise",
+        "value": "220ms ease-enter, translateY(4px) + fade",
+        "purpose": "Streamed stages entering the live preview (.enter)."
+      },
+      {
+        "name": "sheet-up",
+        "value": "280ms ease-enter, translateY(1.5rem) + fade",
+        "purpose": "Sheet arrival on phones."
+      },
+      {
+        "name": "sheet-in",
+        "value": "280ms ease-enter, translateX(2rem) + fade",
+        "purpose": "Sheet arrival from 640px."
+      },
+      {
+        "name": "backdrop-fade",
+        "value": "200ms ease-out",
+        "purpose": "Sheet backdrop."
+      },
+      {
+        "name": "fresh-line",
+        "value": "500ms colour transition",
+        "purpose": "Orange wash on a newly streamed line fading back."
       },
       {
         "name": "reduced-motion",
-        "value": "durations 0.01ms",
-        "purpose": "All motion dropped under prefers-reduced-motion; states (wash) still shown."
+        "value": "0.01ms all animations and transitions",
+        "purpose": "prefers-reduced-motion guard; live ping hidden."
       }
     ],
     "breakpoints": [
@@ -610,168 +921,176 @@
         "value": "640px"
       },
       {
-        "name": "lg",
-        "value": "1024px"
-      },
-      {
-        "name": "container",
-        "value": "64rem"
+        "name": "md",
+        "value": "768px"
       }
-    ],
-    "graduations": {
-      "blade": "minor tick every 4px at 22% height, major every 20px at 45%, 1px on-blade",
-      "rule": "six 1px hairline-strong ticks, heights 10/5/5/5/5/10px, 5px apart, at the left end of a 1px hairline"
-    }
+    ]
   },
   "components": [
     {
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Blade-yellow primary action; 44px (md) or 56px (lg).",
-      "html": "<button class=\"ds-btn-primary\">Price this job <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button>",
-      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:56px;padding:0 24px;border:0;border-radius:4px;background:var(--blade,#f5c400);color:var(--on-blade,#161510);font-family:'Barlow',ui-sans-serif,system-ui,sans-serif;font-size:1.0625rem;font-weight:600;cursor:pointer;transition:background-color 150ms ease-out,transform 150ms ease-out}.ds-btn-primary:hover{background:var(--blade-press,#dcb000)}.ds-btn-primary:active{transform:translateY(1px)}.ds-btn-primary:focus-visible{outline:2px solid var(--focus,#161510);outline-offset:2px}.ds-btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}"
+      "description": "Near-black gradient default action: sheet submit, save, Add.",
+      "html": "<button class=\"ds-btn ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M5 12h14M12 5v14\"/></svg>Add line</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border-radius:8px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:500;line-height:1;border:1px solid transparent;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,filter 150ms ease-out} .ds-btn:active{filter:brightness(.95)} .ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px} .ds-btn-primary{background:linear-gradient(to bottom,var(--primary-top),var(--primary));border-color:var(--primary);color:var(--on-primary);box-shadow:inset 0 1px 0 rgb(255 255 255/.16)} .ds-btn-primary:hover{background:linear-gradient(to bottom,var(--primary-hover),var(--primary))}"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Surface fill with hairline-strong border; Stop, Google sign-in.",
-      "html": "<button class=\"ds-btn-secondary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\"/></svg> Stop</button>",
-      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 16px;border:1px solid var(--hairline-strong,#b4b3ab);border-radius:4px;background:var(--surface,#fff);color:var(--ink,#161510);font-family:'Barlow',ui-sans-serif,system-ui,sans-serif;font-size:.9375rem;font-weight:600;cursor:pointer;transition:border-color 150ms ease-out,transform 150ms ease-out}.ds-btn-secondary:hover{border-color:var(--ink,#161510)}.ds-btn-secondary:active{transform:translateY(1px)}.ds-btn-secondary:focus-visible{outline:2px solid var(--focus,#161510);outline-offset:2px}"
+      "description": "Page-colour button with a strong hairline: Copy as text, Print or PDF, Stop.",
+      "html": "<button class=\"ds-btn ds-btn-secondary\">Print or PDF</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border-radius:8px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:500;line-height:1;border:1px solid transparent;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,filter 150ms ease-out} .ds-btn:active{filter:brightness(.95)} .ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px} .ds-btn-secondary{background:var(--bg);border-color:var(--border-strong);color:var(--ink)} .ds-btn-secondary:hover{background:var(--hover)}"
     },
     {
-      "name": "Danger Link",
+      "name": "Ghost Button",
       "kind": "button",
-      "refersTo": "button-danger",
-      "description": "Destructive action as a red underlined text link; confirms inline.",
-      "html": "<button class=\"ds-btn-danger\">Remove key and turn AI off</button>",
-      "css": ".ds-btn-danger{border:0;background:none;padding:0;color:var(--mark,#c8281e);font-family:'Barlow',ui-sans-serif,system-ui,sans-serif;font-weight:600;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;cursor:pointer}.ds-btn-danger:hover{text-decoration:none}.ds-btn-danger:focus-visible{outline:2px solid var(--focus,#161510);outline-offset:2px;border-radius:4px}"
+      "refersTo": "button-ghost",
+      "description": "Cancel and Back in sheet footers; icon buttons.",
+      "html": "<button class=\"ds-btn ds-btn-ghost\">Cancel</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border-radius:8px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:500;line-height:1;border:1px solid transparent;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,filter 150ms ease-out} .ds-btn:active{filter:brightness(.95)} .ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px} .ds-btn-ghost{background:transparent;color:var(--ink-2)} .ds-btn-ghost:hover{background:var(--hover);color:var(--ink)}"
     },
     {
-      "name": "Text Field",
+      "name": "Accent Button (Price this job)",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "The one orange action: starting a price. At most one per screen.",
+      "html": "<button class=\"ds-btn ds-btn-accent\">Price this job<kbd class=\"ds-kbd\">⌘↵</kbd></button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border-radius:8px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:500;line-height:1;border:1px solid transparent;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,filter 150ms ease-out} .ds-btn:active{filter:brightness(.95)} .ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px} .ds-btn-accent{background:linear-gradient(to bottom,var(--accent),var(--accent-hover));border-color:var(--accent-hover);color:var(--on-accent);box-shadow:inset 0 1px 0 rgb(255 255 255/.22)} .ds-btn-accent:hover{filter:brightness(1.05)} .ds-kbd{border:1px solid color-mix(in oklab,var(--on-accent) 20%,transparent);border-radius:4px;padding:0 4px;font:500 11px/1.4 inherit;color:color-mix(in oklab,var(--on-accent) 70%,transparent)}"
+    },
+    {
+      "name": "Field with Input",
       "kind": "input",
       "refersTo": "input",
-      "description": "Labelled 48px field with hint; red border when invalid.",
-      "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-site\">Site address</label><input id=\"ds-site\" class=\"ds-input\" placeholder=\"12 Example St\"><p class=\"ds-field-hint\">Optional. Helps with travel and local pricing.</p></div>",
-      "css": ".ds-field{display:grid;gap:6px;font-family:'Barlow',ui-sans-serif,system-ui,sans-serif}.ds-field-label{font-weight:600;color:var(--ink,#161510)}.ds-field-hint{margin:0;font-size:.875rem;color:var(--ink-3,#66645c)}.ds-input{width:100%;height:48px;padding:0 14px;border:1px solid var(--hairline-strong,#b4b3ab);border-radius:4px;background:var(--surface,#fff);color:var(--ink,#161510);font:inherit;font-size:1rem;transition:border-color 150ms ease-out}.ds-input::placeholder{color:var(--ink-3,#66645c)}.ds-input:hover{border-color:var(--ink-3,#66645c)}.ds-input:focus{border-color:var(--ink,#161510);outline:none}.ds-input:focus-visible{outline:2px solid var(--focus,#161510);outline-offset:0}.ds-input[aria-invalid=true]{border-color:var(--mark,#c8281e)}"
+      "description": "Label, Optional marker, 36px input, hint.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-i\">Site address <span class=\"ds-opt\">Optional</span></label><input id=\"ds-i\" class=\"ds-input\" placeholder=\"12 Smith St, Fitzroy\"><p class=\"ds-hint\">Used for travel and local pricing.</p></div>",
+      "css": ".ds-field{display:grid;gap:6px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;} .ds-label{font-size:14px;font-weight:500;color:var(--ink);display:flex;gap:6px;align-items:baseline} .ds-opt{font-weight:400;color:var(--ink-3)} .ds-input{height:36px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px;transition:border-color 150ms,box-shadow 150ms} .ds-input::placeholder{color:var(--ink-3)} .ds-input:hover{border-color:var(--border-strong)} .ds-input:focus{outline:none;border-color:var(--ink-4);box-shadow:0 0 0 3px color-mix(in oklab,var(--ink) 5%,transparent)} .ds-hint{margin:0;font-size:12px;color:var(--ink-3)}"
     },
     {
-      "name": "Header Navigation",
+      "name": "Sidebar Navigation",
       "kind": "nav",
-      "refersTo": "header",
-      "description": "Sticky 56px header; current link carries a 3px blade underline.",
-      "html": "<header class=\"ds-header\"><span class=\"ds-brand\"><svg viewBox=\"0 0 28 20\" width=\"28\" height=\"20\" aria-hidden=\"true\"><rect x=\"1\" y=\"2\" width=\"14\" height=\"16\" rx=\"3\" fill=\"currentColor\"/><rect x=\"15\" y=\"11\" width=\"12\" height=\"5\" fill=\"#f5c400\"/><path d=\"M18 11v2.5M21 11v1.5M24 11v2.5\" stroke=\"#161510\" stroke-width=\"1\"/><circle cx=\"8\" cy=\"10\" r=\"2.5\" fill=\"#f5c400\"/></svg>OpenQuote</span><nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">Estimates</a><a href=\"#\">Settings</a></nav></header>",
-      "css": ".ds-header{display:flex;align-items:stretch;gap:24px;height:56px;padding:0 16px;background:var(--surface-2,#ebebe6);border-bottom:1px solid var(--hairline,#d8d7d0);font-family:'Barlow',ui-sans-serif,system-ui,sans-serif;color:var(--ink,#161510)}.ds-brand{display:flex;align-items:center;gap:8px;font-family:'Barlow Semi Condensed','Barlow',sans-serif;font-size:1.125rem;font-weight:700;letter-spacing:-.025em}.ds-nav{display:flex;align-items:stretch}.ds-nav a{position:relative;display:flex;align-items:center;padding:0 12px;font-size:.9375rem;font-weight:600;color:var(--ink-3,#66645c);text-decoration:none;transition:color 150ms}.ds-nav a:hover{color:var(--ink,#161510)}.ds-nav a[aria-current=page]{color:var(--ink,#161510)}.ds-nav a[aria-current=page]::after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:3px;background:var(--blade,#f5c400)}.ds-nav a:focus-visible{outline:2px solid var(--focus,#161510);outline-offset:2px}"
+      "refersTo": "nav-item",
+      "description": "New estimate first, a small Work group label, 28px items, Settings at the foot.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M5 12h14M12 5v14\"/></svg>New estimate</a><p class=\"ds-nav-label\">Work</p><a class=\"ds-nav-item\" aria-current=\"page\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\"><path d=\"M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z\"/><path d=\"M14 3v6h6\"/></svg>Estimates</a><a class=\"ds-nav-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\"><path d=\"M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg>Projects</a></nav>",
+      "css": ".ds-nav{width:232px;padding:12px;background:var(--sidebar);font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;} .ds-nav-item{display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:8px;font-size:14px;font-weight:500;color:var(--ink);text-decoration:none;transition:background-color 150ms} .ds-nav-item:hover{background:color-mix(in oklab,var(--hover) 70%,transparent)} .ds-nav-item[aria-current=page]{background:var(--hover)} .ds-nav-item:focus-visible{outline:2px solid var(--focus);outline-offset:2px} .ds-nav-label{margin:24px 0 6px;padding:0 8px;font-size:12px;font-weight:500;color:var(--label)}"
     },
     {
-      "name": "Blade and Case",
-      "kind": "custom",
-      "refersTo": "blade",
-      "description": "Signature: graduated blade split into numbered stage segments, ending in the case window with the reading.",
-      "html": "<figure class=\"ds-tape\"><div class=\"ds-blade\"><div style=\"flex-grow:450\"><b>1</b></div><div style=\"flex-grow:1553\"><b>2</b></div><div style=\"flex-grow:1673\"><b>3</b></div><div style=\"flex-grow:5533\"><b>4</b><span>Decking and fascia</span></div><div style=\"flex-grow:684\"><b>5</b></div></div><div class=\"ds-case\"><span class=\"ds-case-label\">Total inc GST</span><span class=\"ds-reading\">$11,918<small>.81</small></span></div></figure>",
-      "css": ".ds-tape{display:flex;margin:0;height:72px}.ds-blade{flex:1;display:flex;overflow:hidden;border-radius:4px 0 0 4px;background-color:var(--blade,#f5c400);background-image:linear-gradient(to right,var(--on-blade,#161510) 1px,transparent 1px),linear-gradient(to right,var(--on-blade,#161510) 1px,transparent 1px);background-size:20px 45%,4px 22%;background-repeat:repeat-x;color:var(--on-blade,#161510)}.ds-blade>div{position:relative;flex-basis:0;min-width:28px;border-right:2px solid var(--on-blade,#161510);display:flex;align-items:flex-end;gap:6px;padding:0 4px 6px 6px;font-family:'Barlow Semi Condensed','Barlow',sans-serif}.ds-blade>div:last-child{border-right:0}.ds-blade b{font-size:.9375rem;line-height:1;font-variant-numeric:tabular-nums lining-nums}.ds-blade span{font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ds-case{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;min-width:240px;padding:12px 16px;border-radius:0 4px 4px 0;background:var(--case,#161510);color:var(--on-case,#f7f6ef);font-family:'Barlow Semi Condensed','Barlow',sans-serif}.ds-case-label{font-size:.8125rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.7}.ds-reading{font-size:3.25rem;font-weight:700;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums lining-nums}.ds-reading small{font-size:.5em;color:var(--blade,#f5c400)}"
+      "name": "Status Badge and Source Stamps",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Grey status pills (dot only for in flight or failed) and quiet vs AI source stamps.",
+      "html": "<span class=\"ds-badge\">Draft</span> <span class=\"ds-badge\"><i class=\"ds-dot\"></i>Sent</span> <span class=\"ds-stamp\">Your rate</span> <span class=\"ds-stamp ds-stamp-ai\">AI price</span>",
+      "css": ".ds-badge,.ds-stamp{display:inline-flex;align-items:center;gap:6px;height:20px;padding:0 8px;border-radius:9999px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:500;white-space:nowrap} .ds-badge{background:var(--subtle);color:var(--ink)} .ds-dot{width:6px;height:6px;border-radius:9999px;background:var(--accent)} .ds-stamp{background:var(--subtle);color:var(--ink-3)} .ds-stamp-ai{background:transparent;border:1px dashed var(--ink-3);color:var(--ink)}"
     },
     {
-      "name": "Graduated Rule",
-      "kind": "custom",
-      "refersTo": "",
-      "description": "Section divider: 1px hairline whose left end carries six graduation ticks.",
-      "html": "<div class=\"ds-rule\" aria-hidden=\"true\"><span></span></div>",
-      "css": ".ds-rule{position:relative;height:1px;background:var(--hairline,#d8d7d0);margin:16px 0}.ds-rule span{position:absolute;top:-6px;left:0;width:36px;height:10px;background-image:linear-gradient(var(--hairline-strong,#b4b3ab),var(--hairline-strong,#b4b3ab)),linear-gradient(var(--hairline-strong,#b4b3ab),var(--hairline-strong,#b4b3ab)),linear-gradient(var(--hairline-strong,#b4b3ab),var(--hairline-strong,#b4b3ab)),linear-gradient(var(--hairline-strong,#b4b3ab),var(--hairline-strong,#b4b3ab)),linear-gradient(var(--hairline-strong,#b4b3ab),var(--hairline-strong,#b4b3ab)),linear-gradient(var(--hairline-strong,#b4b3ab),var(--hairline-strong,#b4b3ab));background-size:1px 10px,1px 5px,1px 5px,1px 5px,1px 5px,1px 10px;background-position:0 0,6px 0,12px 0,18px 0,24px 0,30px 0;background-repeat:no-repeat}"
-    },
-    {
-      "name": "Sticky Case Strip",
-      "kind": "custom",
-      "refersTo": "sticky-case-strip",
-      "description": "Case-black strip under the header once the reading scrolls away.",
-      "html": "<div class=\"ds-strip\"><span class=\"ds-strip-title\">Merbau deck 4 × 3 m, 600 mm high with two steps</span><span class=\"ds-strip-total\"><span class=\"ds-strip-label\">Total inc GST</span><span class=\"ds-strip-money\">$11,918<small>.81</small></span></span></div>",
-      "css": ".ds-strip{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 16px;background:var(--case,#161510);color:var(--on-case,#f7f6ef);font-family:'Barlow',ui-sans-serif,sans-serif}.ds-strip-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.9375rem;font-weight:600}.ds-strip-total{display:flex;align-items:baseline;gap:10px;flex-shrink:0;font-family:'Barlow Semi Condensed','Barlow',sans-serif}.ds-strip-label{font-size:.8125rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;opacity:.7}.ds-strip-money{font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums lining-nums}.ds-strip-money small{font-size:.82em}"
-    },
-    {
-      "name": "Wash Line",
-      "kind": "custom",
-      "refersTo": "wash-line",
-      "description": "An AI-written line holding blade wash until seen, then settling.",
-      "html": "<ul class=\"ds-wash-list\"><li class=\"ds-wash\">Merbau decking 90×19 plus 10% waste<span>$3,819<small>.72</small></span></li><li>316 stainless decking screws 10g × 50 mm<span>$117<small>.60</small></span></li></ul>",
-      "css": ".ds-wash-list{list-style:none;margin:0;padding:0;font-family:'Barlow',ui-sans-serif,sans-serif;font-size:.9375rem;color:var(--ink,#161510)}.ds-wash-list li{display:grid;grid-template-columns:1fr auto;gap:16px;padding:8px 6px;border-radius:2px;transition:background-color 700ms ease-out}.ds-wash-list li:hover{background:transparent}.ds-wash{background:var(--blade-wash,#fff3bf)}.ds-wash-list span{font-family:'Barlow Semi Condensed','Barlow',sans-serif;font-variant-numeric:tabular-nums lining-nums}.ds-wash-list small{font-size:.82em}"
-    },
-    {
-      "name": "Error Notice",
+      "name": "Card with Rows",
       "kind": "card",
-      "refersTo": "notice-error",
-      "description": "Inline error / warning row in stud-mark red; never a modal.",
-      "html": "<p class=\"ds-notice-error\" role=\"alert\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/></svg>Bathroom job with no waterproofing line.</p>",
-      "css": ".ds-notice-error{display:flex;align-items:flex-start;gap:10px;margin:0;padding:10px 14px;border-radius:4px;background:var(--mark-wash,#fbe8e5);color:var(--mark,#c8281e);font-family:'Barlow',ui-sans-serif,sans-serif;font-size:.9375rem}.ds-notice-error svg{flex-shrink:0;margin-top:2px}"
+      "refersTo": "panel",
+      "description": "GroupTitle over a ring-outlined Panel of Rows split by dashed rules.",
+      "html": "<section class=\"ds-group\"><h2 class=\"ds-gt\">Current setup</h2><div class=\"ds-panel\"><div class=\"ds-row\"><div><span class=\"ds-rl\">Provider</span><p class=\"ds-rh\">Where estimates are written.</p></div><span class=\"ds-rv\">Anthropic</span></div><div class=\"ds-row\"><div><span class=\"ds-rl\">API key</span><p class=\"ds-rh\">Encrypted at rest.</p></div><span class=\"ds-rv\">Your key ending 4f2a</span></div></div></section>",
+      "css": ".ds-group{font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;} .ds-gt{margin:0 0 12px;font-size:14px;font-weight:500;color:var(--ink-3)} .ds-panel{background:var(--bg);border-radius:10px;box-shadow:var(--shadow-card);padding:0 20px} .ds-row{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:20px 0} .ds-row+.ds-row{border-top:1px dashed var(--border)} .ds-rl{font-size:14px;font-weight:500;color:var(--ink)} .ds-rh{margin:2px 0 0;font-size:14px;color:var(--ink-3)} .ds-rv{font-size:14px;font-weight:500;color:var(--ink)}"
+    },
+    {
+      "name": "Stat Columns",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Totals split by hairlines: Total inc GST as the Figure, then Your cost and Margin.",
+      "html": "<section class=\"ds-stats\"><div><p class=\"ds-sl\">Total inc GST</p><p class=\"ds-sv ds-big\">$18,420<span class=\"ds-c\">.50</span></p><p class=\"ds-ss\">$16,745.91 ex GST</p></div><div><p class=\"ds-sl\">Your cost</p><p class=\"ds-sv\">$12,880<span class=\"ds-c\">.00</span></p><p class=\"ds-ss\">$3,865.91 markup on top</p></div><div><p class=\"ds-sl\">Margin</p><p class=\"ds-sv\">23.1%</p><p class=\"ds-ss\">42 lines across 6 stages</p></div></section>",
+      "css": ".ds-stats{display:grid;grid-template-columns:repeat(3,1fr);font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;font-variant-numeric:tabular-nums lining-nums} .ds-stats>div{padding:0 24px;border-left:1px solid var(--border)} .ds-stats>div:first-child{border-left:0;padding-left:0} .ds-sl{margin:0;font-size:12px;font-weight:500;color:var(--ink-3)} .ds-sv{margin:6px 0 0;font-size:24px;font-weight:600;line-height:1;letter-spacing:-0.01em;color:var(--ink)} .ds-big{font-size:32px} .ds-c{font-size:.85em;color:var(--ink-3)} .ds-ss{margin:8px 0 0;font-size:12px;color:var(--ink-3)}"
+    },
+    {
+      "name": "Composer",
+      "kind": "custom",
+      "refersTo": "composer-card",
+      "description": "White raised card in a grey wrapper with an attached address strip.",
+      "html": "<div class=\"ds-cw\"><div class=\"ds-cc\"><textarea class=\"ds-ct\" rows=\"3\" placeholder=\"Describe the job: size, materials, access, finish.\"></textarea><div class=\"ds-cf\"><span class=\"ds-chip\">Bathroom reno</span><span class=\"ds-cm\">Anthropic</span><button class=\"ds-btn ds-btn-accent\" style=\"margin-left:auto\">Price this job</button></div></div><p class=\"ds-cs\">Site: 12 Smith St, Fitzroy</p></div>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 10px;border-radius:8px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;font-size:12px;font-weight:500;line-height:1;border:1px solid transparent;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,filter 150ms ease-out} .ds-btn:active{filter:brightness(.95)} .ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px} .ds-btn-accent{background:linear-gradient(to bottom,var(--accent),var(--accent-hover));border-color:var(--accent-hover);color:var(--on-accent);box-shadow:inset 0 1px 0 rgb(255 255 255/.22)} .ds-cw{background:var(--subtle);border-radius:16px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;} .ds-cc{background:var(--surface);border-radius:14px;box-shadow:var(--shadow-raised);transition:box-shadow 150ms} .ds-cc:focus-within{box-shadow:var(--shadow-raised),0 0 0 4px color-mix(in oklab,var(--ink) 5%,transparent)} .ds-ct{display:block;width:100%;border:0;background:transparent;resize:none;padding:16px 16px 8px;font:inherit;font-size:14px;line-height:1.625;color:var(--ink);outline:none} .ds-ct::placeholder{color:var(--ink-3)} .ds-cf{display:flex;align-items:center;gap:8px;padding:4px 12px 12px} .ds-chip{height:28px;display:inline-flex;align-items:center;padding:0 10px;border-radius:9999px;background:var(--subtle);font-size:12px;font-weight:500;color:var(--ink-2)} .ds-cm{font-size:12px;color:var(--ink-3)} .ds-cs{margin:0;padding:10px 16px;font-size:12px;color:var(--ink-2)}"
+    },
+    {
+      "name": "Empty State",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Dotted grey panel with a title, one sentence and the one action.",
+      "html": "<div class=\"ds-empty\"><h2>No clients yet</h2><p>Add the people you quote for, so estimates find them.</p></div>",
+      "css": ".ds-empty{min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 24px;border-radius:14px;background-color:color-mix(in oklab,var(--subtle) 60%,transparent);background-image:radial-gradient(color-mix(in oklab,var(--ink-4) 45%,transparent) 1px,transparent 1px);background-size:16px 16px;background-position:-8px -8px;font-family:var(--font-geist),ui-sans-serif,system-ui,sans-serif;} .ds-empty h2{margin:0;font-size:14px;font-weight:500;color:var(--ink)} .ds-empty p{margin:4px 0 0;font-size:14px;color:var(--ink-3);max-width:24rem}"
     }
   ],
   "narrative": {
-    "northStar": "The Steel Tape",
-    "overview": "An estimate is read the way a tradie reads a tape measure: one yellow graduated blade runs out of a black case, and the number at the case window is the reading. Every screen in this world is built from that single instrument. The blade is a proportional chart of where the money goes (each stage segment as long as its share of the price, numbered 1, 2, 3 in order of the work); the case is the one reversed plate that holds the total; everything else is near-black ink on concrete-light ground, organised by 1px hairlines that start with graduation ticks.\n\nThe world is dense and practical, built for a phone in full sun on site and a laptop at night. Hierarchy comes from scale contrast and weight, not from boxes: a 52px condensed reading against 11–13px condensed upper-case blade printing, with plain Barlow text between. There are no cards-in-cards, no tinted panels per section, and no blue. Colour is spent once (blade yellow) and stud-mark red is held back for things that are actually wrong.\n\nDark mode is the tape case at night: warm near-black ground, the case plate lifted to a slightly lighter charcoal so it still reads as an object, and the blade yellow unchanged because a tape blade is the same yellow in any light.",
+    "northStar": "The Quiet Workbench",
+    "overview": "OpenQuote is a calm, neutral workspace: an off-white page, zinc greys, hairlines and dashed row rules, cards outlined by a 1px ring with a barely-there layered shadow, and near-black actions. Nothing decorates. The total, the price of each line, where each price came from, and the next action are the only things allowed to speak. One hi-vis orange accent, the colour of site safety gear, appears only when a job is being priced, is still in flight, or needs checking; everything else stays grey so that orange always means \"this is live, look here\".\n\nDensity is a compact desktop workspace from 640px (28 to 36px controls, 12 to 14px labels, 28px nav items, open tables) and stacked and thumb-sized on a phone (44px targets, bottom tab bar, full-screen sheets). Two faces split the work: Figtree at medium weight for headings (page titles, greeting lines, sheet titles), Geist for everything a user operates or reads in a row, with tabular figures wherever money or quantity appears. A dark zinc theme follows the system setting for evening admin. The system refuses both a costume (no trade metaphors drawn into the UI) and the generic SaaS starter (no heavy display type, no icon tiles, no colour on every status).",
     "keyCharacteristics": [
-      "One committed accent: tape-blade yellow, on the blade, the primary action, the active nav tick, the cents of the reading, selection and new-line wash.",
-      "One reversed plate per screen: the case window (or its sticky strip), never both at once.",
-      "Stage numbering in condensed tabular figures ties the blade segments to the stage headings below.",
-      "Hairlines with graduation ticks replace boxes as section dividers.",
-      "4px \"tape\" radius on every control and plate; nothing rounder.",
-      "Money set as figures: dollars full size, cents set back."
+      "Neutral zinc ramp on an off-white page carries all structure; primary buttons are a short near-black gradient with a top highlight.",
+      "One orange accent, reserved: \"Price this job\", live progress, in-flight status dots, warnings.",
+      "Green and red only for confirmation and error.",
+      "8px controls, 10px cards, 14px raised cards, 16px wrappers; 1px rings and hairlines; dashed rules between rows.",
+      "Figtree 500 for headings, Geist 400/500 for UI, 600 for totals; tabular figures, cents set back in grey.",
+      "Status is a grey pill with a word; only in-flight and failed work add a dot.",
+      "Open tables: a grey 40px header over a hairline, no frame.",
+      "Dotted grid for empty states and the sign-in field."
     ],
     "rules": [
       {
-        "name": "The One Blade Rule",
-        "body": "Yellow is the instrument, not decoration. It appears only as the blade (full, mini, or auth strip), the primary action, the active-nav tick, the reading's cents, selection, and the unseen-line wash. No yellow headings, icons, borders or backgrounds anywhere else.",
+        "name": "The One Orange Rule",
+        "body": "Orange marks only the pricing moment, live or in-flight state, and warnings. Orange anywhere else is wrong. At most one accent button per screen.",
         "section": "colors"
       },
       {
-        "name": "The Stud-Mark Rule",
-        "body": "Red means something needs checking. It never marks a category, a brand moment, or a negative number that is correct.",
+        "name": "The Grey Status Rule",
+        "body": "Status is a grey pill holding a word. Only in-flight work (orange dot) and failed work (red dot) add a dot. Never a rainbow of statuses.",
         "section": "colors"
       },
       {
-        "name": "The One Plate Rule",
-        "body": "A screen shows one reversed case plate at a time. The sticky strip appears only when the case window has scrolled away and leaves when the Totals block arrives.",
+        "name": "The Decoration-Only Rule",
+        "body": "ink-4 never carries text a user must read; it numbers, bullets and counts beside text that already reads.",
         "section": "colors"
       },
       {
-        "name": "The Blade Printing Rule",
-        "body": "Upper-case condensed labels are for text printed on the instrument (case caption, segment names, inline dividers). They are never placed above a heading as a kicker or eyebrow.",
+        "name": "The Two Faces Rule",
+        "body": "Figtree speaks only in headings: page titles, the greeting, sheet titles, card titles and the wordmark. Everything a user operates or reads in a row is Geist.",
         "section": "typography"
       },
       {
-        "name": "The Figures Rule",
-        "body": "Any number a tradie compares (money, quantities, docket numbers, percentages) is set in condensed tabular lining figures so columns align.",
+        "name": "The Medium Ceiling Rule",
+        "body": "Headings stop at weight 500. 600 is for figures that total something (the Figure, stat values, stage headers and their subtotals, the Total row) and the wordmark.",
         "section": "typography"
       },
       {
-        "name": "The No-Boxes Rule",
-        "body": "Sections are separated by space and graduated hairlines, not containers. Rows are divided by 1px hairlines. No cards-in-cards.",
-        "section": "layout"
+        "name": "The Tabular Money Rule",
+        "body": "Every money value, quantity, percentage and document number uses tabular lining figures. Money reads dollars first with the cents at 0.85em in ink-3; turn the grey cents off where the whole figure is already grey, so contrast holds.",
+        "section": "typography"
       },
       {
-        "name": "The Flat Tool Rule",
-        "body": "If something needs to stand out, give it the case plate or the blade, not a shadow.",
+        "name": "The Sentence Case Rule",
+        "body": "Labels, buttons, headers and badges are sentence case. No uppercase labels, no letter-spaced kickers. Headings balance; paragraphs and list items wrap pretty.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline First Rule",
+        "body": "Separate with a 1px line (a ring, a hairline or a dashed row rule) before reaching for shadow or tint. Anything heavier than Raised belongs only to an overlay.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "**Do** open every estimate view with the blade and case: title and docket line above, reading in the case, stages numbered on the blade.",
-      "**Do** size blade segments by money, and keep stage numbers identical on the blade and the stage headings.",
-      "**Do** separate sections with the graduated rule (1px hairline, six ticks at the left) and rows with plain 1px hairlines.",
-      "**Do** use the 4px tape corner on every control and plate; 2px only for 6px-high bars and wash rows.",
-      "**Do** set every money value with the Money treatment: condensed tabular figures, cents at 0.82em (0.5em and blade yellow in the case window).",
-      "**Do** keep primary actions blade yellow with on-blade text at 44px or 56px height.",
-      "**Do** mark freshly AI-written lines with blade wash until seen.",
-      "**Do** keep the dark theme by token swap: blade stays #f5c400, case lifts to charcoal, focus turns yellow."
+      "**Do** use the near-black gradient primary for the default action and at most one accent button per screen, only to start a price.",
+      "**Do** outline cards with the Card ring and divide rows inside them with dashed rules; keep the Sheet shadow for overlays.",
+      "**Do** head a card with a GroupTitle, and build settings and details from Rows and KeyValue lines.",
+      "**Do** set every number in tabular figures, money with the cents in ink-3 at 0.85em.",
+      "**Do** show status as a grey pill with a word, adding an orange dot only for in flight and a red dot only for failed.",
+      "**Do** mark AI-sourced prices with the dashed stamp and keep the tradie's own sources quiet.",
+      "**Do** keep targets at least 44px on phones (controls go compact only from 640px) and keep a sheet's primary action at the bottom.",
+      "**Do** write labels, buttons and headings in sentence case, with \"Optional\" beside optional fields.",
+      "**Do** pluralise and abbreviate units the way the trade writes them, and show a line's markup only when it differs from the default."
     ],
     "donts": [
-      "**Don't** put cards inside cards or wrap sections in bordered panels; use space and hairlines.",
-      "**Don't** use yellow for anything that isn't the blade, the primary action, the active-nav tick, the reading's cents, selection, or the unseen wash.",
-      "**Don't** use stud-mark red for anything except warnings, errors, invalid fields and destructive links.",
-      "**Don't** show two reversed case plates on screen at once.",
-      "**Don't** add box shadows; depth is tonal.",
-      "**Don't** put upper-case condensed labels above headings as kickers or eyebrows; labels are blade printing.",
-      "**Don't** introduce blue accents, stat-tile dashboards, or white SaaS cards on grey.",
-      "**Don't** use modals for errors or destructive confirmation; confirm inline."
+      "**Don't** use orange for navigation, decoration, selected states or ordinary buttons.",
+      "**Don't** use green or red for anything but confirmation and error.",
+      "**Don't** set headings above weight 500, set Figtree on controls or rows, or use uppercase or letter-spaced labels and kickers.",
+      "**Don't** add icon tiles or per-stage hues (stages are one neutral ramp), and keep gradients to the primary and accent button fills.",
+      "**Don't** put text a user must read in ink-4.",
+      "**Don't** show errors in modals; use an inline Notice.",
+      "**Don't** wrap list tables in a frame; they are open, a grey header over a hairline.",
+      "**Don't** introduce radii outside 6 / 7 / 8 / 10 / 14 / 16px and round, or in-page shadows heavier than Raised."
     ]
   }
 }

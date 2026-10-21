@@ -1,344 +1,423 @@
 ---
 name: OpenQuote
-description: Open-source AI quoting for trades, read like a steel tape.
+description: Open-source AI quoting for trades, in a calm neutral workspace where the number and the next action speak.
 colors:
-  ground: "#f3f3f0"
+  bg: "#fcfcfc"
   surface: "#ffffff"
-  surface-2: "#ebebe6"
-  ink: "#161510"
-  ink-2: "#47463f"
-  ink-3: "#66645c"
-  hairline: "#d8d7d0"
-  hairline-strong: "#b4b3ab"
-  blade: "#f5c400"
-  blade-press: "#dcb000"
-  blade-wash: "#fff3bf"
-  on-blade: "#161510"
-  case: "#161510"
-  on-case: "#f7f6ef"
-  mark: "#c8281e"
-  mark-wash: "#fbe8e5"
-  ok: "#1c6a43"
-  focus: "#161510"
-  ground-dark: "#11110f"
-  surface-dark: "#1a1a17"
-  surface-2-dark: "#23231f"
-  ink-dark: "#f2f1ea"
-  ink-2-dark: "#c4c2b8"
-  ink-3-dark: "#96948a"
-  hairline-dark: "#313029"
-  hairline-strong-dark: "#4a4942"
-  blade-press-dark: "#ffd633"
-  blade-wash-dark: "#3a320f"
-  case-dark: "#2a2925"
-  mark-dark: "#ff7468"
-  mark-wash-dark: "#3b1b17"
-  ok-dark: "#5fc48c"
-  focus-dark: "#f5c400"
+  sidebar: "#fcfcfc"
+  subtle: "#f4f4f5"
+  hover: "#f4f4f5"
+  border: "#ebebf1"
+  border-strong: "#e2e2e8"
+  ink: "#18191b"
+  ink-2: "#3f3f46"
+  ink-3: "#6b6b74"
+  ink-4: "#a1a1aa"
+  label: "#5a5b5e"
+  primary: "#262626"
+  primary-top: "#404040"
+  primary-hover: "#333333"
+  on-primary: "#ffffff"
+  accent: "#f26b1d"
+  accent-hover: "#e05d12"
+  on-accent: "#18181b"
+  accent-soft: "#fff2ea"
+  accent-ink: "#c2410c"
+  danger: "#c81e1e"
+  danger-soft: "#fef1f1"
+  ok: "#15803d"
+  ok-soft: "#effbf3"
+  focus: "#18191b"
+  bg-dark: "#0f0f10"
+  surface-dark: "#161618"
+  sidebar-dark: "#0f0f10"
+  subtle-dark: "#1a1a1d"
+  hover-dark: "#1f1f23"
+  border-dark: "#232328"
+  border-strong-dark: "#2e2e34"
+  ink-dark: "#f4f4f5"
+  ink-2-dark: "#d4d4d8"
+  ink-3-dark: "#a1a1aa"
+  ink-4-dark: "#52525b"
+  label-dark: "#a1a1aa"
+  primary-dark: "#e4e4e7"
+  primary-top-dark: "#fafafa"
+  primary-hover-dark: "#ffffff"
+  on-primary-dark: "#18181b"
+  accent-hover-dark: "#ff7a2e"
+  accent-soft-dark: "#2a170b"
+  accent-ink-dark: "#ff9a5c"
+  danger-dark: "#f87171"
+  danger-soft-dark: "#2a1213"
+  ok-dark: "#4ade80"
+  ok-soft-dark: "#0f2416"
+  focus-dark: "#f4f4f5"
 typography:
-  reading:
-    fontFamily: "Barlow Semi Condensed, Barlow, ui-sans-serif, sans-serif"
-    fontSize: "3.25rem"
-    fontWeight: 700
+  figure:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "2rem"
+    fontWeight: 600
     lineHeight: 1
     letterSpacing: "-0.01em"
-    fontFeature: "\"tnum\" 1, \"lnum\" 1"
-  headline:
-    fontFamily: "Barlow, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.75rem"
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: "-0.01em"
-  headline-detail:
-    fontFamily: "Barlow, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "2.125rem"
-    fontWeight: 700
-    lineHeight: 1.25
-    letterSpacing: "-0.01em"
-  title:
-    fontFamily: "Barlow, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.25rem"
-    fontWeight: 700
-    lineHeight: 1.375
-  body-lg:
-    fontFamily: "Barlow, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1.0625rem"
-    fontWeight: 400
-    lineHeight: 1.375
-  body:
-    fontFamily: "Barlow, ui-sans-serif, system-ui, sans-serif"
-    fontSize: "1rem"
-    fontWeight: 400
-    lineHeight: 1.5
-  meta:
-    fontFamily: "Barlow Semi Condensed, Barlow, ui-sans-serif, sans-serif"
-    fontSize: "0.9375rem"
-    fontWeight: 400
-    lineHeight: 1.4
-    fontFeature: "\"tnum\" 1, \"lnum\" 1"
-  figures:
-    fontFamily: "Barlow Semi Condensed, Barlow, ui-sans-serif, sans-serif"
-    fontSize: "1.25rem"
-    fontWeight: 700
-    lineHeight: 1.2
-    fontFeature: "\"tnum\" 1, \"lnum\" 1"
-  label:
-    fontFamily: "Barlow Semi Condensed, Barlow, ui-sans-serif, sans-serif"
-    fontSize: "0.8125rem"
+    fontFeature: "\"tnum\", \"lnum\", \"ss01\", \"cv11\""
+  stat:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.5rem"
     fontWeight: 600
-    lineHeight: 1.2
-    letterSpacing: "0.06em"
+    lineHeight: 1
+    letterSpacing: "-0.01em"
+    fontFeature: "\"tnum\", \"lnum\", \"ss01\", \"cv11\""
+  title:
+    fontFamily: "Figtree, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 500
+    lineHeight: "2rem"
+    letterSpacing: "-0.01em"
+  headline-sm:
+    fontFamily: "Figtree, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 500
+    lineHeight: "1.75rem"
+  sheet-title:
+    fontFamily: "Figtree, Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 500
+    lineHeight: 1.5
+  body:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: 1.43
+    fontFeature: "\"ss01\", \"cv11\""
+  label:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.875rem"
+    fontWeight: 500
+    lineHeight: 1.43
+  caption:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 400
+    lineHeight: 1.33
+  micro:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.6875rem"
+    fontWeight: 500
+    lineHeight: 1.25
 rounded:
-  blade-sm: "2px"
-  tape: "4px"
+  segment: "7px"
+  sm: "6px"
+  control: "8px"
+  panel: "10px"
+  card: "14px"
+  wrapper: "16px"
+  pill: "9999px"
 spacing:
-  line: "8px"
-  row: "12px"
-  field: "20px"
-  stage: "24px"
-  section: "32px"
-  section-lg: "40px"
-  gutter: "16px"
+  hairline-gap: "2px"
+  xs: "6px"
+  sm: "8px"
+  md: "12px"
+  lg: "16px"
+  xl: "20px"
+  2xl: "24px"
+  section: "40px"
 components:
   button-primary:
-    backgroundColor: "{colors.blade}"
-    textColor: "{colors.on-blade}"
-    rounded: "{rounded.tape}"
-    padding: "0 16px"
-    height: "44px"
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.control}"
+    padding: "0 10px"
+    height: "32px"
   button-primary-hover:
-    backgroundColor: "{colors.blade-press}"
-  button-primary-lg:
-    backgroundColor: "{colors.blade}"
-    textColor: "{colors.on-blade}"
-    rounded: "{rounded.tape}"
-    padding: "0 24px"
-    height: "56px"
+    backgroundColor: "{colors.primary-hover}"
   button-secondary:
-    backgroundColor: "{colors.surface}"
+    backgroundColor: "{colors.bg}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.tape}"
-    padding: "0 16px"
-    height: "44px"
+    rounded: "{rounded.control}"
+    padding: "0 10px"
+    height: "32px"
+  button-secondary-hover:
+    backgroundColor: "{colors.hover}"
   button-ghost:
     textColor: "{colors.ink-2}"
-    rounded: "{rounded.tape}"
-    padding: "0 16px"
-    height: "44px"
+    rounded: "{rounded.control}"
+    padding: "0 10px"
+    height: "32px"
   button-ghost-hover:
-    backgroundColor: "{colors.surface-2}"
+    backgroundColor: "{colors.hover}"
     textColor: "{colors.ink}"
+  button-accent:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-accent}"
+    rounded: "{rounded.control}"
+    padding: "0 10px"
+    height: "32px"
+  button-accent-hover:
+    backgroundColor: "{colors.accent-hover}"
   button-danger:
-    textColor: "{colors.mark}"
+    backgroundColor: "{colors.bg}"
+    textColor: "{colors.danger}"
+    rounded: "{rounded.control}"
+    padding: "0 10px"
+    height: "32px"
+  button-danger-hover:
+    backgroundColor: "{colors.danger-soft}"
+  button-sm:
+    rounded: "{rounded.sm}"
+    padding: "0 8px"
+    height: "28px"
+  button-lg:
+    rounded: "{rounded.control}"
+    padding: "0 12px"
+    height: "36px"
   input:
+    backgroundColor: "{colors.bg}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    rounded: "{rounded.control}"
+    padding: "0 12px"
+    height: "36px"
+  panel:
+    backgroundColor: "{colors.bg}"
+    rounded: "{rounded.panel}"
+  row:
+    typography: "{typography.label}"
+    padding: "20px 20px"
+  key-value:
+    typography: "{typography.body}"
+    padding: "10px 0"
+    height: "44px"
+  composer-card:
     backgroundColor: "{colors.surface}"
+    rounded: "{rounded.card}"
+  composer-wrapper:
+    backgroundColor: "{colors.subtle}"
+    rounded: "{rounded.wrapper}"
+  badge:
+    backgroundColor: "{colors.subtle}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.tape}"
-    padding: "0 14px"
-    height: "48px"
-  case-window:
-    backgroundColor: "{colors.case}"
-    textColor: "{colors.on-case}"
-    rounded: "{rounded.tape}"
-    padding: "12px 16px"
-    width: "240px"
-  blade:
-    backgroundColor: "{colors.blade}"
-    textColor: "{colors.on-blade}"
-    rounded: "{rounded.tape}"
-    height: "64px"
-  mini-blade:
-    backgroundColor: "{colors.blade}"
-    rounded: "{rounded.blade-sm}"
-    height: "6px"
-  sticky-case-strip:
-    backgroundColor: "{colors.case}"
-    textColor: "{colors.on-case}"
-    padding: "8px 16px"
-  header:
-    backgroundColor: "{colors.surface-2}"
+    typography: "{typography.caption}"
+    rounded: "{rounded.pill}"
+    padding: "0 8px"
+    height: "20px"
+  source-badge:
+    backgroundColor: "{colors.subtle}"
+    textColor: "{colors.ink-3}"
+    rounded: "{rounded.pill}"
+    padding: "0 8px"
+    height: "20px"
+  source-badge-ai:
     textColor: "{colors.ink}"
-    height: "56px"
-  notice-error:
-    backgroundColor: "{colors.mark-wash}"
-    textColor: "{colors.mark}"
-    rounded: "{rounded.tape}"
-    padding: "12px 14px"
-  notice-info:
-    backgroundColor: "{colors.surface-2}"
+    rounded: "{rounded.pill}"
+    padding: "0 8px"
+    height: "20px"
+  nav-item:
+    textColor: "{colors.ink}"
+    typography: "{typography.label}"
+    rounded: "{rounded.control}"
+    padding: "0 8px"
+    height: "28px"
+  nav-item-active:
+    backgroundColor: "{colors.hover}"
+  nav-group-label:
+    textColor: "{colors.label}"
+    typography: "{typography.caption}"
+  example-chip:
+    backgroundColor: "{colors.subtle}"
     textColor: "{colors.ink-2}"
-    rounded: "{rounded.tape}"
-    padding: "12px 14px"
-  wash-line:
-    backgroundColor: "{colors.blade-wash}"
-    rounded: "{rounded.blade-sm}"
-    padding: "8px 6px"
+    rounded: "{rounded.pill}"
+    padding: "0 10px"
+    height: "28px"
 ---
 
 # Design System: OpenQuote
 
 ## Overview
 
-**Creative North Star: "The Steel Tape"**
+**Creative North Star: "The Quiet Workbench"**
 
-An estimate is read the way a tradie reads a tape measure: one yellow graduated blade runs out of a black case, and the number at the case window is the reading. Every screen in this world is built from that single instrument. The blade is a proportional chart of where the money goes (each stage segment as long as its share of the price, numbered 1, 2, 3 in order of the work); the case is the one reversed plate that holds the total; everything else is near-black ink on concrete-light ground, organised by 1px hairlines that start with graduation ticks.
+OpenQuote is a calm, neutral workspace: an off-white page, zinc greys, hairlines and dashed row rules, cards outlined by a 1px ring with a barely-there layered shadow, and near-black actions. Nothing decorates. The total, the price of each line, where each price came from, and the next action are the only things allowed to speak. One hi-vis orange accent, the colour of site safety gear, appears only when a job is being priced, is still in flight, or needs checking; everything else stays grey so that orange always means "this is live, look here".
 
-The world is dense and practical, built for a phone in full sun on site and a laptop at night. Hierarchy comes from scale contrast and weight, not from boxes: a 52px condensed reading against 11–13px condensed upper-case blade printing, with plain Barlow text between. There are no cards-in-cards, no tinted panels per section, and no blue. Colour is spent once (blade yellow) and stud-mark red is held back for things that are actually wrong.
-
-Dark mode is the tape case at night: warm near-black ground, the case plate lifted to a slightly lighter charcoal so it still reads as an object, and the blade yellow unchanged because a tape blade is the same yellow in any light.
+Density is a compact desktop workspace from 640px (28 to 36px controls, 12 to 14px labels, 28px nav items, open tables) and stacked and thumb-sized on a phone (44px targets, bottom tab bar, full-screen sheets). Two faces split the work: Figtree at medium weight for headings (page titles, greeting lines, sheet titles), Geist for everything a user operates or reads in a row, with tabular figures wherever money or quantity appears. A dark zinc theme follows the system setting for evening admin. The system refuses both a costume (no trade metaphors drawn into the UI) and the generic SaaS starter (no heavy display type, no icon tiles, no colour on every status).
 
 **Key Characteristics:**
-- One committed accent: tape-blade yellow, on the blade, the primary action, the active nav tick, the cents of the reading, selection and new-line wash.
-- One reversed plate per screen: the case window (or its sticky strip), never both at once.
-- Stage numbering in condensed tabular figures ties the blade segments to the stage headings below.
-- Hairlines with graduation ticks replace boxes as section dividers.
-- 4px "tape" radius on every control and plate; nothing rounder.
-- Money set as figures: dollars full size, cents set back.
+- Neutral zinc ramp on an off-white page carries all structure; primary buttons are a short near-black gradient with a top highlight.
+- One orange accent, reserved: "Price this job", live progress, in-flight status dots, warnings.
+- Green and red only for confirmation and error.
+- 8px controls, 10px cards, 14px raised cards, 16px wrappers; 1px rings and hairlines; dashed rules between rows.
+- Figtree 500 for headings, Geist 400/500 for UI, 600 for totals; tabular figures, cents set back in grey.
+- Status is a grey pill with a word; only in-flight and failed work add a dot.
+- Open tables: a grey 40px header over a hairline, no frame.
+- Dotted grid for empty states and the sign-in field.
 
 ## Colors
 
-A warm-neutral concrete-and-ink palette with exactly one saturated accent, plus a red reserved for faults.
+A zinc neutral ramp on an off-white page with a single hi-vis orange; semantic green and red stay out of the way until something succeeds or fails. Base keys are the light theme; `-dark` keys are the same roles under `prefers-color-scheme: dark`. The accent and its ink text partner are identical in both themes.
 
 ### Primary
-- **Tape-Blade Yellow** (`blade`): the graduated blade and its stage segments, the primary button, the 3px active-nav underline, the cents digits in the case window, text selection, the brand mark's blade, and the auth-frame blade strip along the top edge. Unchanged in dark mode.
-- **Pressed Blade** (`blade-press`): primary-button hover only. Darker in light mode, brighter in dark mode, so the hover always reads as "pushed further".
-- **Blade Wash** (`blade-wash`): the fresh-ink state of a line the AI has just written. It holds until the line has been on screen for 1.5s at 90% visibility, then fades over 700ms to transparent. In dark mode it is a deep olive (`blade-wash-dark`).
-- **On-Blade** (`on-blade`): everything printed on yellow: graduation ticks, segment dividers (2px), stage numbers, segment labels, primary-button text.
-
-### Secondary
-- **Stud-Mark Red** (`mark`): warnings and errors only: sanity warnings above the stage list, error notices, `aria-invalid` field borders, "No key" status, and destructive text links. Brightened to a coral (`mark-dark`) for contrast on dark ground.
-- **Stud-Mark Wash** (`mark-wash`): the background of warning rows and error notices, always paired with `mark` text.
-
-### Tertiary
-- **Level Green** (`ok`): success notice text only, on `surface-2`. Never a fill.
+- **Workbench Black** (primary, primary-top): the default action fill (sheet submit, save, the bottom-bar New tile), set as a short vertical gradient from primary-top to primary with a 1px inset white highlight at 16%. Inverts to near-white in dark mode so the primary stays the highest-contrast object on screen.
+- **Hi-Vis Orange** (accent, accent-hover): the pricing moment. "Price this job", the pulsing live dot while a quote streams, the status dot for in-flight work, and the last line of the Mark. Accent buttons run accent to accent-hover with a 22% inset highlight. Text on it is ink (on-accent), never white.
+- **Orange Wash / Orange Ink** (accent-soft, accent-ink): warnings ("Check before sending", "No key yet" in Settings), the fresh-line wash in the live preview, and text selection.
 
 ### Neutral
-- **Concrete Ground** (`ground`): the page.
-- **Work Surface** (`surface`): inputs, secondary buttons, list-row hover, example-job tiles, the login confirmation panel.
-- **Second Layer** (`surface-2`): the sticky header (at 85–95% with backdrop blur), info/ok notices, ghost-button hover, skeletons.
-- **Ink** (`ink`): headings, body, money. **Ink 2** (`ink-2`): summaries, secondary values, row labels in totals. **Ink 3** (`ink-3`): metadata lines, docket numbers, stage numbers in headings, hints, placeholders.
-- **Hairline** (`hairline`): every 1px divider and row separator. **Hairline Strong** (`hairline-strong`): control borders, the graduation ticks on section rules, scrollbar thumb.
-- **Case Black** (`case`) with **On-Case** (`on-case`): the case window and sticky case strip. Case labels use `on-case` at 70% opacity. In dark mode the case lifts to `case-dark` so it separates from the ground.
-- **Focus** (`focus`): ink in light mode, blade yellow in dark mode.
+- **Paper** (bg): the page, the sidebar (sidebar is the same value), cards and sheets; cards separate from the page by their ring, not by tint.
+- **Surface** (surface): pure white raised inputs: the composer card, the auth card, the empty-estimates card.
+- **Subtle / Hover** (subtle, hover): one grey for badges, source stamps, example chips, the composer wrapper, the "What you'll get" panel, the dotted empty field, nav hover and active, ghost hover, the segmented track.
+- **Hairline / Hairline Strong** (border, border-strong): border draws dividers, dashed row rules, input edges and the sidebar edge; border-strong draws card rings, secondary and danger button edges, and input hover.
+- **Ink ramp** (ink, ink-2, ink-3): primary text, secondary text, labels/meta/placeholders/table headers. **label** is the small sidebar group label. **ink-4** is decoration only: stage numbers, bullets, filter counts, the dotted grid, focused input edges.
+
+### Semantic
+- **Danger** (danger on danger-soft): errors, invalid fields, the danger button, the failed status dot.
+- **OK** (ok on ok-soft): confirmations (the "Copied" check, success notices).
 
 ### Named Rules
-**The One Blade Rule.** Yellow is the instrument, not decoration. It appears only as the blade (full, mini, or auth strip), the primary action, the active-nav tick, the reading's cents, selection, and the unseen-line wash. No yellow headings, icons, borders or backgrounds anywhere else.
+**The One Orange Rule.** Orange marks only the pricing moment, live or in-flight state, and warnings. Orange anywhere else is wrong. At most one accent button per screen.
 
-**The Stud-Mark Rule.** Red means something needs checking. It never marks a category, a brand moment, or a negative number that is correct.
+**The Grey Status Rule.** Status is a grey pill holding a word. Only in-flight work (orange dot) and failed work (red dot) add a dot. Never a rainbow of statuses.
 
-**The One Plate Rule.** A screen shows one reversed case plate at a time. The sticky strip appears only when the case window has scrolled away and leaves when the Totals block arrives.
+**The Decoration-Only Rule.** ink-4 never carries text a user must read; it numbers, bullets and counts beside text that already reads.
 
 ## Typography
 
-**Display / Figures Font:** Barlow Semi Condensed (500, 600, 700), falling back to Barlow, then ui-sans-serif
-**Body Font:** Barlow (400, 500, 600, 700), falling back to ui-sans-serif, system-ui
+**Display Font:** Figtree (next/font, `--font-figtree`, weights 500 and 600 loaded; fallback Geist, ui-sans-serif, system-ui) via `font-display`
+**Body Font:** Geist (next/font, `--font-geist`; fallback ui-sans-serif, system-ui)
+**Label/Mono Font:** none. Document numbers are Geist with tabular figures.
 
-**Character:** Barlow's flat, highway-signage geometry for reading; its semi-condensed cut for everything that is printed on the tool: numbers, docket numbers, quantities, and tiny upper-case captions. Rank is carried by weight and case, not by colour.
+**Character:** A rounded, friendly geometric for headings over a neutral grotesque for the interface; hierarchy comes from size, face and grey, not from bold. Stylistic sets `ss01` and `cv11` are on globally.
 
 ### Hierarchy
-- **Reading** (700, 2.5rem mobile / 3.25rem desktop, line-height 1, -0.01em, tabular lining figures): the total in the case window only. Cents at 0.5em in blade yellow.
-- **Headline** (700, 1.75rem, tight, -0.01em): page titles (Estimates, AI settings, New estimate). Estimate titles step to 2.125rem on desktop; auth pages use 2rem.
-- **Title** (700, 1.25rem, snug): stage headings with their ink-3 stage number, "Totals", "Options to offer", and stage prices. Live-preview title is 1.375rem.
-- **Body large** (400, 1.0625rem, snug): line-item descriptions, summaries and intros (max 68ch, relaxed leading), list-row titles at 600.
-- **Body** (400, 1rem, 1.5): default text, field labels at 600.
-- **Meta** (condensed figures, 0.9375rem, ink-3): the line build-up "12 lm × $16.00 · Materials · AI price · +20%", docket and date lines. "Your rate" is set at 600 in ink-2 to stand out from "AI price".
-- **Figures** (condensed, tabular, 600–700): every money value. Cents shrink to 0.82em via the Money component; sizes 0.9375rem (live lines), 1.0625rem (line prices), 1.25rem (stage and list totals), 1.5rem (Totals total).
-- **Label** (600, 0.8125rem, 0.06em tracking, upper-case, condensed): blade printing: the case caption ("TOTAL INC GST", "RUNNING TOTAL"), blade segment names (0.6875rem), the "or" in the auth divider.
+- **Figure** (Geist 600, 2rem, line-height 1, -0.01em): the estimate total inc GST, once per page.
+- **Stat** (Geist 600, 1.5rem, line-height 1): the secondary stat columns (Your cost, Margin, usage figures; 1.25rem on phones in Settings) and the live preview's running total.
+- **Title** (Figtree 500, 1.5rem / 2rem, -0.01em): page titles, the estimate, project and client titles, auth cards. The ramp's `title-lg` step equals `title` and is not used separately.
+- **Headline small** (Figtree 500, 1.25rem / 1.75rem): the greeting subline on New estimate, the live-preview title, the empty-estimates card title.
+- **Sheet title** (Figtree 500, 1rem): sheet headers.
+- **Body** (Geist 400, 0.875rem): default UI text, list rows, schedule lines, descriptions, the summary (max 68ch, relaxed leading). Phones step schedule lines to the same 14px and inputs to 16px.
+- **Label** (Geist 500, 0.875rem): field and row labels, nav items, table headers (in ink-3), group titles (in ink-3), key-value values.
+- **Caption** (Geist 400/500, 0.75rem): hints, stat labels and sublines, meta, badges and stamps (500), desktop button labels at sm and md.
+- **Micro** (Geist 500, 0.6875rem): bottom-bar tab labels and the kbd hint only.
 
 ### Named Rules
-**The Blade Printing Rule.** Upper-case condensed labels are for text printed on the instrument (case caption, segment names, inline dividers). They are never placed above a heading as a kicker or eyebrow.
+**The Two Faces Rule.** Figtree speaks only in headings: page titles, the greeting, sheet titles, card titles and the wordmark. Everything a user operates or reads in a row is Geist.
 
-**The Figures Rule.** Any number a tradie compares (money, quantities, docket numbers, percentages) is set in condensed tabular lining figures so columns align.
+**The Medium Ceiling Rule.** Headings stop at weight 500. 600 is for figures that total something (the Figure, stat values, stage headers and their subtotals, the Total row) and the wordmark.
+
+**The Tabular Money Rule.** Every money value, quantity, percentage and document number uses tabular lining figures. Money reads dollars first with the cents at 0.85em in ink-3; turn the grey cents off where the whole figure is already grey, so contrast holds.
+
+**The Sentence Case Rule.** Labels, buttons, headers and badges are sentence case. No uppercase labels, no letter-spaced kickers. Headings balance; paragraphs and list items wrap pretty.
 
 ## Layout
 
-A single centred column, `max-width` 64rem with 16px side gutters, under a 56px sticky header. Main content starts 24px below the header on mobile and 40px on desktop, with 96px of bottom padding. Auth pages use a narrower 28rem column with the yellow graduated blade strip (12px) across the very top.
-
-Spacing runs on a 4px base. Line rows are 8px vertical; totals and settings rows 10–12px; form fields stack at 20px; stages stack at 24px; major sections (totals, scope, options) separate at 32–40px, each opened by a graduated rule. Summary and note text is capped at 68ch. Totals sit right-aligned in a 28rem column.
-
-Responsive behaviour (Tailwind `sm` 640px, `lg` 1024px):
-- **Blade:** on desktop the case window sits at the right end (min 15rem) and the blade runs leftward out of it, squared off where they meet. On phones the case sits above and the blade grows left to right beneath it, 64px tall.
-- **New estimate:** one column on phones; at `lg` a 26rem form column beside the preview, with a hairline-ruled "What you'll get" note filling the preview slot until generation starts.
-- **List rows:** title + total on line one, docket/date/line count on line two, mini blade under; on desktop a 5.5rem docket column leads.
-- **Scope / Options:** stack on phones, 3 and 2 columns from `sm`.
-
-### Named Rules
-**The No-Boxes Rule.** Sections are separated by space and graduated hairlines, not containers. Rows are divided by 1px hairlines. No cards-in-cards.
+- **Shell.** From 768px: a 256px left sidebar on the page colour behind a right hairline, sticky full height, padded 12px. The wordmark sits in a 56px row; "New estimate" is the first nav item; a small "Work" label (12px medium, label colour, 24px above) heads Estimates, Projects and Clients; Settings sits at the foot above a hairline; the account row (20px initials tile, email, a kebab) opens a small menu with sign out. Content sits in a centred column, max 60rem, padded 64px at the sides and 56px at the top. Below 768px: a 56px sticky top bar (wordmark, a 44px account button) and a fixed bottom tab bar of five 64px columns with a central 48px New tile, clear of the home indicator; content gets bottom padding to clear it, sides 16px (24px from 640px), top 24px.
+- **Breakpoints.** 640px (controls drop from 44px to 28/32/36px, inputs to 36px and 14px text, sheets become right-hand panels, the schedule becomes columns), 768px (sidebar shell, list table headers).
+- **Rhythm.** A 4px base: 6px label to control, 8px between buttons, 12px from a group title to its card, 16-20px inside rows, 40px between page sections.
+- **Group then card.** A section is a GroupTitle (14px medium ink-3, optional action right, 28px min height) over a card. Cards hold Rows (label and hint left, control right, dashed rules between) or KeyValue lines (112px ink-3 label, medium ink value, 44px min height, dashed rules).
+- **Estimate page.** Title and one meta line (status badge, EST number, client, project, address, date, joined by middots) with actions top right; three stat columns split by hairlines (Total inc GST as the Figure, Your cost, Margin; each with a 12px label and subline); warnings; "Where the money goes" card; the summary paragraph; Schedule; a right-aligned totals block (max 20rem); scope, assumptions and exclusions in three columns; options in two cards.
+- **Schedule.** An open table: a 40px header (14px medium ink-3) over a hairline, then Description | Qty (6.5rem) | Rate (7rem) | Source (5.5rem) | Amount (7rem), grouped under numbered stage headers with a dashed rule below and dashed rules between lines. On phones each line folds into the description, a "qty unit × rate · source" line, and the amount on the right.
+- **Record lists.** Page title with action, filter tabs, a search box, then an open table: 40px grey 14px header over a hairline, rows split by hairlines with a faint hover fill, no outer frame.
+- **Composer.** New estimate opens with a greeting-style heading (Title in ink-3, Headline small subline in ink), then the composer (max 50rem): a white raised card inside a 16px grey wrapper whose attached strip below holds the site address. The card holds the borderless description, example chips, and a footer row with the project chip, the provider/model hint and the accent "Price this job". First use shows a grey "What you'll get" panel below; the live preview replaces it while pricing.
 
 ## Elevation & Depth
 
-Flat. No box shadows anywhere in the system. Depth is tonal and positional: the case plate is a reversed slab of ink, the sticky header is `surface-2` with an 85–95% backdrop blur and a hairline bottom border, and the sticky case strip rides directly beneath the header (top 56px) at z-10. State is shown with fills (blade wash, mark wash, surface hover), never lift.
+Depth is ring-first. The page is off-white; cards sit on it outlined by a 1px border-strong ring with a layered shadow so faint it reads as weight rather than lift. Raised surfaces (the white composer, the auth card, menus) add a little more. Only the sheet overlay gets a real shadow. Dark mode keeps the rings and drops the faint layers.
+
+### Shadow Vocabulary
+- **Card** (`box-shadow: 0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.02), 0 3px 3px -1.5px rgb(0 0 0 / 0.015), 0 6px 6px -3px rgb(0 0 0 / 0.015)`): Panels and the live preview card.
+- **Raised** (`box-shadow: 0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.03), 0 3px 3px -1.5px rgb(0 0 0 / 0.03), 0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02)`): the composer card, auth card, empty-estimates card, account menu.
+- **Sheet** (`box-shadow: 0 12px 32px -12px rgb(24 24 27 / 0.22), 0 2px 6px rgb(24 24 27 / 0.06)`): the right-hand sheet from 640px, over a 20% ink backdrop.
+- **Button highlight** (`box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16)`, 0.22 on accent): the top edge of gradient buttons and the New tile.
+- **Focus halo** (3px ring of ink at 5%, border to ink-4): inputs on focus; the composer card adds a 4px halo on focus-within.
 
 ### Named Rules
-**The Flat Tool Rule.** If something needs to stand out, give it the case plate or the blade, not a shadow.
+**The Hairline First Rule.** Separate with a 1px line (a ring, a hairline or a dashed row rule) before reaching for shadow or tint. Anything heavier than Raised belongs only to an overlay.
 
 ## Shapes
 
-One radius: the 4px "tape" corner on buttons, inputs, notices, warning rows, example tiles, the blade and the case window. Where blade meets case on desktop the shared edges go square so they read as one object. The 6px mini blade and the wash-line rows use a 2px corner because 4px would round them to pills. Dividers are 1px; the blade's stage dividers are 2px on-blade lines; the active nav marker is a 3px blade bar on the header's bottom edge.
-
-The graduated rule is the signature divider: a 1px hairline whose left end carries six hairline-strong ticks (10, 5, 5, 5, 5, 10px tall, 5px apart). The blade itself carries printed graduations: minor ticks every 4px at 22% height, major every 20px at 45%, in on-blade ink.
+One soft-rectangle family: 6px for small buttons, menu items and legend rows; 8px for controls (md and lg buttons, inputs, selects, nav items, notices, list rows); 10px for cards (Panels, the account menu, warnings, the segmented track); 14px for raised cards (composer, auth, empty states, live preview, the bottom-bar New tile); 16px for the grey wrappers that hold them (composer wrapper, the empty-estimates dotted field). Radii nest concentrically: the segmented control is a 10px track with 3px padding around 7px segments; the 14px composer sits in a 16px wrapper. Fully round for badges, source stamps, example chips, dots and the breakdown bar. Lines are always 1px. Dashed rules divide rows inside a card or table; a dashed outline on a stamp means "check this" (AI price).
 
 ## Components
 
 ### Buttons
-Solid, square-shouldered, and big enough for gloves.
-- **Shape:** tape corner (4px). Heights 44px (md) and 56px (lg); header action 40px.
-- **Primary:** blade yellow with on-blade text, 600 weight, 0.9375rem (md) / 1.0625rem (lg), 16 / 24px side padding; trailing arrow or leading plus icon at 16–20px.
-- **Hover / Active / Focus:** hover to `blade-press`; active nudges down 1px; 150ms ease-out colour transitions; 2px focus outline offset 2px. Disabled at 55% opacity with no nudge.
-- **Secondary:** surface fill, hairline-strong border, ink text; hover darkens the border to ink. Used for Stop during generation and Google sign-in.
-- **Ghost:** ink-2 text, hover to surface-2 fill and ink text.
-- **Danger:** a red underlined text link (1px, 4px offset) that drops its underline on hover. Destructive actions confirm inline, never in a modal.
+Dense on a desk, thumb-sized on site.
+- **Shape:** 8px (6px at sm), medium weight, 6px icon gap; pressing dims brightness to 95% over 150ms.
+- **Sizes from 640px:** sm 28px (12px label), md 32px (12px label, the default), lg 36px (14px label). On phones: sm 36px at 14px, md and lg 44px at 15px; sheet submits go full width at 48px and 16px.
+- **Primary:** primary-top to primary gradient, 1px primary edge, white text, inset top highlight; hover lifts the top stop to primary-hover.
+- **Secondary:** page colour with a border-strong edge; Hover fill on hover. Copy as text, Print or PDF, Stop.
+- **Ghost:** ink-2 text, Hover fill on hover. Cancel and Back in sheet footers; icon buttons.
+- **Accent:** accent to accent-hover gradient, accent-hover edge, ink text, inset highlight, optional ⌘↵ kbd hint from 640px. Only for starting a price.
+- **Danger:** page colour, border-strong edge, red text; pale red fill and a red-tinted edge on hover.
+- **Disabled:** 50% opacity, no pointer events.
 
 ### Inputs / Fields
-- **Style:** surface fill, 1px hairline-strong border, tape corner, 48px tall (textarea relaxed leading, 12px vertical padding), 16px text, ink-3 placeholder.
-- **States:** hover border to ink-3; focus border to ink plus a 2px focus outline flush to the edge; `aria-invalid` border in stud-mark red; disabled at 60%.
-- **Field:** 600-weight label above, 6px gap, ink-3 hint in 0.875rem below.
+- **Style:** page colour, 1px border hairline (border-strong on hover), 8px radius, 12px inset, 36px tall with 14px text from 640px; 44px with 16px text on phones (no iOS zoom); placeholders in ink-3.
+- **Focus:** border to ink-4 plus the 3px focus halo; the global `:focus-visible` is a 2px focus-colour outline offset 2px.
+- **Select:** native, with a 14px ink-3 up-down chevron and 36px right padding.
+- **Textarea:** no resize grip, relaxed leading.
+- **Field:** label in Label type; "Optional" in regular ink-3 beside it (never an asterisk); hint in 12px ink-3 below.
+- **Error / Disabled:** `aria-invalid` turns the border and halo red and the message is a Notice; disabled controls drop to 60% opacity.
+- **Search:** an input with a 16px ink-3 search icon inset left; the query lives in the URL.
 
-### Notices
-Inline status lines, never modals: tape corner, 12px × 14px padding, 0.9375rem. Error is mark on mark-wash (role alert); ok is green on surface-2; info is ink-2 on surface-2. Estimate warnings use the same red row with a 18px warning-triangle icon.
+### Notices and Warnings
+Inline, never modal. A Notice is an 8px-radius line on a tinted wash with a faint matching border: error (red, `role="alert"`), ok (green), info (Subtle, ink-2). Estimate warnings are 10px-radius orange-wash rows with orange-ink text and a triangle icon, no border.
+
+### Cards, Rows and Key-Values
+- **Panel:** page colour, 10px corners, the Card ring shadow; no border, no padding of its own.
+- **GroupTitle:** 14px medium ink-3 above the card, 12px gap, an optional action at the right.
+- **Rows:** 16px (20px from 640px) side inset, dashed rules between; each Row is 16-20px tall padding with a 14px medium ink label and a 14px ink-3 hint on the left and the control on the right (14-22rem wide), stacking under the label on phones or for long inputs. Used for Settings ("Current setup", "Provider and key").
+- **KeyValue:** a 112px ink-3 label and a medium ink value on one line, 44px minimum, dashed rules between. Used for the project and client Details cards.
+
+### Badges and Source Stamps
+- **Badge:** a 20px grey pill (Subtle fill), 12px medium ink word (ink-3 when muted); a 6px dot appears only for accent (in flight) and danger (failed).
+- **Source stamp:** a 20px pill at 12px medium. The tradie's own figures (Your rate, Kit, Supplier, Manual) are quiet: Subtle fill, ink-3. **AI price** is the one to check: dashed ink-3 edge, no fill, ink text.
 
 ### Navigation
-Sticky 56px header on `surface-2` with a hairline bottom. Brand mark (a case with the blade run out) plus "OpenQuote" in condensed 700 (wordmark hidden on phones). Links are 0.9375rem 600: ink-3 at rest, ink on hover, ink with a 3px blade underline when current. "New estimate" primary button at the right (shortens to "New" on phones), then an icon-only sign-out.
+- **Sidebar:** 28px items, 8px radius, 8px inset, 14px medium ink text with 16px icons at 1.75 stroke; the active item gets the Hover fill, hover a 70% Hover fill. "New estimate" leads, then the "Work" group, then Settings at the foot.
+- **Account menu:** a 36px row (20px rounded initials tile, email, kebab) opening a 10px Raised menu above it: the email in caption ink-3 and a 32px "Sign out" item.
+- **Bottom bar:** four 64px tabs with 22px icons over Micro labels (active: ink, medium, heavier stroke) around the central 48px gradient New tile.
+- **Filter tabs:** text tabs on a hairline, 20px apart, 36px tall (44px on phones); the current tab is ink, medium, with a 2px ink underline; counts sit beside each in ink-4 tabular figures. Scrolls sideways on phones.
+- **Segmented control:** a radiogroup on a Hover track; the chosen segment is page colour with a hairline ring and medium text; arrow keys move and select.
 
-### The Blade and Case (signature)
-The estimate's first viewport: a graduated yellow blade split into stage segments whose widths are proportional to stage price (min 1.5% so tiny stages remain visible, min 28px wide). Each segment prints its stage number in bold condensed figures at bottom-left and its name as a label when the segment is at least 7.5rem wide. The case window holds the caption label and the reading. While generating, the blade's extent grows with each arriving stage (700ms, `cubic-bezier(0.16, 1, 0.3, 1)`), a pulsing on-blade bar marks the growing end, and the reading updates live (`aria-live="polite"`).
+### Sheet
+A native dialog. Full screen on phones (rises 1.5rem); a 28rem right-hand panel from 640px (slides in 2rem) with a left hairline and the Sheet shadow. A 56px header carries Back (in nested steps), the Figtree sheet title and Close; Escape steps back one level rather than discarding the flow; clicking the backdrop closes. The primary action sits in a sticky bottom footer over a hairline (full-width 48px on phones; ghost Cancel or Back beside it from 640px). ⌘/Ctrl+Enter submits from anywhere in the sheet.
 
-### Stage Numbering
-Stages are numbered 1…n in work order. The same number appears on the blade segment and, in ink-3 condensed figures, before the stage heading, so the eye can travel from blade to list.
+### Stat Columns and Breakdown (signature)
+Stat columns sit straight on the page, split by vertical hairlines with 24px either side: a 12px medium ink-3 label, the value (Figure for the lead total, Stat for the rest), and a 12px ink-3 subline. The same pattern carries Settings usage. "Where the money goes" is a card holding a 6px pill bar that splits the price by stage in a neutral ramp (ink mixed into the ground, darkest first, at least a 10-point step) with 2px gaps, over a legend of 40px rows split by dashed rules: an 8px dot, stage, percent and amount. Pointing at or focusing a row dims the other segments to 25% and links to that stage.
 
-### Line Items
-Two-column grid: description (1.0625rem) with a condensed meta line beneath (qty × unit cost · type · source · markup), price figures right-aligned. Rows divided by hairlines. Notes in ink-3 under the meta line.
+### Schedule Line
+Description in ink, the line type in caption ink-3 below, notes in caption ink-3. Quantities read as a tradie writes them: abbreviated and pluralised (3 hrs, 1 hr, 36 bags, 12 lm, 4.5 m², 1 lot). The rate shows a markup suffix (+30%) only when the line's markup differs from the default. Stage headers carry an ink-4 number and a semibold subtotal over a dashed rule; the schedule closes with price ex GST, GST, and a Total row (16px semibold) over a hairline.
 
-### Wash Line (unseen state)
-In the live preview, each line the AI writes sits on blade wash until it has been at least 90% visible for 1.5s, then fades to transparent over 700ms. It is state, not a timer, so it still shows under reduced motion.
+### Composer and Live Preview (signature)
+The white composer card sits in a grey wrapper with an attached address strip (12px text, map pin) and takes a focus halo as a whole. Example chips are 28px (36px on phones) grey pills. The footer row carries the project chip, the provider and model in caption ink-3, and the accent "Price this job". While a quote streams, the preview card (14px, Card ring) shows a pulsing orange dot beside the status line, the Figtree title, a running total in Stat type with a line count, the breakdown bar, and stages entering with a 4px rise; each newly arrived line flashes the orange wash and fades back over 500ms.
 
-### Sticky Case Strip
-A full-bleed case-black strip pinned under the header: estimate title (600, truncated) left, "TOTAL INC GST" label (desktop only) and the total in 1.25rem bold figures right. Fades in over 150ms once the case window scrolls past, out once Totals is reached.
+### Empty States
+A dotted grid (ink-4 at 45% dots on a 16px grid) on a 60% Subtle panel, 14px corners, at least 15rem tall, centred title (14px medium), one sentence of purpose in ink-3 and the one action. The first-run estimates list holds a white 14px Raised card with a Figtree title inside a 16px dotted wrapper. Sign-in and onboarding put a 26rem white 14px Raised card on the dotted page, the wordmark above and one line of what the app does below.
 
-### Estimate List Rows
-Hairline-ruled rows (top and bottom border on the list). Title 1.0625rem 600 with underline on hover, docket number in ink-3 figures, total at 1.25rem bold, and a 6px mini blade whose length is the estimate's share of the largest total on screen, segmented by stage. Row hover is a surface fill.
+### Brand Mark
+A near-black rounded square (6.5/24 radius) holding two ground-coloured lines and a short orange last line, the total. The wordmark sets "OpenQuote" in Figtree semibold at 17px, -0.01em, beside a 22px mark.
 
-### Totals
-Right-aligned 28rem definition list: Cost, Markup (%), Price ex GST, GST, then Total at 1.5rem bold, then Margin in ink-3. Markup and margin are both shown.
+### Motion, Print and Reduced Motion
+- **Motion:** state changes at 150ms ease-out; entrances on `cubic-bezier(0.16, 1, 0.3, 1)`: rise 220ms (4px), sheet 280ms, backdrop fade 200ms. Nothing loops except the live dot.
+- **Print:** `.no-print` drops the shell, nav and actions; pages print black on white with 16mm by 14mm margins, and the schedule keeps its columns on paper.
+- **Reduced motion:** every animation and transition collapses to 0.01ms; the live ping is hidden.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** open every estimate view with the blade and case: title and docket line above, reading in the case, stages numbered on the blade.
-- **Do** size blade segments by money, and keep stage numbers identical on the blade and the stage headings.
-- **Do** separate sections with the graduated rule (1px hairline, six ticks at the left) and rows with plain 1px hairlines.
-- **Do** use the 4px tape corner on every control and plate; 2px only for 6px-high bars and wash rows.
-- **Do** set every money value with the Money treatment: condensed tabular figures, cents at 0.82em (0.5em and blade yellow in the case window).
-- **Do** keep primary actions blade yellow with on-blade text at 44px or 56px height.
-- **Do** mark freshly AI-written lines with blade wash until seen.
-- **Do** keep the dark theme by token swap: blade stays #f5c400, case lifts to charcoal, focus turns yellow.
+- **Do** use the near-black gradient primary for the default action and at most one accent button per screen, only to start a price.
+- **Do** outline cards with the Card ring and divide rows inside them with dashed rules; keep the Sheet shadow for overlays.
+- **Do** head a card with a GroupTitle, and build settings and details from Rows and KeyValue lines.
+- **Do** set every number in tabular figures, money with the cents in ink-3 at 0.85em.
+- **Do** show status as a grey pill with a word, adding an orange dot only for in flight and a red dot only for failed.
+- **Do** mark AI-sourced prices with the dashed stamp and keep the tradie's own sources quiet.
+- **Do** keep targets at least 44px on phones (controls go compact only from 640px) and keep a sheet's primary action at the bottom.
+- **Do** write labels, buttons and headings in sentence case, with "Optional" beside optional fields.
+- **Do** pluralise and abbreviate units the way the trade writes them, and show a line's markup only when it differs from the default.
 
 ### Don't:
-- **Don't** put cards inside cards or wrap sections in bordered panels; use space and hairlines.
-- **Don't** use yellow for anything that isn't the blade, the primary action, the active-nav tick, the reading's cents, selection, or the unseen wash.
-- **Don't** use stud-mark red for anything except warnings, errors, invalid fields and destructive links.
-- **Don't** show two reversed case plates on screen at once.
-- **Don't** add box shadows; depth is tonal.
-- **Don't** put upper-case condensed labels above headings as kickers or eyebrows; labels are blade printing.
-- **Don't** introduce blue accents, stat-tile dashboards, or white SaaS cards on grey.
-- **Don't** use modals for errors or destructive confirmation; confirm inline.
+- **Don't** use orange for navigation, decoration, selected states or ordinary buttons.
+- **Don't** use green or red for anything but confirmation and error.
+- **Don't** set headings above weight 500, set Figtree on controls or rows, or use uppercase or letter-spaced labels and kickers.
+- **Don't** add icon tiles or per-stage hues (stages are one neutral ramp), and keep gradients to the primary and accent button fills.
+- **Don't** put text a user must read in ink-4.
+- **Don't** show errors in modals; use an inline Notice.
+- **Don't** wrap list tables in a frame; they are open, a grey header over a hairline.
+- **Don't** introduce radii outside 6 / 7 / 8 / 10 / 14 / 16px and round, or in-page shadows heavier than Raised.

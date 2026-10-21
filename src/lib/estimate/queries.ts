@@ -9,7 +9,8 @@ type Line = typeof schema.lineItems.$inferSelect;
 type Group = typeof schema.lineGroups.$inferSelect;
 type Estimate = typeof schema.estimates.$inferSelect;
 
-export type LineView = Line & { markupPct: number; priceCents: number; costCents: number };
+/** `markupPct` is the resolved markup; `defaultMarkupPct` is what the line would get without its own override. */
+export type LineView = Line & { markupPct: number; defaultMarkupPct: number; priceCents: number; costCents: number };
 export type GroupView = { id: string; name: string; lines: LineView[]; costCents: number; priceCents: number };
 
 export function markupSettings(org: Org): MarkupSettings {
@@ -36,7 +37,8 @@ function buildView(org: Org, estimate: Estimate, groups: Group[], lines: Line[])
         .sort((a, b) => a.sort - b.sort)
         .map((l) => {
           const markupPct = resolveMarkupPct(l, markup, estimate.markupPct);
-          return { ...l, markupPct, costCents: Math.round(l.qty * l.unitCostCents), priceCents: linePriceCents(l, markupPct) };
+          const defaultMarkupPct = resolveMarkupPct({ ...l, markupPct: null }, markup, estimate.markupPct);
+          return { ...l, markupPct, defaultMarkupPct, costCents: Math.round(l.qty * l.unitCostCents), priceCents: linePriceCents(l, markupPct) };
         });
       return {
         id: g.id,
@@ -58,6 +60,16 @@ function buildView(org: Org, estimate: Estimate, groups: Group[], lines: Line[])
 export async function getOrg(orgId: string) {
   const [org] = await db.select().from(schema.organisations).where(eq(schema.organisations.id, orgId));
   return org;
+}
+
+/** True once the business has priced anything; the new-estimate page drops its explainer after that. */
+export async function hasEstimates(orgId: string) {
+  const [row] = await db
+    .select({ id: schema.estimates.id })
+    .from(schema.estimates)
+    .where(eq(schema.estimates.orgId, orgId))
+    .limit(1);
+  return !!row;
 }
 
 export async function listEstimates(orgId: string, filter: { projectId?: string; clientId?: string } = {}) {

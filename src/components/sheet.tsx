@@ -6,8 +6,9 @@ import { createPortal } from "react-dom";
 import { Button } from "./ui";
 
 /**
- * A task sheet on a native <dialog>: full screen on phones, a right-hand panel from 640px. The top bar carries
- * the way out (Cancel, or Back inside a nested step) and the one primary action, which submits the sheet's form.
+ * A task sheet on a native <dialog>: full screen on phones, a right-hand panel from 640px. The header carries the
+ * way out (close, or Back inside a nested step); the primary action sits in a footer at the bottom, within thumb
+ * reach on a phone. ⌘/Ctrl+Enter submits from anywhere in the sheet.
  */
 export function Sheet({
   open,
@@ -52,30 +53,53 @@ export function Sheet({
         leave();
       }}
       onClick={(e) => e.target === ref.current && onClose()}
-      className="m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-ground p-0 text-ink backdrop:bg-ink/40 backdrop:backdrop-blur-[2px] open:flex open:flex-col sm:ml-auto sm:max-w-lg sm:border-l sm:border-hairline sm:shadow-[-12px_0_32px_-16px_rgb(0_0_0/0.35)]"
+      className="sheet m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-bg p-0 text-ink backdrop:bg-ink/20 open:flex open:flex-col sm:ml-auto sm:max-w-[28rem] sm:border-l sm:border-border sm:shadow-lg"
     >
-      <form onSubmit={onSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-hairline bg-surface-2 px-2">
-          <button
-            type="button"
-            onClick={leave}
-            className="inline-flex h-10 items-center gap-1.5 rounded-tape px-2.5 font-semibold text-ink-2 transition-colors hover:bg-surface hover:text-ink"
-          >
-            {onBack ? <ArrowLeft className="size-[1.125rem]" aria-hidden /> : <X className="size-[1.125rem]" aria-hidden />}
-            {back ?? (onBack ? "Back" : "Cancel")}
-          </button>
-          <h2 id="sheet-title" className="min-w-0 flex-1 truncate text-center text-[1.0625rem] font-bold">
+      <form
+        onSubmit={onSubmit}
+        onKeyDown={(e) => {
+          if (action && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            e.currentTarget.requestSubmit();
+          }
+        }}
+        noValidate
+        className="flex min-h-0 flex-1 flex-col"
+      >
+        <header className="flex h-14 shrink-0 items-center gap-1 border-b border-border px-2 sm:px-4">
+          {onBack ? (
+            <button
+              type="button"
+              onClick={leave}
+              className="inline-flex h-11 items-center gap-1.5 rounded-lg px-2.5 text-body text-ink-2 transition-colors hover:bg-hover hover:text-ink sm:-ml-2 sm:h-9 sm:text-sm"
+            >
+              <ArrowLeft className="size-4" aria-hidden />
+              {back ?? "Back"}
+            </button>
+          ) : null}
+          <h2 id="sheet-title" className={`min-w-0 flex-1 truncate font-display text-base font-medium ${onBack ? "text-center sm:text-left sm:pl-2" : "pl-2 sm:pl-0"}`}>
             {title}
           </h2>
-          {action ? (
-            <Button type="submit" className="h-10 px-4" disabled={busy}>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex size-11 items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-hover hover:text-ink sm:-mr-2 sm:size-9"
+          >
+            <X className="size-[1.125rem]" aria-hidden />
+            <span className="sr-only">Close</span>
+          </button>
+        </header>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8 pt-5 sm:px-6 sm:pt-6">{children}</div>
+        {action && (
+          <footer className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-bg px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-4 sm:pt-4">
+            <Button type="button" variant="ghost" onClick={leave} className="hidden sm:inline-flex">
+              {onBack ? "Back" : "Cancel"}
+            </Button>
+            <Button type="submit" disabled={busy} className="max-sm:h-12 max-sm:w-full max-sm:text-base">
               {busy ? "Saving…" : action}
             </Button>
-          ) : (
-            <span className="w-[4.5rem]" aria-hidden />
-          )}
-        </header>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-10 pt-6 sm:px-6">{children}</div>
+          </footer>
+        )}
       </form>
     </dialog>,
     document.body,

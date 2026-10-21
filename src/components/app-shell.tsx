@@ -1,53 +1,77 @@
-import { LogOut, Plus } from "lucide-react";
-import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
+import Link from "next/link";
 import { getAuthUser } from "@/lib/auth";
-import { LinkButton } from "./ui";
-import { ActiveBottomNav, ActiveNavLinks, BottomNav, NavLinks } from "./nav-links";
+import { AccountMenu } from "./account-menu";
+import { ActiveBottomNav, ActiveSidebarNav, BottomNav, SidebarNav } from "./nav-links";
 
-/** Mark: a tape case with the blade run out. Authored, one stroke weight. */
+/** Mark: a quote sheet whose last line, the total, is set in hi-vis orange. */
 export function Mark({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 28 20" className={className} aria-hidden>
-      <rect x="1" y="2" width="14" height="16" rx="3" fill="currentColor" />
-      <rect x="15" y="11" width="12" height="5" fill="var(--blade)" />
-      <path d="M18 11v2.5M21 11v1.5M24 11v2.5" stroke="var(--on-blade)" strokeWidth="1" />
-      <circle cx="8" cy="10" r="2.5" fill="var(--blade)" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <rect width="24" height="24" rx="6.5" fill="currentColor" />
+      <path d="M7 8h10M7 12h10" stroke="var(--bg)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M12.5 16.5H17" stroke="var(--accent)" strokeWidth="2.25" strokeLinecap="round" />
     </svg>
   );
 }
 
+export function Wordmark({ className = "" }: { className?: string }) {
+  return (
+    <span className={`flex items-center gap-2 text-ink ${className}`}>
+      <Mark className="size-[22px] shrink-0" />
+      <span translate="no" className="font-display text-[1.0625rem] font-semibold tracking-[-0.01em]">
+        OpenQuote
+      </span>
+    </span>
+  );
+}
+
+/**
+ * Signed-in frame. From 768px: a 256px sidebar on the page colour behind a hairline, grouped nav with small grey
+ * labels and the account at the foot. On phones: a slim top bar and a bottom tab bar with New in the middle.
+ */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <>
       <a
         href="#main"
-        className="sr-only z-30 rounded-tape bg-blade px-4 py-2 font-semibold text-on-blade focus:not-sr-only focus:fixed focus:left-4 focus:top-2"
+        className="sr-only z-40 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary focus:not-sr-only focus:fixed focus:left-4 focus:top-2"
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-20 border-b border-hairline bg-surface-2/95 backdrop-blur-sm supports-[backdrop-filter]:bg-surface-2/85">
-        <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-2 px-4 sm:gap-6">
-          <Link href="/estimates" className="flex items-center gap-2 text-ink" aria-label="OpenQuote estimates">
-            <Mark className="h-5 w-7 shrink-0" />
-            <span translate="no" className="hidden font-cond text-lg font-bold tracking-tight sm:inline">OpenQuote</span>
-          </Link>
-          <Suspense fallback={<NavLinks pathname="" />}>
-            <ActiveNavLinks />
-          </Suspense>
-          <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            <LinkButton href="/estimates/new" className="h-10 px-3 sm:px-4">
-              <Plus className="size-4" strokeWidth={2.5} aria-hidden />
-              <span className="sm:hidden">New</span>
-              <span className="hidden sm:inline">New estimate</span>
-            </LinkButton>
-            <Suspense>
-              <Account />
+      <div className="flex min-h-dvh flex-1">
+        <div className="no-print hidden w-64 shrink-0 border-r border-border bg-sidebar md:block">
+          <aside className="sticky top-0 flex h-dvh flex-col px-3 pb-3">
+            <Link href="/estimates" className="flex h-14 items-center px-1.5" aria-label="OpenQuote estimates">
+              <Wordmark />
+            </Link>
+            <Suspense fallback={<SidebarNav pathname="" />}>
+              <ActiveSidebarNav />
             </Suspense>
-          </div>
+            <Suspense fallback={<div className="h-9" />}>
+              <SidebarAccount />
+            </Suspense>
+          </aside>
         </div>
-      </header>
-      <main id="main" tabIndex={-1} className="mx-auto w-full max-w-5xl flex-1 px-4 pb-32 pt-6 outline-none sm:pb-24 sm:pt-10">{children}</main>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="no-print sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-bg px-4 md:hidden">
+            <Link href="/estimates" aria-label="OpenQuote estimates">
+              <Wordmark />
+            </Link>
+            <Suspense>
+              <MobileAccount />
+            </Suspense>
+          </header>
+          <main
+            id="main"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-[60rem] flex-1 px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-6 outline-none sm:px-6 md:px-16 md:pb-8 md:pt-14"
+          >
+            {children}
+          </main>
+        </div>
+      </div>
       <Suspense fallback={<BottomNav pathname="" />}>
         <ActiveBottomNav />
       </Suspense>
@@ -55,18 +79,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-async function Account() {
+async function SidebarAccount() {
   const user = await getAuthUser();
-  if (!user) return null;
-  return (
-    <form action="/auth/signout" method="post">
-      <button
-        className="inline-flex size-10 items-center justify-center rounded-tape text-ink-2 transition-colors hover:bg-surface hover:text-ink"
-        title={`Sign out (${user.email})`}
-      >
-        <LogOut className="size-[1.125rem]" aria-hidden />
-        <span className="sr-only">Sign out {user.email}</span>
-      </button>
-    </form>
-  );
+  if (!user?.email) return null;
+  return <AccountMenu email={user.email} />;
+}
+
+async function MobileAccount() {
+  const user = await getAuthUser();
+  if (!user?.email) return null;
+  return <AccountMenu email={user.email} compact />;
 }

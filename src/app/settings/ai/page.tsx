@@ -6,19 +6,18 @@ import { requireMember } from "@/lib/auth";
 import { PROVIDER_INFO } from "@/lib/ai/providers";
 import { removeAiKey } from "./actions";
 import { Money } from "@/components/money";
-import { Rule } from "@/components/ui";
+import { GroupTitle, PageTitle, Panel, Row, Rows } from "@/components/ui";
 import { AiSettingsForm, RemoveKey } from "./form";
 
 export const metadata: Metadata = { title: "AI settings" };
 
 export default function AiSettingsPage() {
   return (
-    <div className="max-w-xl">
-      <h1 className="text-[1.75rem] font-bold leading-tight tracking-[-0.01em]">AI settings</h1>
-      <p className="mt-2 text-[1.0625rem] text-ink-2">
-        OpenQuote uses your own AI provider account. Your key is encrypted, never leaves the server, and you pay the
-        provider directly.
-      </p>
+    <div className="max-w-[56rem]">
+      <PageTitle
+        title="AI settings"
+        description="OpenQuote uses your own AI provider account. Your key is encrypted, never leaves the server, and you pay the provider directly."
+      />
       <Suspense>
         <AiSettings />
       </Suspense>
@@ -56,32 +55,39 @@ async function AiSettings() {
 
   return (
     <>
-      <dl className="mt-8 divide-y divide-hairline border-y border-hairline text-[1.0625rem]">
-        <div className="flex justify-between gap-4 py-3">
-          <dt className="text-ink-2">Provider</dt>
-          <dd className="font-semibold">{info.label}</dd>
-        </div>
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3">
-          <dt className="text-ink-2">Key</dt>
-          <dd className="flex items-baseline gap-3 font-semibold">
-            <span className={keyStatus.startsWith("No key") ? "text-mark" : undefined}>{keyStatus}</span>
-            {canEdit && settings?.apiKeyLast4 && (
-              <RemoveKey action={removeAiKey} />
-            )}
-          </dd>
-        </div>
-        <div className="flex justify-between gap-4 py-3">
-          <dt className="text-ink-2">This month</dt>
-          <dd className="figures text-right font-semibold">
-            {usage.calls} {usage.calls === 1 ? "call" : "calls"} · {usage.tokens.toLocaleString("en-AU")} tokens ·{" "}
-            <span className="whitespace-nowrap">
-              US<Money cents={Math.round(Number(usage.costMicroUsd) / 10_000)} />
-            </span>
-          </dd>
-        </div>
-      </dl>
+      <section aria-label="This month" className="mt-8 grid grid-cols-3 gap-0">
+        {[
+          ["Calls this month", usage.calls.toLocaleString("en-AU"), "Estimates and edits"],
+          ["Tokens", usage.tokens.toLocaleString("en-AU"), "Input and output"],
+          ["Cost", <span key="c" className="whitespace-nowrap">US<Money cents={Math.round(Number(usage.costMicroUsd) / 10_000)} /></span>, "Billed by your provider"],
+        ].map(([label, value, sub], i) => (
+          <div key={i} className="border-l border-border px-3 first:border-l-0 first:pl-0 sm:px-6">
+            <p className="text-xs font-medium text-ink-3">{label}</p>
+            <p className="figures mt-1.5 text-xl font-semibold leading-none text-ink sm:text-title">{value}</p>
+            <p className="mt-2 hidden text-xs text-ink-3 sm:block">{sub}</p>
+          </div>
+        ))}
+      </section>
 
-      <Rule className="mt-12" />
+      <section aria-labelledby="current" className="mt-10">
+        <GroupTitle id="current">Current setup</GroupTitle>
+        <Panel>
+          <Rows>
+            <Row label="Provider" hint="Where estimates are written.">
+              <span className="text-sm font-medium">{info.label}</span>
+            </Row>
+            <Row label="API key" hint="Encrypted at rest. Only the last four characters are shown.">
+              <span className="flex items-center gap-3 text-sm font-medium">
+                <span className={keyStatus.startsWith("No key") ? "text-accent-ink" : undefined}>{keyStatus}</span>
+                {canEdit && settings?.apiKeyLast4 && <RemoveKey action={removeAiKey} />}
+              </span>
+            </Row>
+          </Rows>
+        </Panel>
+      </section>
+
+      <section aria-labelledby="change" className="mt-10">
+      <GroupTitle id="change">Provider and key</GroupTitle>
       {canEdit ? (
         <AiSettingsForm
           initial={{
@@ -94,8 +100,9 @@ async function AiSettings() {
           }}
         />
       ) : (
-        <p className="mt-8 text-ink-3">Only owners and admins can change AI settings.</p>
+        <p className="text-sm text-ink-3">Only owners and admins can change AI settings.</p>
       )}
+      </section>
     </>
   );
 }

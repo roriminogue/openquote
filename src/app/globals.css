@@ -1,93 +1,149 @@
 @import "tailwindcss";
 
-/* OpenQuote: the estimate is read like a steel tape. See PRODUCT.md and DESIGN.md. */
+/* OpenQuote: a calm, neutral workspace on an off-white page. Hairlines and dashed row rules carry the structure,
+   near-black gradient buttons carry actions, and one hi-vis orange accent marks the moment that matters (pricing a
+   job, live progress). Geist for the interface, Figtree for page headings. See DESIGN.md. */
 
 :root {
-  --ground: #f3f3f0; /* concrete-light page */
-  --surface: #ffffff;
-  --surface-2: #ebebe6; /* second neutral layer: header, table heads */
-  --ink: #161510;
-  --ink-2: #47463f;
-  --ink-3: #66645c;
-  --hairline: #d8d7d0;
-  --hairline-strong: #b4b3ab;
-  --blade: #f5c400; /* tape-blade yellow: the one committed accent */
-  --blade-press: #dcb000;
-  --blade-wash: #fff3bf;
-  --on-blade: #161510;
-  --case: #161510; /* the tape case: reversed plate */
-  --on-case: #f7f6ef;
-  --mark: #c8281e; /* stud-mark red: warnings and errors only */
-  --mark-wash: #fbe8e5;
-  --ok: #1c6a43;
-  --focus: #161510;
+  --bg: #fcfcfc;
+  --surface: #ffffff; /* raised inputs such as the composer */
+  --sidebar: #fcfcfc;
+  --subtle: #f4f4f5;
+  --hover: #f4f4f5;
+  --border: #ebebf1;
+  --border-strong: #e2e2e8;
+  --ink: #18191b;
+  --ink-2: #3f3f46;
+  --ink-3: #6b6b74;
+  --ink-4: #a1a1aa; /* decoration only, never text */
+  --label: #5a5b5e; /* small group labels */
+  --primary: #262626;
+  --primary-top: #404040; /* primary buttons are a short vertical gradient with a top highlight */
+  --primary-hover: #333333;
+  --on-primary: #ffffff;
+  --accent: #f26b1d; /* hi-vis orange */
+  --accent-hover: #e05d12;
+  --on-accent: #18181b;
+  --accent-soft: #fff2ea;
+  --accent-ink: #c2410c;
+  --danger: #c81e1e;
+  --danger-soft: #fef1f1;
+  --ok: #15803d;
+  --ok-soft: #effbf3;
+  --focus: #18191b;
+  --shadow-xs: 0 1px 2px rgb(24 24 27 / 0.04);
+  --shadow-sm: 0 1px 3px rgb(24 24 27 / 0.06), 0 1px 2px rgb(24 24 27 / 0.04);
+  --shadow-lg: 0 12px 32px -12px rgb(24 24 27 / 0.22), 0 2px 6px rgb(24 24 27 / 0.06);
+  /* Cards are outlined by a 1px ring with a barely-there layered shadow; the composer lifts a little more. */
+  --shadow-card: 0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.02), 0 3px 3px -1.5px rgb(0 0 0 / 0.015),
+    0 6px 6px -3px rgb(0 0 0 / 0.015);
+  --shadow-raised: 0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.03), 0 3px 3px -1.5px rgb(0 0 0 / 0.03),
+    0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --ground: #11110f;
-    --surface: #1a1a17;
-    --surface-2: #23231f;
-    --ink: #f2f1ea;
-    --ink-2: #c4c2b8;
-    --ink-3: #96948a;
-    --hairline: #313029;
-    --hairline-strong: #4a4942;
-    --blade-press: #ffd633;
-    --blade-wash: #3a320f;
-    --case: #2a2925;
-    --mark: #ff7468;
-    --mark-wash: #3b1b17;
-    --ok: #5fc48c;
-    --focus: #f5c400;
+    --bg: #0f0f10;
+    --surface: #161618;
+    --sidebar: #0f0f10;
+    --subtle: #1a1a1d;
+    --hover: #1f1f23;
+    --border: #232328;
+    --border-strong: #2e2e34;
+    --ink: #f4f4f5;
+    --ink-2: #d4d4d8;
+    --ink-3: #a1a1aa;
+    --ink-4: #52525b;
+    --label: #a1a1aa;
+    --primary: #e4e4e7;
+    --primary-top: #fafafa;
+    --primary-hover: #ffffff;
+    --on-primary: #18181b;
+    --accent-hover: #ff7a2e;
+    --accent-soft: #2a170b;
+    --accent-ink: #ff9a5c;
+    --danger: #f87171;
+    --danger-soft: #2a1213;
+    --ok: #4ade80;
+    --ok-soft: #0f2416;
+    --focus: #f4f4f5;
+    --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 16px 40px -12px rgb(0 0 0 / 0.7);
+    --shadow-card: 0 0 0 1px var(--border-strong);
+    --shadow-raised: 0 0 0 1px var(--border-strong), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   }
 }
 
+/* Type ramp: Tailwind's xs–2xl plus these steps. */
+@theme {
+  --text-2xs: 0.6875rem;
+  --text-caption: 0.75rem;
+  --text-body: 0.875rem;
+  --text-lead: 1rem;
+  --text-title: 1.5rem;
+  --text-title-lg: 1.5rem;
+  --text-figure: 2rem;
+}
+
 @theme inline {
-  --color-ground: var(--ground);
+  --color-bg: var(--bg);
   --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
+  --color-label: var(--label);
+  --color-primary-top: var(--primary-top);
+  --color-sidebar: var(--sidebar);
+  --color-subtle: var(--subtle);
+  --color-hover: var(--hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
-  --color-hairline: var(--hairline);
-  --color-hairline-strong: var(--hairline-strong);
-  --color-blade: var(--blade);
-  --color-blade-press: var(--blade-press);
-  --color-blade-wash: var(--blade-wash);
-  --color-on-blade: var(--on-blade);
-  --color-case: var(--case);
-  --color-on-case: var(--on-case);
-  --color-mark: var(--mark);
-  --color-mark-wash: var(--mark-wash);
+  --color-ink-4: var(--ink-4);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --color-ok: var(--ok);
-  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
-  --font-cond: var(--font-barlow-cond), var(--font-barlow), ui-sans-serif, sans-serif;
-  --radius-tape: 4px;
+  --color-ok-soft: var(--ok-soft);
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-figtree), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-card: var(--shadow-card);
+  --shadow-raised: var(--shadow-raised);
 }
 
 html {
   color-scheme: light dark;
-  scroll-padding-top: 7rem; /* keep focused elements clear of the sticky header */
-  -webkit-tap-highlight-color: transparent;
+  scroll-padding-top: 5rem;
   -webkit-text-size-adjust: 100%;
-  scrollbar-color: var(--hairline-strong) transparent;
+  -webkit-tap-highlight-color: transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 body {
   touch-action: manipulation;
-  background: var(--ground);
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.5;
+  font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   caret-color: var(--ink);
 }
 
 ::selection {
-  background: var(--blade);
-  color: var(--on-blade);
+  background: var(--accent-soft);
+  color: var(--ink);
 }
 
 :focus-visible {
@@ -106,31 +162,76 @@ h3 {
   text-wrap: balance;
 }
 
-/* Blade printing: condensed, upper-case, tabular. Used for labels and numbers. */
-@utility label {
-  font-family: var(--font-cond);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  line-height: 1.2;
+p,
+li,
+dd {
+  text-wrap: pretty;
 }
 
+/* Numbers in money, quantities and totals: tabular so columns line up. */
 @utility figures {
-  font-family: var(--font-cond);
   font-variant-numeric: tabular-nums lining-nums;
 }
 
-/* The graduated blade: minor ticks every 4px, major every 20px, printed along the top edge. */
-@utility graduations {
-  background-image:
-    linear-gradient(to right, var(--on-blade) 1px, transparent 1px),
-    linear-gradient(to right, var(--on-blade) 1px, transparent 1px);
-  background-size:
-    20px 45%,
-    4px 22%;
-  background-repeat: repeat-x;
-  background-position: 0 0;
+/* Dotted grid for empty states and quiet panels. */
+@utility dots {
+  background-image: radial-gradient(color-mix(in oklab, var(--ink-4) 45%, transparent) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: -8px -8px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@utility enter {
+  animation: rise 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Sheets arrive from where they live: up from the bottom on phones, in from the right from 640px. */
+dialog.sheet[open] {
+  animation: sheet-up 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+dialog.sheet[open]::backdrop {
+  animation: fade 200ms ease-out;
+}
+@media (min-width: 40rem) {
+  dialog.sheet[open] {
+    animation-name: sheet-in;
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(1.5rem);
+    opacity: 0;
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateX(2rem);
+    opacity: 0;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media print {
+  @page {
+    margin: 16mm 14mm;
+  }
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -141,4 +242,3 @@ h3 {
     transition-duration: 0.01ms !important;
   }
 }
-

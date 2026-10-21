@@ -14,7 +14,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/db/seed.ts",
     "db:studio": "drizzle-kit studio",
-    "ai:try": "tsx scripts/try-estimate.ts"
+    "ai:try": "tsx scripts/try-estimate.ts",
+    "dev:lan": "next dev -H 0.0.0.0"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.84",

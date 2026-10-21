@@ -12,7 +12,10 @@ export const metadata: Metadata = { title: "Estimate" };
 export default function EstimatePage({ params }: PageProps<"/estimates/[id]">) {
   return (
     <>
-      <Link href="/estimates" className="inline-flex items-center gap-1.5 text-[0.9375rem] font-semibold text-ink-3 hover:text-ink">
+      <Link
+        href="/estimates"
+        className="no-print -ml-2 inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-ink-3 transition-colors hover:bg-hover hover:text-ink"
+      >
         <ArrowLeft className="size-4" aria-hidden />
         Estimates
       </Link>
@@ -35,12 +38,12 @@ async function EstimateDetail({ params }: Pick<PageProps<"/estimates/[id]">, "pa
 
 function DetailSkeleton() {
   return (
-    <div className="mt-4 space-y-6" aria-busy="true" aria-label="Loading estimate">
-      <div className="h-9 w-2/3 animate-pulse rounded-tape bg-surface-2" />
-      <div className="h-20 animate-pulse rounded-tape bg-surface-2" />
+    <div className="mt-5 space-y-6" aria-busy="true" aria-label="Loading estimate">
+      <div className="h-9 w-2/3 animate-pulse rounded-lg bg-hover" />
+      <div className="h-48 animate-pulse rounded-xl bg-hover" />
       <div className="space-y-3">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-12 animate-pulse rounded-tape bg-surface-2" />
+          <div key={i} className="h-10 animate-pulse rounded-lg bg-hover" />
         ))}
       </div>
     </div>
