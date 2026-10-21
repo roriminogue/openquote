@@ -1,24 +1,42 @@
 import { ArrowDownRight, ArrowUpRight, TriangleAlert } from "lucide-react";
-import { Blade } from "@/components/blade";
+import { Breakdown } from "@/components/breakdown";
+import { EstimateActions } from "@/components/estimate-actions";
 import { Money } from "@/components/money";
-import { Rule } from "@/components/ui";
-import { StickyReading } from "@/components/sticky-reading";
+import { Badge, GroupTitle, Panel, type Tone } from "@/components/ui";
 import { validateEstimate } from "@/lib/estimate/price";
 import type { EstimateContext, GroupView, LineView } from "@/lib/estimate/queries";
+import { estimateAsText } from "@/lib/estimate/text";
 import { formatProjectNo } from "@/lib/project-schema";
 import { formatAud, formatEstimateNo, type EstimateTotals } from "@/lib/pricing";
+import { formatQty, unitLabel } from "@/lib/units";
 import type { schema } from "@/db";
+
+type Estimate = typeof schema.estimates.$inferSelect;
 
 const typeLabel: Record<LineView["type"], string> = {
   material: "Materials",
   labour: "Labour",
-  subbie: "Subbie",
+  subbie: "Subcontractor",
   other: "Other",
 };
 
+export const ESTIMATE_STATUS: Record<Estimate["status"], [string, Tone]> = {
+  draft: ["Draft", "neutral"],
+  sent: ["Sent", "accent"],
+  accepted: ["Accepted", "neutral"],
+  declined: ["Declined", "muted"],
+  invoiced: ["Invoiced", "neutral"],
+  archived: ["Archived", "muted"],
+};
+
+export function EstimateStatus({ status }: { status: Estimate["status"] }) {
+  const [label, tone] = ESTIMATE_STATUS[status] ?? [status, "neutral"];
+  return <Badge tone={tone}>{label}</Badge>;
+}
+
 const dateFmt = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "long", year: "numeric" });
 
-/** The estimate as the tradie checks it: the tape, the stages and lines, totals, scope and options. */
+/** The estimate as the tradie checks it: the number up top, where it goes, then the schedule line by line. */
 export function EstimateView({
   estimate: e,
   gstRatePct,
@@ -27,7 +45,7 @@ export function EstimateView({
   context,
 }: {
   context?: EstimateContext;
-  estimate: typeof schema.estimates.$inferSelect;
+  estimate: Estimate;
   gstRatePct: number;
   groups: GroupView[];
   totals: EstimateTotals;
@@ -36,161 +54,234 @@ export function EstimateView({
   const markupCents = totals.subtotalCents - totals.costCents;
   const upgrades = (e.alternatives ?? []).filter((a) => a.kind === "upgrade");
   const savings = (e.alternatives ?? []).filter((a) => a.kind === "saving");
+  const meta = [
+    context?.clientName,
+    context?.projectName && `${context.projectName} · ${formatProjectNo(context.projectNumber!)}`,
+    e.siteAddress,
+  ].filter((x): x is string => !!x);
+  const text = estimateAsText({
+    number: e.number,
+    title: e.title,
+    meta,
+    summary: e.summary,
+    groups,
+    totals,
+    gstRatePct,
+    scope: e.scope,
+    exclusions: e.exclusions,
+  });
+
+  const lineCount = groups.reduce((s, g) => s + g.lines.length, 0);
 
   return (
     <article className="mt-4">
-      <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <h1 className="max-w-3xl text-[1.75rem] font-bold leading-tight tracking-[-0.01em] sm:text-[2.125rem]">{e.title}</h1>
-        <p className="figures text-[0.9375rem] font-semibold text-ink-3">
-          {formatEstimateNo(e.number)} · {dateFmt.format(e.createdAt)} · Draft
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4 sm:flex-nowrap">
+        <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
+          <h1 className="max-w-3xl font-display text-title font-medium leading-8 tracking-[-0.01em]">{e.title}</h1>
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-ink-3">
+            <EstimateStatus status={e.status} />
+            <span className="figures text-ink-2">{formatEstimateNo(e.number)}</span>
+            {[...meta, dateFmt.format(e.createdAt)].map((m) => (
+              <span key={m}>
+                <span aria-hidden className="mr-2">·</span>
+                {m}
+              </span>
+            ))}
+          </p>
+        </div>
+        <EstimateActions text={text} />
       </header>
-      {(context?.clientName || context?.projectName || e.siteAddress) && (
-        <p className="mt-1.5 text-[1.0625rem] text-ink-2">
-          {[
-            context?.clientName,
-            context?.projectName && `${context.projectName} (${formatProjectNo(context.projectNumber!)})`,
-            e.siteAddress,
-          ]
-            .filter(Boolean)
-            .join(" · ")}
-        </p>
-      )}
 
-      <StickyReading
-        watch="reading"
-        until="totals-block"
-        title={e.title}
-        cents={totals.totalCents}
-        label={totals.gstCents > 0 ? "Total inc GST" : "Total"}
-      />
-      <div className="mt-6" id="reading">
-        <Blade
-          segments={groups.map((g) => ({ name: g.name, cents: g.priceCents }))}
-          totalCents={totals.totalCents}
-          caption={totals.gstCents > 0 ? "Total inc GST" : "Total"}
+      <section aria-label="Totals" className="mt-8 grid gap-6 sm:grid-cols-3 sm:gap-0">
+        <Stat
+          label={totals.gstCents > 0 ? "Total inc GST" : "Total"}
+          value={<Money cents={totals.totalCents} />}
+          big
+          sub={
+            totals.gstCents > 0 ? (
+              <>
+                <Money cents={totals.subtotalCents} quiet={false} /> ex GST · <Money cents={totals.gstCents} quiet={false} /> GST {gstRatePct}%
+              </>
+            ) : (
+              "No GST on this estimate"
+            )
+          }
         />
-      </div>
+        <Stat
+          label="Your cost"
+          value={<Money cents={totals.costCents} />}
+          sub={
+            <>
+              <Money cents={markupCents} quiet={false} /> markup on top
+            </>
+          }
+        />
+        <Stat
+          label="Margin"
+          value={<span className="figures">{totals.marginPct.toFixed(1)}%</span>}
+          sub={`${lineCount} lines across ${groups.length} ${groups.length === 1 ? "stage" : "stages"}`}
+        />
+      </section>
 
       {warnings.length > 0 && (
         <ul className="mt-6 space-y-2" aria-label="Check before sending">
           {warnings.map((w) => (
-            <li key={w} className="flex items-start gap-2.5 rounded-tape bg-mark-wash px-3.5 py-2.5 text-mark">
-              <TriangleAlert className="mt-0.5 size-[1.125rem] shrink-0" aria-hidden />
+            <li key={w} className="flex items-start gap-2.5 rounded-[10px] bg-accent-soft px-3.5 py-2.5 text-sm text-accent-ink">
+              <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
               <span>{w}</span>
             </li>
           ))}
         </ul>
       )}
 
-      {e.summary && <p className="mt-8 max-w-[68ch] text-[1.0625rem] leading-relaxed text-ink-2">{e.summary}</p>}
-
-      <section aria-labelledby="stages" className="mt-8">
-        <h2 id="stages" className="sr-only">
-          Stages and line items
-        </h2>
-        <div className="space-y-6">
-          {groups.map((g, gi) => (
-            <section key={g.id} aria-labelledby={`g-${g.id}`}>
-              <Rule />
-              <div className="mt-4 flex items-baseline justify-between gap-4">
-                <h3 id={`g-${g.id}`} className="text-[1.25rem] font-bold leading-snug">
-                  <span className="figures mr-2 text-ink-3">{gi + 1}</span>
-                  {g.name}
-                </h3>
-                <Money cents={g.priceCents} className="text-[1.25rem] font-bold" />
-              </div>
-              <ul className="mt-1 divide-y divide-hairline">
-                {g.lines.map((l) => (
-                  <li key={l.id} className="grid grid-cols-[1fr_auto] gap-x-4 py-2">
-                    <div className="min-w-0">
-                      <p className="break-words text-[1.0625rem] leading-snug text-ink">{l.description}</p>
-                      <p className="figures mt-0.5 text-[0.9375rem] text-ink-3">
-                        {formatQty(l.qty)} {l.unit} × {formatAud(l.unitCostCents)}
-                        <span aria-hidden> · </span>
-                        {typeLabel[l.type]}
-                        <span aria-hidden> · </span>
-                        {l.source === "rate_rule" ? (
-                          <span className="font-semibold text-ink-2">Your rate</span>
-                        ) : (
-                          "AI price"
-                        )}
-                        <span aria-hidden> · </span>+{l.markupPct}%
-                      </p>
-                      {l.notes && <p className="mt-1 max-w-[68ch] text-[0.9375rem] text-ink-3">{l.notes}</p>}
-                    </div>
-                    <Money cents={l.priceCents} className="text-[1.0625rem] font-semibold" />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+      <section aria-labelledby="money" className="mt-10">
+        <GroupTitle id="money">Where the money goes</GroupTitle>
+        <Panel className="px-4 pb-2 pt-4 sm:px-5 sm:pt-5">
+          <Breakdown stages={groups.map((g) => ({ id: g.id, name: g.name, cents: g.priceCents }))} />
+        </Panel>
       </section>
 
-      <section aria-labelledby="totals" className="mt-8" id="totals-block">
-        <Rule />
-        <div className="ml-auto max-w-md">
-        <h2 id="totals" className="mt-4 text-[1.25rem] font-bold">
-          Totals
-        </h2>
-        <dl className="mt-2 divide-y divide-hairline text-[1.0625rem]">
-          <Row label="Cost" cents={totals.costCents} />
-          <Row label={`Markup (${totals.costCents ? Math.round((markupCents / totals.costCents) * 100) : 0}%)`} cents={markupCents} />
-          <Row label="Price ex GST" cents={totals.subtotalCents} />
-          {totals.gstCents > 0 && <Row label={`GST (${gstRatePct}%)`} cents={totals.gstCents} />}
-          <div className="flex items-baseline justify-between gap-4 py-3">
-            <dt className="font-bold">Total</dt>
+      {e.summary && <p className="mt-10 max-w-[68ch] text-sm leading-relaxed text-ink-2">{e.summary}</p>}
+
+      <section aria-labelledby="schedule" className="mt-10">
+        <GroupTitle id="schedule">Schedule</GroupTitle>
+        <Schedule groups={groups} />
+        <dl className="ml-auto mt-2 max-w-xs text-sm">
+          <TotalRow label="Price ex GST" cents={totals.subtotalCents} />
+          {totals.gstCents > 0 && <TotalRow label={`GST (${gstRatePct}%)`} cents={totals.gstCents} />}
+          <div className="flex items-baseline justify-between gap-4 border-t border-border py-3">
+            <dt className="font-medium">Total</dt>
             <dd>
-              <Money cents={totals.totalCents} className="text-[1.5rem] font-bold" />
+              <Money cents={totals.totalCents} className="text-base font-semibold" />
             </dd>
           </div>
-          <div className="flex items-baseline justify-between gap-4 py-2.5 text-ink-3">
-            <dt>Margin</dt>
-            <dd className="figures font-semibold">{totals.marginPct.toFixed(1)}%</dd>
-          </div>
         </dl>
-        </div>
       </section>
 
       {(e.scope?.length || e.assumptions?.length || e.exclusions?.length) && (
-        <section aria-label="Scope" className="mt-10">
-          <Rule />
-          <div className="mt-5 grid gap-8 sm:grid-cols-3">
-            <TextList title="Scope of work" items={e.scope} />
-            <TextList title="Assumptions" items={e.assumptions} />
-            <TextList title="Not included" items={e.exclusions} />
-          </div>
+        <section aria-label="Scope" className="mt-10 grid gap-8 sm:grid-cols-3">
+          <TextList title="Scope of work" items={e.scope} />
+          <TextList title="Assumptions" items={e.assumptions} />
+          <TextList title="Not included" items={e.exclusions} />
         </section>
       )}
 
       {(upgrades.length > 0 || savings.length > 0) && (
         <section aria-labelledby="options" className="mt-10">
-          <Rule />
-          <h2 id="options" className="mt-5 text-[1.25rem] font-bold">
-            Options to offer
-          </h2>
-          <div className="mt-4 grid gap-8 sm:grid-cols-2">
+          <GroupTitle id="options">Options to offer</GroupTitle>
+          <div className="grid gap-4 sm:grid-cols-2">
             <OptionList title="Upgrades" icon="up" items={upgrades} />
             <OptionList title="Ways to save" icon="down" items={savings} />
           </div>
         </section>
       )}
-          </article>
+    </article>
   );
 }
 
-function formatQty(qty: number) {
-  return Number.isInteger(qty) ? String(qty) : qty.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+/** A figure in a column: small grey label, the number, a grey line under it. Columns split by hairlines. */
+function Stat({ label, value, sub, big = false }: { label: string; value: React.ReactNode; sub?: React.ReactNode; big?: boolean }) {
+  return (
+    <div className="border-border sm:border-l sm:px-6 sm:first:border-l-0 sm:first:pl-0">
+      <p className="text-xs font-medium text-ink-3">{label}</p>
+      <p className={`mt-1.5 font-semibold leading-none tracking-[-0.01em] text-ink ${big ? "text-figure" : "text-title"}`}>{value}</p>
+      {sub && <p className="mt-2 text-xs text-ink-3">{sub}</p>}
+    </div>
+  );
 }
 
-function Row({ label, cents }: { label: string; cents: number }) {
+function TotalRow({ label, cents }: { label: string; cents: number }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 py-2.5">
-      <dt className="text-ink-2">{label}</dt>
+    <div className="flex items-baseline justify-between gap-4 py-1.5">
+      <dt className="text-ink-3">{label}</dt>
       <dd>
-        <Money cents={cents} className="font-semibold" />
+        <Money cents={cents} className="text-ink-2" />
       </dd>
+    </div>
+  );
+}
+
+/**
+ * Where a price came from. The tradie's own figures sit quietly on a solid chip; an AI guess is the one with a
+ * dashed edge and darker text, because it's the one to check.
+ */
+export function SourceBadge({ source }: { source: LineView["source"] }) {
+  if (source === "ai")
+    return (
+      <span className="inline-flex h-5 items-center whitespace-nowrap rounded-full border border-dashed border-ink-3 px-2 text-xs font-medium text-ink">
+        AI price
+      </span>
+    );
+  const label = { rate_rule: "Your rate", kit: "Kit", supplier: "Supplier", manual: "Manual" }[source];
+  return (
+    <span className="inline-flex h-5 items-center whitespace-nowrap rounded-full bg-subtle px-2 text-xs font-medium text-ink-3">
+      {label}
+    </span>
+  );
+}
+
+function Rate({ l }: { l: LineView }) {
+  return (
+    <>
+      {formatAud(l.unitCostCents)}
+      {l.markupPct !== l.defaultMarkupPct && <span className="text-ink-3"> +{l.markupPct}%</span>}
+    </>
+  );
+}
+
+const cols = "sm:grid-cols-[minmax(0,1fr)_6.5rem_7rem_5.5rem_7rem]";
+
+/**
+ * One schedule for every width: from 640px (and on paper) the line's parts sit in columns under a header; on
+ * phones they fold into a description, a qty × rate line, and the amount on the right.
+ */
+function Schedule({ groups }: { groups: GroupView[] }) {
+  return (
+    <div className="text-sm">
+      <div aria-hidden className={`hidden h-10 items-center gap-x-4 border-b border-border text-sm font-medium text-ink-3 sm:grid ${cols}`}>
+        <span>Description</span>
+        <span className="text-right">Qty</span>
+        <span className="text-right">Rate</span>
+        <span>Source</span>
+        <span className="text-right">Amount</span>
+      </div>
+      {groups.map((g, gi) => (
+        <section key={g.id} id={`g-${g.id}`} aria-labelledby={`gh-${g.id}`} className="scroll-mt-24 pt-6">
+          <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-border pb-2.5">
+            <h3 id={`gh-${g.id}`} className="text-sm font-semibold text-ink">
+              <span className="figures mr-2.5 text-ink-4">{gi + 1}</span>
+              {g.name}
+            </h3>
+            <Money cents={g.priceCents} className="text-sm font-semibold" />
+          </div>
+          <ul className="divide-y divide-dashed divide-border">
+            {g.lines.map((l) => (
+              <li key={l.id} className={`grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1 py-3 ${cols}`}>
+                <div className="min-w-0">
+                  <p className="break-words text-body leading-snug text-ink sm:text-sm">{l.description}</p>
+                  <p className="mt-0.5 hidden text-caption text-ink-3 sm:block">{typeLabel[l.type]}</p>
+                  {l.notes && <p className="mt-1 max-w-[62ch] text-caption text-ink-3">{l.notes}</p>}
+                </div>
+                <div className="figures col-start-1 row-start-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-ink-3 sm:contents">
+                  <span className="whitespace-nowrap sm:text-right sm:text-ink-2">
+                    <span className="sr-only">Quantity </span>
+                    {formatQty(l.qty)} <span className="text-ink-3">{unitLabel(l.unit, l.qty)}</span>
+                  </span>
+                  <span aria-hidden className="sm:hidden">×</span>
+                  <span className="whitespace-nowrap sm:text-right sm:text-ink-2">
+                    <span className="sr-only">at </span>
+                    <Rate l={l} />
+                  </span>
+                  <span className="ml-1.5 sm:ml-0">
+                    <SourceBadge source={l.source} />
+                  </span>
+                </div>
+                <Money cents={l.priceCents} className="col-start-2 row-start-1 text-right text-ink sm:col-start-auto sm:row-start-auto" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
     </div>
   );
 }
@@ -199,11 +290,11 @@ function TextList({ title, items }: { title: string; items: string[] | null }) {
   if (!items?.length) return null;
   return (
     <div>
-      <h3 className="font-bold">{title}</h3>
-      <ul className="mt-2 space-y-1.5 text-ink-2">
+      <h3 className="text-sm font-medium text-ink-3">{title}</h3>
+      <ul className="mt-3 space-y-2 text-sm text-ink">
         {items.map((it) => (
           <li key={it} className="flex gap-2.5">
-            <span aria-hidden className="mt-[0.7em] h-px w-2.5 shrink-0 bg-ink-3" />
+            <span aria-hidden className="mt-[0.6em] size-1 shrink-0 rounded-full bg-ink-4" />
             <span>{it}</span>
           </li>
         ))}
@@ -224,20 +315,19 @@ function OptionList({
   if (!items.length) return null;
   const Icon = icon === "up" ? ArrowUpRight : ArrowDownRight;
   return (
-    <div>
-      <h3 className="flex items-center gap-1.5 font-bold">
-        <Icon className="size-[1.125rem]" aria-hidden />
+    <Panel>
+      <h3 className="flex items-center gap-2 px-4 pt-4 text-sm font-medium text-ink-3 sm:px-5">
+        <Icon className="size-4" aria-hidden />
         {title}
       </h3>
-      <ul className="mt-2 divide-y divide-hairline">
+      <ul className="divide-y divide-dashed divide-border px-4 sm:px-5">
         {items.map((a) => (
-          <li key={a.title} className="py-3">
-            <p className="font-semibold text-ink">{a.title}</p>
-            <p className="mt-0.5 text-ink-2">{a.detail}</p>
+          <li key={a.title} className="py-4">
+            <p className="text-sm font-medium text-ink">{a.title}</p>
+            <p className="mt-0.5 text-sm text-ink-3">{a.detail}</p>
           </li>
         ))}
       </ul>
-    </div>
+    </Panel>
   );
 }
-

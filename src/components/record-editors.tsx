@@ -160,13 +160,23 @@ export function ClientEditor({
 }
 
 /** Page-level buttons that open an editor and then show the result. */
-export function NewProjectButton({ clients, clientId, label = "New project" }: { clients: ClientOption[]; clientId?: string; label?: string }) {
+export function NewProjectButton({
+  clients,
+  clientId,
+  label = "New project",
+  variant = "secondary",
+}: {
+  clients: ClientOption[];
+  clientId?: string;
+  label?: string;
+  variant?: "primary" | "secondary";
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={buttonClass("primary", "md")}>
-        <Plus className="size-4" strokeWidth={2.5} aria-hidden />
+      <button type="button" onClick={() => setOpen(true)} className={buttonClass(variant, "md")}>
+        <Plus className="size-4" aria-hidden />
         {label}
       </button>
       {open && (
@@ -206,13 +216,13 @@ export function EditProjectButton({ projectId, initial, clients }: { projectId: 
   );
 }
 
-export function NewClientButton() {
+export function NewClientButton({ variant = "secondary" }: { variant?: "primary" | "secondary" }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={buttonClass("primary", "md")}>
-        <Plus className="size-4" strokeWidth={2.5} aria-hidden />
+      <button type="button" onClick={() => setOpen(true)} className={buttonClass(variant, "md")}>
+        <Plus className="size-4" aria-hidden />
         New client
       </button>
       {open && <ClientEditor onClose={() => setOpen(false)} onSaved={(c) => router.push(`/clients/${c.id}`)} />}

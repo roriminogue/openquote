@@ -36,7 +36,7 @@ async function OnboardingForm({ searchParams }: Pick<PageProps<"/onboarding">, "
       <Field id="business" label="Business name">
         <Input id="business" name="business" required autoComplete="organization" />
       </Field>
-      <Button size="lg" className="w-full">
+      <Button className="w-full">
         Create business
       </Button>
       {error && <Notice tone="error">{error}</Notice>}

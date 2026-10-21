@@ -1,44 +1,76 @@
 import Link from "next/link";
 import type { listEstimates } from "@/lib/estimate/queries";
 import { formatEstimateNo } from "@/lib/pricing";
-import { MiniBlade } from "./blade";
+import { EstimateStatus } from "./estimate-view";
 import { Money } from "./money";
+import { ListFrame, listHeader, listRow } from "./records";
 
-const dateFmt = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short" });
+const dateFmt = new Intl.DateTimeFormat("en-AU", {
+  day: "numeric",
+  month: "short",
+});
 
-export function EstimateRows({ rows }: { rows: Awaited<ReturnType<typeof listEstimates>> }) {
-  // Bars are as long as the money: the biggest estimate in view runs the full width.
-  const max = Math.max(...rows.map((r) => r.totals.totalCents));
+type Rows = Awaited<ReturnType<typeof listEstimates>>;
+
+const cols = "md:grid-cols-[5.5rem_minmax(0,1fr)_9rem_6.5rem_7.5rem]";
+
+/** Estimates as a quiet table: number, what and who, status, total. Rows link to the estimate. */
+export function EstimateRows({
+  rows,
+  showClient = true,
+}: {
+  rows: Rows;
+  showClient?: boolean;
+}) {
   return (
-    <ul className="mt-6 divide-y divide-hairline border-y border-hairline">
-      {rows.map(({ estimate: e, groups, totals, lineCount, clientName }) => (
-        <li key={e.id}>
-          <Link
-            href={`/estimates/${e.id}`}
-            className="group grid grid-cols-[1fr_auto] items-baseline gap-x-4 gap-y-2 px-1 py-4 transition-colors hover:bg-surface sm:grid-cols-[5.5rem_1fr_auto] sm:px-3"
-          >
-            <span className="figures order-2 col-span-2 text-sm font-semibold text-ink-3 sm:order-none sm:col-span-1 sm:text-[0.9375rem]">
-              {formatEstimateNo(e.number)}
-              <span className="sm:hidden">
-                {" "}
-                · {clientName ? `${clientName} · ` : ""}
+    <div>
+      <ListFrame
+        header={
+          <div aria-hidden className={`${listHeader} ${cols}`}>
+            <span>Number</span>
+            <span>Job</span>
+            <span>Status</span>
+            <span>Created</span>
+            <span className="text-right">Total</span>
+          </div>
+        }
+      >
+        {rows.map(({ estimate: e, totals, lineCount, clientName }) => (
+          <li key={e.id}>
+            <Link href={`/estimates/${e.id}`} className={`${listRow} ${cols}`}>
+              <span className="figures hidden text-sm text-ink-3 md:block">
+                {formatEstimateNo(e.number)}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium text-ink">
+                  {e.title}
+                </span>
+                <span className="mt-0.5 block truncate text-caption text-ink-3">
+                  <span className="figures md:hidden">
+                    {formatEstimateNo(e.number)} ·{" "}
+                  </span>
+                  {showClient && clientName ? `${clientName} · ` : ""}
+                  {lineCount} lines
+                  <span className="md:hidden">
+                    {" "}
+                    · {dateFmt.format(e.createdAt)}
+                  </span>
+                </span>
+              </span>
+              <span className="hidden md:block">
+                <EstimateStatus status={e.status} />
+              </span>
+              <span className="figures hidden text-sm text-ink-3 md:block">
                 {dateFmt.format(e.createdAt)}
               </span>
-            </span>
-            <span className="order-1 min-w-0 sm:order-none">
-              <span className="block truncate text-[1.0625rem] font-semibold text-ink group-hover:underline">{e.title}</span>
-              <span className="mt-0.5 hidden text-sm text-ink-3 sm:block">
-                {clientName ? `${clientName} · ` : ""}
-                {dateFmt.format(e.createdAt)} · {lineCount} lines · {groups.length} stages
-              </span>
-            </span>
-            <Money cents={totals.totalCents} className="order-1 text-[1.25rem] font-bold sm:order-none" />
-            <span className="order-3 col-span-2 sm:col-span-3 sm:col-start-2">
-              <MiniBlade segments={groups.map((g) => ({ name: g.name, cents: g.priceCents }))} share={max > 0 ? totals.totalCents / max : 1} />
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
+              <Money
+                cents={totals.totalCents}
+                className="text-right text-sm font-medium text-ink"
+              />
+            </Link>
+          </li>
+        ))}
+      </ListFrame>
+    </div>
   );
 }

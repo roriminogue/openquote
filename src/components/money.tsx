@@ -1,4 +1,4 @@
-// Money as it reads on the tape: dollars large, cents set back.
+// Money in tabular Geist figures, cents set back a touch so the dollars read first.
 
 const dollars = new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 });
 
@@ -12,12 +12,13 @@ export function splitAud(cents: number) {
   };
 }
 
-export function Money({ cents, className = "" }: { cents: number; className?: string }) {
+/** `quiet` sets the cents back in ink-3; leave it off where the figure is already grey, so contrast holds. */
+export function Money({ cents, className = "", quiet = true }: { cents: number; className?: string; quiet?: boolean }) {
   const m = splitAud(cents);
   return (
     <span className={`figures whitespace-nowrap ${className}`}>
       {m.sign}${m.dollars}
-      <span className="text-[0.82em]">.{m.cents}</span>
+      <span className={quiet ? "text-[0.85em] text-ink-3" : ""}>.{m.cents}</span>
     </span>
   );
 }

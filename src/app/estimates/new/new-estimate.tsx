@@ -1,13 +1,12 @@
 "use client";
 
-import { ArrowRight, Square } from "lucide-react";
+import { MapPin, Square } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { Blade } from "@/components/blade";
+import { Breakdown } from "@/components/breakdown";
 import { Money } from "@/components/money";
-import { WashLine } from "@/components/wash-line";
-import { Button, Field, Input, Notice, Textarea } from "@/components/ui";
+import { Button, Notice } from "@/components/ui";
 import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";
 import { ProjectField } from "./project-flow";
@@ -49,6 +48,7 @@ const EXAMPLES = [
 
 export function NewEstimate({
   initialDescription,
+  firstTime = false,
   projects,
   clients,
   initialProject,
@@ -57,6 +57,8 @@ export function NewEstimate({
   ai,
 }: {
   initialDescription: string;
+  /** No estimates yet: explain what comes back under the composer. */
+  firstTime?: boolean;
   projects: ProjectOption[];
   clients: ClientOption[];
   initialProject: ProjectOption | null;
@@ -130,103 +132,145 @@ export function NewEstimate({
     }
   }
 
+  const submitOnShortcut = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      e.currentTarget.form?.requestSubmit();
+    }
+  };
+
   return (
-    <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:gap-12">
-      <form onSubmit={generate} className="space-y-5">
+    <div className="mx-auto mt-6 max-w-[50rem]">
+      <form onSubmit={generate}>
         {!ai && (
-          <Notice tone="info">
-            Add an AI key first. OpenQuote uses your own provider account.{" "}
-            <Link href="/settings/ai" className="font-semibold text-ink underline">
-              Set up AI
-            </Link>
-          </Notice>
-        )}
-        <ProjectField projects={projects} clients={clients} value={project} onChange={setProject} disabled={busy} />
-        <Field
-          id="description"
-          label="Describe the job"
-          hint="Size, materials, access, finish. Whatever you’d tell a mate on the phone."
-        >
-          <Textarea
-            id="description"
-            name="description"
-            rows={7}
-            required
-            minLength={10}
-            maxLength={8000}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            disabled={busy}
-            placeholder="e.g. Build a 4 × 3 m merbau deck at the back, about 600 mm off the ground, two steps down to the lawn, oil finish…"
-          />
-        </Field>
-        {!description.trim() && !busy && (
-          <div className="-mt-1 flex flex-wrap gap-2" aria-label="Start from an example">
-            {EXAMPLES.map(([label, text]) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => setDescription(text)}
-                className="h-9 rounded-tape border border-hairline-strong bg-surface px-3 text-[0.9375rem] font-semibold text-ink-2 transition-colors hover:border-ink hover:text-ink"
-              >
-                {label}
-              </button>
-            ))}
+          <div className="mb-4">
+            <Notice tone="info">
+              Add an AI key first. OpenQuote uses your own provider account.{" "}
+              <Link href="/settings/ai" className="font-medium text-ink underline underline-offset-2">
+                Set up AI
+              </Link>
+            </Notice>
           </div>
         )}
-        {!project?.siteAddress && (
-          <Field id="siteAddress" label="Site address" hint="Optional. Helps with travel and local pricing.">
-            <Input
-              id="siteAddress"
-              name="siteAddress"
-              autoComplete="off"
-              value={siteAddress}
-              onChange={(e) => setSiteAddress(e.target.value)}
+        <div className="rounded-2xl bg-subtle">
+          <div className="rounded-[14px] bg-surface shadow-raised transition-shadow duration-150 focus-within:shadow-[var(--shadow-raised),0_0_0_4px_color-mix(in_oklab,var(--ink)_5%,transparent)]">
+            <label htmlFor="description" className="sr-only">
+              Describe the job
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={4}
+              required
+              minLength={10}
+              maxLength={8000}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onKeyDown={submitOnShortcut}
               disabled={busy}
+              aria-describedby="description-hint"
+              placeholder="Describe the job: size, materials, access, finish. Whatever you’d tell a mate on the phone."
+              className="block min-h-28 w-full resize-none rounded-t-[14px] bg-transparent px-4 pb-2 pt-4 text-base leading-relaxed text-ink placeholder:text-ink-3 focus:outline-none disabled:opacity-60 sm:text-sm"
             />
-          </Field>
+            {!description.trim() && !busy && (
+              <div className="flex flex-wrap gap-1.5 px-4 pb-2" aria-label="Start from an example">
+                {EXAMPLES.map(([label, text]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => setDescription(text)}
+                    className="h-9 rounded-full bg-subtle px-3 text-sm font-medium text-ink-2 transition-colors hover:bg-hover hover:text-ink sm:h-7 sm:px-2.5 sm:text-xs"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-2 px-3 pb-3 pt-1">
+              <ProjectField projects={projects} clients={clients} value={project} onChange={setProject} disabled={busy} />
+              {ai && (
+                <span id="description-hint" className="hidden min-w-0 truncate text-xs text-ink-3 sm:inline">
+                  {ai.provider}
+                  {ai.model ? ` · ${ai.model}` : ""}
+                </span>
+              )}
+              <span className="ml-auto max-sm:w-full">
+                {busy ? (
+                  <Button type="button" variant="secondary" className="max-sm:w-full" onClick={() => abortRef.current?.abort()}>
+                    <Square className="size-3 fill-current" aria-hidden />
+                    Stop
+                  </Button>
+                ) : (
+                  <Button type="submit" variant="accent" className="max-sm:w-full" disabled={!ai}>
+                    Price this job
+                    <kbd className="hidden rounded border border-on-accent/20 px-1 font-sans text-2xs font-medium text-on-accent/70 sm:inline">
+                      ⌘↵
+                    </kbd>
+                  </Button>
+                )}
+              </span>
+            </div>
+          </div>
+          {project?.siteAddress ? (
+            <p className="flex items-center gap-2 px-4 py-2.5 text-xs text-ink-2">
+              <MapPin className="size-3.5 shrink-0 text-ink-3" aria-hidden />
+              <span className="truncate">Site: {project.siteAddress}</span>
+            </p>
+          ) : (
+            <div className="flex items-center gap-2 px-4">
+              <MapPin className="size-3.5 shrink-0 text-ink-3" aria-hidden />
+              <label htmlFor="siteAddress" className="sr-only">
+                Site address
+              </label>
+              <input
+                id="siteAddress"
+                name="siteAddress"
+                autoComplete="off"
+                value={siteAddress}
+                onChange={(e) => setSiteAddress(e.target.value)}
+                disabled={busy}
+                placeholder="Add a site address for travel and local pricing (optional)"
+                className="h-11 min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-ink-3 focus:outline-none disabled:opacity-60 sm:h-10 sm:text-xs"
+              />
+            </div>
+          )}
+        </div>
+        {phase.kind === "error" && (
+          <div className="mt-4">
+            <Notice tone="error">{phase.message}</Notice>
+          </div>
         )}
-
-        {busy ? (
-          <Button type="button" variant="secondary" size="lg" className="w-full" onClick={() => abortRef.current?.abort()}>
-            <Square className="size-4 fill-current" aria-hidden />
-            Stop
-          </Button>
-        ) : (
-          <Button type="submit" size="lg" className="w-full" disabled={!ai}>
-            Price this job
-            <ArrowRight className="size-5" aria-hidden />
-          </Button>
-        )}
-        {ai && (
-          <p className="text-sm text-ink-3">
-            Uses your {ai.provider} key{ai.model ? ` (${ai.model})` : ""}. Usually 15–60 seconds and a few cents.
-          </p>
-        )}
-        {phase.kind === "error" && <Notice tone="error">{phase.message}</Notice>}
       </form>
 
-      <section ref={previewRef} aria-label="Estimate preview" aria-busy={busy} className="scroll-mt-20 min-w-0">
+      <section ref={previewRef} aria-label="Estimate preview" aria-busy={busy} className="mt-8 min-w-0 scroll-mt-20">
         {busy ? (
           <LivePreview draft={phase.draft} number={phase.number} saving={phase.kind === "saving"} markup={markup} gstRatePct={gstRatePct} />
-        ) : (
+        ) : firstTime ? (
           <HowItWorks />
-        )}
+        ) : null}
       </section>
     </div>
   );
 }
 
 function HowItWorks() {
+  const points = [
+    ["Stages, in order", "Each line with a quantity, unit and price, grouped the way the work happens."],
+    ["Your rates first", "Your rate rules are used wherever they fit. Anything else is marked as an AI price to check."],
+    ["Scope and options", "What’s included, what isn’t, and ways to upgrade or save."],
+    ["Sanity checks", "Warnings for anything that looks off, like a bathroom with no waterproofing."],
+  ];
   return (
-    <div className="hidden border-l border-hairline pl-8 lg:block">
-      <h2 className="font-bold">What you&rsquo;ll get</h2>
-      <ul className="mt-3 space-y-3 text-ink-2">
-        <li>Stages in the order the work happens, each line with a quantity, unit and price.</li>
-        <li>Your rate rules used wherever they fit, marked &ldquo;Your rate&rdquo;. Everything else is marked as an AI price.</li>
-        <li>Scope, assumptions, what&rsquo;s not included, and options to upgrade or save.</li>
-        <li>Warnings for anything that looks off, like a bathroom with no waterproofing.</li>
-      </ul>
+    <div className="rounded-[14px] bg-subtle px-4 py-3">
+      <h2 className="text-sm font-medium text-ink">What you&rsquo;ll get</h2>
+      <dl className="mt-3 grid gap-x-8 gap-y-4 pb-2 sm:grid-cols-2">
+        {points.map(([t, d]) => (
+          <div key={t}>
+            <dt className="text-sm font-medium text-ink">{t}</dt>
+            <dd className="mt-0.5 text-sm text-ink-3">{d}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
@@ -252,49 +296,61 @@ export function LivePreview({
   const current = groups.at(-1);
 
   return (
-          <>
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="min-w-0 truncate text-[1.375rem] font-bold leading-tight">{draft.title || "Reading the job…"}</h2>
-              {number && <span className="figures shrink-0 font-semibold text-ink-3">{formatEstimateNo(number)}</span>}
+    <div className="rounded-[14px] bg-bg p-4 shadow-card sm:p-5">
+      <div className="flex items-start justify-between gap-6">
+        <div className="min-w-0">
+          <p className="flex items-center gap-2 text-sm text-ink-3" role="status">
+            <span aria-hidden className="relative flex size-2">
+              <span className="absolute inset-0 animate-ping rounded-full bg-accent/60 motion-reduce:hidden" />
+              <span className="relative size-2 rounded-full bg-accent" />
+            </span>
+            {saving
+              ? "Checking prices and saving…"
+              : current
+                ? `Stage ${groups.length} · ${current.name}`
+                : "Working out the stages…"}
+          </p>
+          <h2 className="mt-2 font-display text-xl font-medium leading-snug">{draft.title || "Reading the job…"}</h2>
+          {number && <p className="figures mt-0.5 text-sm text-ink-3">{formatEstimateNo(number)}</p>}
+        </div>
+        <div className="shrink-0 text-right">
+          <p className="text-caption text-ink-3">Running total</p>
+          <Money cents={total} className="mt-0.5 block text-title font-semibold tracking-[-0.01em]" />
+          <p className="figures mt-0.5 text-caption text-ink-3">{lineCount} lines</p>
+        </div>
+      </div>
+      <div className="mt-5">
+        <Breakdown legend={false} stages={groups.map((g) => ({ name: g.name, cents: g.priceCents }))} />
+      </div>
+      <ol className="mt-6 space-y-5">
+        {groups.map((g, gi) => (
+          <li key={gi} className="enter">
+            <div className="flex items-baseline justify-between gap-4 border-b border-border pb-2">
+              <h3 className="text-body font-medium">
+                <span className="figures mr-2 text-ink-4">{gi + 1}</span>
+                {g.name}
+              </h3>
+              <Money cents={g.priceCents} className="text-body font-medium" />
             </div>
-            <p className="mt-1 text-[0.9375rem] text-ink-3" role="status">
-              {saving
-                ? "Pricing and saving…"
-                : current
-                  ? `Stage ${groups.length}: ${current.name} · ${lineCount} lines so far`
-                  : "Working out the stages…"}
-            </p>
-            <div className="mt-5">
-              <Blade
-                live
-                segments={groups.map((g) => ({ name: g.name, cents: g.priceCents }))}
-                totalCents={total}
-                caption="Running total"
-                extent={saving ? 1 : Math.min(0.92, 0.1 + groups.length * 0.13)}
-              />
-            </div>
-            <ol className="mt-6 space-y-6">
-              {groups.map((g, gi) => (
-                <li key={gi}>
-                  <div className="flex items-baseline justify-between gap-4 border-b border-hairline pb-2">
-                    <h3 className="font-bold">
-                      <span className="figures mr-2 text-ink-3">{gi + 1}</span>
-                      {g.name}
-                    </h3>
-                    <Money cents={g.priceCents} className="font-bold" />
-                  </div>
-                  <ul>
-                    {g.lines.map((l, li) => (
-                      <WashLine key={li} className="-mx-1.5 grid grid-cols-[1fr_auto] gap-x-4 rounded-sm px-1.5 py-2">
-                        <span className="min-w-0 text-[0.9375rem] leading-snug">{l.description}</span>
-                        <Money cents={l.priceCents} className="text-[0.9375rem]" />
-                      </WashLine>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ol>
-            <p className="mt-6 text-sm text-ink-3">Draft prices. Your rate rules and final checks apply when it&rsquo;s saved.</p>
-          </>
+            <ul>
+              {g.lines.map((l, li) => {
+                // The line being written right now sits on a pale wash until the next one arrives.
+                const fresh = !saving && gi === groups.length - 1 && li === g.lines.length - 1;
+                return (
+                  <li
+                    key={li}
+                    className={`-mx-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 rounded-md px-2 py-2 transition-colors duration-500 ${fresh ? "bg-accent-soft" : ""}`}
+                  >
+                    <span className="min-w-0 text-sm leading-snug text-ink-2">{l.description}</span>
+                    <Money cents={l.priceCents} className="text-sm text-ink" />
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-6 text-caption text-ink-3">Draft prices. Your rate rules and final checks apply when it&rsquo;s saved.</p>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronRight, Plus, Search } from "lucide-react";
+import { Check, ChevronDown, FolderOpen, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Sheet } from "@/components/sheet";
 import { Input } from "@/components/ui";
@@ -32,37 +32,24 @@ export function ProjectField({
 
   return (
     <>
-      <div className="space-y-1.5">
-        <span id="project-label" className="block font-semibold text-ink">
-          Project
-        </span>
-        <button
-          type="button"
-          aria-labelledby="project-label"
-          disabled={disabled}
-          onClick={() => setView(value || projects.length ? "pick" : "new")}
-          className="group flex w-full items-center gap-3 rounded-tape border border-hairline-strong bg-surface px-3.5 py-3 text-left transition-colors hover:border-ink disabled:opacity-60"
-        >
-          {value ? (
-            <span className="min-w-0 flex-1">
-              <span className="flex items-baseline justify-between gap-3">
-                <span className="truncate text-[1.0625rem] font-semibold">{value.name}</span>
-                <span className="figures shrink-0 text-[0.9375rem] font-semibold text-ink-3">{formatProjectNo(value.number)}</span>
-              </span>
-              <span className="mt-0.5 block truncate text-[0.9375rem] text-ink-3">
-                {value.client.name}
-                {value.siteAddress ? ` · ${value.siteAddress}` : ""}
-              </span>
-            </span>
-          ) : (
-            <span className="min-w-0 flex-1 text-ink-2">
-              <span className="block font-semibold text-ink">Choose or create a project</span>
-              <span className="block text-[0.9375rem] text-ink-3">Optional. Keeps the client, site and quotes together.</span>
-            </span>
-          )}
-          <ChevronRight className="size-5 shrink-0 text-ink-3 transition-transform group-hover:translate-x-0.5" aria-hidden />
-        </button>
-      </div>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setView(value || projects.length ? "pick" : "new")}
+        aria-label={value ? `Project: ${value.name}, ${value.client.name}. Change` : "Add to a project"}
+        className="group inline-flex h-10 min-w-0 max-w-full items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-ink transition-colors hover:bg-hover disabled:opacity-60 sm:h-7 sm:text-xs"
+      >
+        <FolderOpen className="size-4 shrink-0 sm:size-3.5" aria-hidden />
+        {value ? (
+          <span className="min-w-0 truncate">
+            <span>{value.name}</span>
+            <span className="font-normal text-ink-3"> · {value.client.name}</span>
+          </span>
+        ) : (
+          <span>Add to a project</span>
+        )}
+        <ChevronDown className="size-3.5 shrink-0 text-ink-3" aria-hidden />
+      </button>
 
       {view === "pick" && (
         <PickProject
@@ -129,14 +116,14 @@ function PickProject({
   return (
     <Sheet open title="Project" onClose={onClose}>
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 size-[1.125rem] -translate-y-1/2 text-ink-3" aria-hidden />
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3" aria-hidden />
         <Input
           type="search"
           aria-label="Search projects"
           placeholder="Search by project, client or address…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10"
+          className="pl-9"
           autoComplete="off"
         />
       </div>
@@ -144,20 +131,20 @@ function PickProject({
       <button
         type="button"
         onClick={onNew}
-        className="mt-4 flex w-full items-center gap-3 rounded-tape bg-blade px-3.5 py-3 text-left font-semibold text-on-blade transition-colors hover:bg-blade-press"
+        className="mt-3 flex h-11 w-full items-center gap-2.5 rounded-lg border border-dashed border-border-strong px-3 text-left text-body font-medium text-ink transition-colors hover:border-ink-3 hover:bg-subtle"
       >
-        <Plus className="size-5" strokeWidth={2.5} aria-hidden />
+        <Plus className="size-4" strokeWidth={2.25} aria-hidden />
         New project
       </button>
 
       {recent.length > 0 && <ProjectList title="Recent" items={recent} value={value} onPick={onPick} />}
       {rest.length > 0 && <ProjectList title={q ? "Matches" : "All projects"} items={rest} value={value} onPick={onPick} />}
       {q && matches.length === 0 && (
-        <p className="mt-6 text-ink-3">No projects match &ldquo;{query.trim()}&rdquo;. Make a new one instead.</p>
+        <p className="mt-6 text-body text-ink-3">No projects match &ldquo;{query.trim()}&rdquo;. Make a new one instead.</p>
       )}
 
       {value && (
-        <button type="button" onClick={() => onPick(null)} className="mt-8 font-semibold text-ink-2 underline underline-offset-4 hover:text-ink">
+        <button type="button" onClick={() => onPick(null)} className="mt-8 text-body font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
           Don&rsquo;t link a project
         </button>
       )}
@@ -177,9 +164,9 @@ function ProjectList({
   onPick: (p: ProjectOption) => void;
 }) {
   return (
-    <section className="mt-7">
-      <h3 className="font-bold">{title}</h3>
-      <ul className="mt-2 divide-y divide-hairline border-y border-hairline">
+    <section className="mt-6">
+      <h3 className="text-caption text-ink-3">{title}</h3>
+      <ul className="mt-1.5 space-y-0.5">
         {items.map((p) => {
           const selected = value?.id === p.id;
           return (
@@ -188,20 +175,20 @@ function ProjectList({
                 type="button"
                 onClick={() => onPick(p)}
                 aria-pressed={selected}
-                className="flex w-full items-center gap-3 px-1 py-3 text-left transition-colors hover:bg-surface"
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-hover ${selected ? "bg-hover" : ""}`}
               >
                 <span className="min-w-0 flex-1">
                   <span className="flex items-baseline justify-between gap-3">
-                    <span className="truncate font-semibold">{p.name}</span>
-                    <span className="figures shrink-0 text-[0.9375rem] text-ink-3">{formatProjectNo(p.number)}</span>
+                    <span className="truncate text-body font-medium">{p.name}</span>
+                    <span className="figures shrink-0 text-caption text-ink-3">{formatProjectNo(p.number)}</span>
                   </span>
-                  <span className="block truncate text-[0.9375rem] text-ink-3">
+                  <span className="block truncate text-caption text-ink-3">
                     {p.client.name}
                     {p.siteAddress ? ` · ${p.siteAddress}` : ""}
                   </span>
                 </span>
                 <span className="flex size-6 shrink-0 items-center justify-center" aria-hidden>
-                  {selected && <Check className="size-5" strokeWidth={2.5} />}
+                  {selected && <Check className="size-4" strokeWidth={2.5} />}
                 </span>
               </button>
             </li>

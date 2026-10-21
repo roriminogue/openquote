@@ -47,11 +47,11 @@ export function ProjectForm({
 
       <div className="space-y-1.5">
         <div className="flex items-baseline justify-between gap-3">
-          <label htmlFor="clientId" className="font-semibold">
+          <label htmlFor="clientId" className="text-sm font-medium">
             Client
           </label>
           {onNewClient && (
-            <button type="button" onClick={onNewClient} className="inline-flex items-center gap-1 font-semibold text-ink-2 underline underline-offset-4 hover:text-ink">
+            <button type="button" onClick={onNewClient} className="-my-2 inline-flex h-9 items-center gap-1 rounded-md px-1.5 text-sm font-medium text-ink-2 transition-colors hover:bg-hover hover:text-ink">
               <Plus className="size-4" aria-hidden />
               New client
             </button>
@@ -72,7 +72,7 @@ export function ProjectForm({
             type="button"
             id="clientId"
             onClick={onNewClient}
-            className="flex h-12 w-full items-center gap-2 rounded-tape border border-dashed border-hairline-strong px-3.5 text-left text-ink-2 hover:border-ink hover:text-ink"
+            className="flex h-11 w-full items-center gap-2 rounded-lg border border-dashed border-border-strong px-3 text-left text-body text-ink-2 transition-colors hover:border-ink-3 hover:bg-subtle hover:text-ink"
           >
             <Plus className="size-4" aria-hidden />
             Add your first client
@@ -81,7 +81,7 @@ export function ProjectForm({
       </div>
 
       <div className="space-y-1.5">
-        <label htmlFor="siteAddress" className="block font-semibold">
+        <label htmlFor="siteAddress" className="block text-sm font-medium">
           Site address
         </label>
         <Input id="siteAddress" value={value.siteAddress} onChange={set("siteAddress")} autoComplete="off" placeholder="Where the work is…" />
@@ -89,9 +89,9 @@ export function ProjectForm({
           <button
             type="button"
             onClick={() => onChange({ ...value, siteAddress: chosen!.address! })}
-            className="inline-flex items-center gap-1.5 rounded-tape bg-surface-2 px-2.5 py-1.5 text-[0.9375rem] font-semibold text-ink-2 transition-colors hover:text-ink"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-caption text-ink-2 transition-colors hover:bg-subtle hover:text-ink max-sm:h-9"
           >
-            <MapPin className="size-4" aria-hidden />
+            <MapPin className="size-3.5" aria-hidden />
             Use {chosen!.name}&rsquo;s address
           </button>
         )}
@@ -108,15 +108,15 @@ export function ProjectForm({
       </Field>
 
       <div className="grid grid-cols-2 gap-3">
-        <Field id="startDate" label="Start">
+        <Field id="startDate" label="Start" optional>
           <Input id="startDate" type="date" value={value.startDate} onChange={set("startDate")} />
         </Field>
-        <Field id="endDate" label="Finish">
+        <Field id="endDate" label="Finish" optional>
           <Input id="endDate" type="date" value={value.endDate} min={value.startDate || undefined} onChange={set("endDate")} aria-invalid={invalid("endDate")} />
         </Field>
       </div>
 
-      <Field id="notes" label="Notes" hint="For you, not the client.">
+      <Field id="notes" label="Notes" optional hint="For you, not the client.">
         <Textarea id="notes" rows={3} value={value.notes} onChange={set("notes")} placeholder="Access, parking, dogs, gate codes…" />
       </Field>
 
@@ -141,32 +141,16 @@ export function ClientForm({
   return (
     <div className="space-y-5">
       <fieldset>
-        <legend className="font-semibold">Client is</legend>
-        <div className="mt-1.5 grid grid-cols-2 gap-1 rounded-tape bg-surface-2 p-1" role="radiogroup">
-          {(
-            [
-              ["individual", "A person", User],
-              ["company", "A business", Building2],
-            ] as const
-          ).map(([k, label, Icon]) => {
-            const on = value.kind === k;
-            return (
-              <button
-                key={k}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                onClick={() => onChange({ ...value, kind: k })}
-                className={`flex h-11 items-center justify-center gap-2 rounded-[3px] font-semibold transition-colors ${
-                  on ? "bg-surface text-ink shadow-[0_1px_2px_rgb(0_0_0/0.12)]" : "text-ink-3 hover:text-ink"
-                }`}
-              >
-                <Icon className="size-[1.125rem]" aria-hidden />
-                {label}
-              </button>
-            );
-          })}
-        </div>
+        <legend className="text-sm font-medium">Client is</legend>
+        <Segmented
+          className="mt-1.5"
+          value={value.kind}
+          onChange={(kind) => onChange({ ...value, kind })}
+          options={[
+            ["individual", "A person", User],
+            ["company", "A business", Building2],
+          ]}
+        />
       </fieldset>
 
       <div className={company ? "grid gap-5 sm:grid-cols-2 sm:gap-3" : ""}>
@@ -174,32 +158,81 @@ export function ClientForm({
           <Input id="clientName" required value={value.name} onChange={set("name")} autoComplete="off" aria-invalid={invalid("name")} />
         </Field>
         {company && (
-          <Field id="contactName" label="Contact person">
+          <Field id="contactName" label="Contact person" optional>
             <Input id="contactName" value={value.contactName} onChange={set("contactName")} autoComplete="off" />
           </Field>
         )}
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 sm:gap-3">
-        <Field id="email" label="Email">
+        <Field id="email" label="Email" optional>
           <Input id="email" type="email" inputMode="email" spellCheck={false} value={value.email} onChange={set("email")} autoComplete="off" aria-invalid={invalid("email")} />
         </Field>
-        <Field id="phone" label="Phone">
+        <Field id="phone" label="Phone" optional>
           <Input id="phone" type="tel" inputMode="tel" value={value.phone} onChange={set("phone")} autoComplete="off" placeholder="04…" />
         </Field>
       </div>
 
       {company && (
-        <Field id="abn" label="ABN">
+        <Field id="abn" label="ABN" optional>
           <Input id="abn" inputMode="numeric" value={value.abn} onChange={set("abn")} autoComplete="off" placeholder="11 digits…" />
         </Field>
       )}
 
-      <Field id="address" label="Address" hint="Used as the site address when it's the same place.">
+      <Field id="address" label="Address" optional hint="Used as the site address when it’s the same place.">
         <Input id="address" value={value.address} onChange={set("address")} autoComplete="off" />
       </Field>
 
       {error && <Notice tone="error">{error.message}</Notice>}
+    </div>
+  );
+}
+
+/**
+ * Two or three mutually exclusive choices. Concentric radii (track 10px, thumb 7px, 3px inset), no shadow; arrow
+ * keys move the choice, as a radio group should.
+ */
+function Segmented<T extends string>({
+  value,
+  onChange,
+  options,
+  className = "",
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  options: readonly (readonly [T, string, typeof User])[];
+  className?: string;
+}) {
+  const move = (e: React.KeyboardEvent<HTMLButtonElement>, i: number) => {
+    const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const next = (i + step + options.length) % options.length;
+    onChange(options[next][0]);
+    (e.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
+  };
+  return (
+    <div role="radiogroup" className={`grid auto-cols-fr grid-flow-col gap-0.5 rounded-[10px] bg-hover p-[3px] ${className}`}>
+      {options.map(([k, label, Icon], i) => {
+        const on = value === k;
+        return (
+          <button
+            key={k}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            tabIndex={on ? 0 : -1}
+            onClick={() => onChange(k)}
+            onKeyDown={(e) => move(e, i)}
+            className={`flex h-10 items-center justify-center gap-2 rounded-[7px] text-body transition-colors sm:h-9 sm:text-sm ${
+              on ? "bg-bg font-medium text-ink ring-1 ring-border" : "text-ink-3 hover:text-ink"
+            }`}
+          >
+            <Icon className="size-4" aria-hidden />
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -1,8 +1,12 @@
 import { listEstimates } from "@/lib/estimate/queries";
 import { listClients, listProjects, type ClientOption, type ProjectOption } from "@/lib/projects";
 
-// Read models for the Projects and Clients pages: each record with how much has been quoted against it.
+// Read models for the Projects and Clients pages: each record with its estimate count and latest quote.
 
+/**
+ * `quotedCents` is the most recent estimate's total, not a sum: a second estimate for the same job is usually an
+ * alternative or a revision, so adding them up would overstate the work.
+ */
 export type Quoted = { estimateCount: number; quotedCents: number };
 
 function tally(rows: Awaited<ReturnType<typeof listEstimates>>, key: (r: (typeof rows)[number]) => string | null) {
@@ -10,9 +14,9 @@ function tally(rows: Awaited<ReturnType<typeof listEstimates>>, key: (r: (typeof
   for (const r of rows) {
     const k = key(r);
     if (!k) continue;
-    const t = map.get(k) ?? { estimateCount: 0, quotedCents: 0 };
+    // listEstimates is newest first, so the first row seen for a record is its latest quote.
+    const t = map.get(k) ?? { estimateCount: 0, quotedCents: r.totals.totalCents };
     t.estimateCount += 1;
-    t.quotedCents += r.totals.totalCents;
     map.set(k, t);
   }
   return map;
