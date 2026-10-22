@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Geist } from "next/font/google";
+import { AppLinks } from "@/components/app-links";
 import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
@@ -11,6 +12,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // Draw under the notch and home indicator; the shell pads with env(safe-area-inset-*).
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#fcfcfc" },
     { media: "(prefers-color-scheme: dark)", color: "#0f0f10" },
@@ -20,7 +23,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-AU" className={`${geist.variable} ${figtree.variable} h-full`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <AppLinks />
+      </body>
     </html>
   );
 }

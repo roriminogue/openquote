@@ -45,3 +45,7 @@ next-env.d.ts
 /.impeccable/review/
 /.impeccable/build/
 /.impeccable/mocks/
+
+# iOS build output
+/ios/build/
+/ios/build.log

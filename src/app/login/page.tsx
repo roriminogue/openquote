@@ -1,9 +1,10 @@
 import { Mail } from "lucide-react";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Suspense } from "react";
 import { AuthFrame } from "@/components/auth-frame";
 import { Button, Field, Input, Notice } from "@/components/ui";
-import { sendMagicLink, signInWithGoogle } from "./actions";
+import { sendMagicLink, signInWithGoogle, signInWithPassword, verifyCode } from "./actions";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -18,17 +19,44 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
 }
 
 async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchParams">) {
-  const { sent, error } = await searchParams;
+  const { sent, error, codeError, email: lastEmail } = await searchParams;
+  // The iPhone app adds this to its user agent. Google refuses to sign in inside embedded browsers.
+  const inApp = (await headers()).get("user-agent")?.includes("OpenQuoteApp") ?? false;
 
-  if (sent) {
+  if (typeof sent === "string") {
     return (
       <div className="space-y-4">
         <div className="flex items-start gap-3 rounded-lg border border-border bg-subtle p-4">
           <Mail className="mt-0.5 size-5 shrink-0 text-ink-2" aria-hidden />
           <p className="text-body">
-            Check <strong className="break-all font-medium">{sent}</strong> for a sign-in link. Open it on this device.
+            We emailed a sign-in link to <strong className="break-all font-medium">{sent}</strong>.{" "}
+            {inApp ? "Open the email on this phone and tap Sign in. It brings you back to OpenQuote." : "Open it on this device."}
           </p>
         </div>
+        <details className="group" open={typeof codeError === "string"}>
+          <summary className="cursor-pointer list-none text-sm font-medium text-ink-2 underline underline-offset-4 hover:text-ink [&::-webkit-details-marker]:hidden">
+            Got a 6-digit code instead?
+          </summary>
+          <form action={verifyCode} className="mt-3 space-y-3">
+            <input type="hidden" name="email" value={sent} />
+            <Field id="code" label="Code">
+              <Input
+                id="code"
+                name="code"
+                required
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9 ]*"
+                maxLength={12}
+                placeholder="123456"
+                aria-invalid={codeError ? true : undefined}
+                className="figures tracking-[0.2em]"
+              />
+            </Field>
+            {typeof codeError === "string" && <Notice tone="error">{codeError}</Notice>}
+            <Button className="w-full">Sign in</Button>
+          </form>
+        </details>
         <a href="/login" className="inline-block text-sm font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
           Use a different email
         </a>
@@ -38,26 +66,54 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
 
   return (
     <div className="space-y-5">
-      <form action={sendMagicLink} className="space-y-3">
+      <form action={signInWithPassword} className="space-y-3">
         <Field id="email" label="Email">
-          <Input id="email" name="email" type="email" required autoComplete="email" inputMode="email" spellCheck={false} placeholder="you@business.com.au" />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="username"
+            inputMode="email"
+            spellCheck={false}
+            defaultValue={typeof lastEmail === "string" ? lastEmail : undefined}
+            placeholder="you@business.com.au"
+          />
         </Field>
-        <Button className="w-full">
-          Email me a sign-in link
-        </Button>
-      </form>
-      <div className="flex items-center gap-3 text-xs text-ink-3" aria-hidden>
-        <span className="h-px flex-1 bg-border" />
-        or
-        <span className="h-px flex-1 bg-border" />
-      </div>
-      <form action={signInWithGoogle}>
-        <Button variant="secondary" className="w-full">
-          <GoogleG />
-          Continue with Google
-        </Button>
+        <Field id="password" label="Password">
+          <Input id="password" name="password" type="password" required autoComplete="current-password" />
+        </Field>
+        <Button className="w-full">Sign in</Button>
       </form>
       {error && <Notice tone="error">{error}</Notice>}
+      <details className="group">
+        <summary className="cursor-pointer list-none text-sm font-medium text-ink-2 underline underline-offset-4 hover:text-ink [&::-webkit-details-marker]:hidden">
+          No password yet? Email me a sign-in link
+        </summary>
+        <form action={sendMagicLink} className="mt-3 space-y-3">
+          <Field id="linkEmail" label="Email">
+            <Input id="linkEmail" name="email" type="email" required autoComplete="email" inputMode="email" spellCheck={false} placeholder="you@business.com.au" />
+          </Field>
+          <Button variant="secondary" className="w-full">
+            Email me a sign-in link
+          </Button>
+        </form>
+      </details>
+      {!inApp && (
+        <>
+          <div className="flex items-center gap-3 text-xs text-ink-3" aria-hidden>
+            <span className="h-px flex-1 bg-border" />
+            or
+            <span className="h-px flex-1 bg-border" />
+          </div>
+          <form action={signInWithGoogle}>
+            <Button variant="secondary" className="w-full">
+              <GoogleG />
+              Continue with Google
+            </Button>
+          </form>
+        </>
+      )}
     </div>
   );
 }

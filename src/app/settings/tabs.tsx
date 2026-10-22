@@ -6,6 +6,7 @@ import { FilterTabs } from "@/components/records";
 const TABS = [
   ["/settings/rates", "Rates and pricing"],
   ["/settings/ai", "AI"],
+  ["/settings/account", "Account"],
 ] as const;
 
 /** The tabs for a known path; also the Suspense fallback. */
