@@ -40,6 +40,23 @@ export async function verifyCode(formData: FormData) {
   redirect("/onboarding");
 }
 
+export async function signInWithPassword(formData: FormData) {
+  const email = z.email().safeParse(formData.get("email"));
+  const password = String(formData.get("password") ?? "");
+  if (!email.success || !password) redirect("/login?error=Enter+your+email+and+password");
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email: email.data, password });
+  if (error) {
+    const message =
+      error.code === "invalid_credentials"
+        ? "That email and password don’t match. If you haven’t set a password yet, use an email link."
+        : error.message;
+    redirect(`/login?error=${encodeURIComponent(message)}&email=${encodeURIComponent(email.data)}`);
+  }
+  redirect("/onboarding");
+}
+
 export async function signInWithGoogle() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({

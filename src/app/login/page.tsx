@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 import { AuthFrame } from "@/components/auth-frame";
 import { Button, Field, Input, Notice } from "@/components/ui";
-import { sendMagicLink, signInWithGoogle, verifyCode } from "./actions";
+import { sendMagicLink, signInWithGoogle, signInWithPassword, verifyCode } from "./actions";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -19,7 +19,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
 }
 
 async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchParams">) {
-  const { sent, error, codeError } = await searchParams;
+  const { sent, error, codeError, email: lastEmail } = await searchParams;
   // The iPhone app adds this to its user agent. Google refuses to sign in inside embedded browsers.
   const inApp = (await headers()).get("user-agent")?.includes("OpenQuoteApp") ?? false;
 
@@ -66,14 +66,39 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
 
   return (
     <div className="space-y-5">
-      <form action={sendMagicLink} className="space-y-3">
+      <form action={signInWithPassword} className="space-y-3">
         <Field id="email" label="Email">
-          <Input id="email" name="email" type="email" required autoComplete="email" inputMode="email" spellCheck={false} placeholder="you@business.com.au" />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="username"
+            inputMode="email"
+            spellCheck={false}
+            defaultValue={typeof lastEmail === "string" ? lastEmail : undefined}
+            placeholder="you@business.com.au"
+          />
         </Field>
-        <Button className="w-full">
-          Email me a sign-in link
-        </Button>
+        <Field id="password" label="Password">
+          <Input id="password" name="password" type="password" required autoComplete="current-password" />
+        </Field>
+        <Button className="w-full">Sign in</Button>
       </form>
+      {error && <Notice tone="error">{error}</Notice>}
+      <details className="group">
+        <summary className="cursor-pointer list-none text-sm font-medium text-ink-2 underline underline-offset-4 hover:text-ink [&::-webkit-details-marker]:hidden">
+          No password yet? Email me a sign-in link
+        </summary>
+        <form action={sendMagicLink} className="mt-3 space-y-3">
+          <Field id="linkEmail" label="Email">
+            <Input id="linkEmail" name="email" type="email" required autoComplete="email" inputMode="email" spellCheck={false} placeholder="you@business.com.au" />
+          </Field>
+          <Button variant="secondary" className="w-full">
+            Email me a sign-in link
+          </Button>
+        </form>
+      </details>
       {!inApp && (
         <>
           <div className="flex items-center gap-3 text-xs text-ink-3" aria-hidden>
@@ -89,7 +114,6 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
           </form>
         </>
       )}
-      {error && <Notice tone="error">{error}</Notice>}
     </div>
   );
 }
