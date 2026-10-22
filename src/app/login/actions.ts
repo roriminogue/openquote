@@ -6,8 +6,11 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
 async function callbackUrl() {
-  const origin = (await headers()).get("origin") ?? "http://localhost:3000";
-  return `${origin}/auth/callback`;
+  const h = await headers();
+  const origin = h.get("origin") ?? "http://localhost:3000";
+  // From the iPhone app the emailed link opens Safari, so route it through a page that hands it back to the app.
+  const inApp = h.get("user-agent")?.includes("OpenQuoteApp") ?? false;
+  return `${origin}/auth/${inApp ? "open-app" : "callback"}`;
 }
 
 export async function sendMagicLink(formData: FormData) {

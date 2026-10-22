@@ -66,5 +66,16 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.roriminogue.openquote</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>openquote</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
