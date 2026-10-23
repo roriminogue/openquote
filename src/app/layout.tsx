@@ -9,6 +9,7 @@ const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"], weight
 export const metadata: Metadata = {
   title: { default: "OpenQuote", template: "%s · OpenQuote" },
   description: "Open-source AI quoting for trades",
+  appleWebApp: { capable: true, title: "OpenQuote", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

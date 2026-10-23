@@ -6,6 +6,7 @@ import { AuthFrame } from "@/components/auth-frame";
 import { Button, Field, Input, Notice } from "@/components/ui";
 import { db, schema } from "@/db";
 import { getAuthUser } from "@/lib/auth";
+import { canCreateBusiness } from "@/lib/signups";
 import { createOrganisation } from "./actions";
 
 export const metadata: Metadata = { title: "Set up your business" };
@@ -27,6 +28,19 @@ async function OnboardingForm({ searchParams }: Pick<PageProps<"/onboarding">, "
   if (member) redirect("/estimates");
 
   const { error } = await searchParams;
+  const allowed = await canCreateBusiness(user.email ?? "");
+  if (!allowed.ok) {
+    return (
+      <div className="space-y-4">
+        <Notice tone="info">{allowed.reason}</Notice>
+        <form action="/auth/signout" method="post">
+          <Button variant="secondary" className="w-full">
+            Sign out
+          </Button>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <form action={createOrganisation} className="space-y-5">

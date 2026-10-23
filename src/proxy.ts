@@ -4,9 +4,19 @@ import { supabaseEnv } from "@/lib/supabase/env";
 
 // Refreshes the Supabase session cookie on every request and sends signed-out visitors to /login.
 // This is an optimistic check only; pages still verify the user (see lib/auth.ts).
-const PUBLIC_PATHS = ["/", "/login", "/auth", "/p"];
+const PUBLIC_PATHS = ["/", "/login", "/auth", "/p", "/setup"];
 
 export async function proxy(request: NextRequest) {
+  // A fresh install with settings missing: send everything to the setup checklist instead of erroring.
+  const configured = !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && !!process.env.DATABASE_URL;
+  if (!configured) {
+    if (request.nextUrl.pathname.startsWith("/setup")) return NextResponse.next({ request });
+    const to = request.nextUrl.clone();
+    to.pathname = "/setup";
+    to.search = "";
+    return NextResponse.redirect(to);
+  }
+
   let response = NextResponse.next({ request });
   const { url, key } = supabaseEnv();
 
@@ -47,5 +57,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)"],
 };

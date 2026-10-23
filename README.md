@@ -1,70 +1,124 @@
 # OpenQuote
 
-Open-source, AI-powered quoting and job management for trades businesses. Describe a job by voice, text, photos
-or plans, and get a priced, editable quote built from your own rates. Then send it, track it and invoice it.
+Free, open-source AI quoting for tradies. Describe a job the way you'd tell a mate on the phone, and OpenQuote
+breaks it into stages and prices every line with your own rates. Edit it, send it to your client as a link, and
+they can accept it from their phone.
 
-> Working name. Product spec, data model and roadmap: [SPEC.md](SPEC.md).
+- **Price a job in under a minute.** Stages, quantities, labour and materials, with your rates used first.
+- **Edit anything.** Change quantities, prices and descriptions, and add or remove lines and stages.
+- **Send it.** A branded quote page for your client with your logo and terms, plus Accept and Decline buttons.
+- **See what happened.** Know when they opened it, and who accepted or declined it.
+- **Your own AI key.** You pay your AI provider directly (a few cents a quote). OpenQuote itself is free.
 
-## Stack
+## Run your own OpenQuote (free)
 
-Next.js (App Router, TypeScript, Tailwind) · Supabase (Postgres + Auth + Storage) with Drizzle ORM · Mailpit
-(dev email) · Vitest · bring-your-own-key AI, Claude by default (coming next).
+You get your own private copy, on free accounts that you control. Nobody else can see your quotes. It takes about
+20 minutes, and you don't need to write any code.
 
-## Getting started
+**You'll need:** a free [Supabase](https://supabase.com) account (the database), a free
+[Vercel](https://vercel.com) account (hosting), and an [Anthropic](https://console.anthropic.com) account with
+some API credit for the AI. US$5 goes a long way.
 
-Prerequisites: Node 22+, a free [Supabase](https://supabase.com) project, and Docker if you want Mailpit.
+### Step 1: Make the database
 
-1. In Supabase → your project → **Connect**, copy the API URL, the publishable key, and the
-   **Transaction pooler** connection string (fill in your database password).
-2. Set up env and the database:
+1. Sign in to Supabase and click **New project**. Pick the region closest to you (Sydney for Australia), and
+   write down the database password you choose.
+2. When it's ready, click **Connect** at the top of the project and keep that page open. You'll copy three
+   things from it in step 2:
+   - the **Project URL** (`https://xxxx.supabase.co`)
+   - the **Publishable key** (starts with `sb_publishable_`)
+   - the **Transaction pooler** connection string (ends in `:6543/postgres`). Replace `[YOUR-PASSWORD]` in it
+     with your database password.
+
+### Step 2: Put it online
+
+1. Make an encryption key. It protects the AI keys you save. Copy the result of one of these:
+   - **Mac or Linux:** open Terminal and run `openssl rand -base64 32`
+   - **Windows:** open PowerShell and run
+     `[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))`
+2. Click this button and sign in to Vercel:
+
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Froriminogue%2Fquoteai&project-name=openquote&repository-name=openquote&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,DATABASE_URL,ENCRYPTION_KEY&envDescription=Your%20Supabase%20project%20details%20and%20an%20encryption%20key&envLink=https%3A%2F%2Fgithub.com%2Froriminogue%2Fquoteai%23step-2-put-it-online)
+
+3. Paste in the four values: the Supabase Project URL, the publishable key, the pooler string (as
+   `DATABASE_URL`) and your encryption key. Click **Deploy**. The first deploy also sets up your database tables.
+
+### Step 3: Finish setting up
+
+1. Open your new site and go to **`/setup`** (for example `https://openquote-abc.vercel.app/setup`). It checks
+   everything and tells you exactly what to fix if anything is missing.
+2. Do the one step it can't do for you: in Supabase → **Authentication → URL Configuration**, set **Site URL**
+   to your site's address, and add `https://your-site/**` under **Redirect URLs**.
+3. Sign in with your email, create your business, then go to **Settings**:
+   - **Business:** your name, logo, ABN and quote terms
+   - **Rates and pricing:** your hourly rate, the materials you use often, and your markup
+   - **AI:** your Anthropic key
+
+Your copy is private: only the first business can be created. To let more people in (staff, or another
+business), add `ALLOWED_EMAILS` in Vercel → Settings → Environment Variables, for example
+`you@gmail.com, @yourbusiness.com.au`, then redeploy.
+
+### Put it on your phone
+
+- **Quickest:** open your site in Safari (iPhone) or Chrome (Android), then tap **Share → Add to Home Screen**.
+  It opens full screen with its own icon.
+- **As an iPhone app** (needs a Mac with Xcode and a free Apple ID): see [ios/README.md](ios/README.md).
+
+### Updates
+
+Your copy is a repository on your GitHub. When OpenQuote gets new features, open it on GitHub and click
+**Sync fork** (or copy the changes across). Vercel redeploys automatically and updates your database on the way.
+
+## What it costs
+
+| | |
+|---|---|
+| OpenQuote | Free (AGPL-3.0) |
+| Supabase and Vercel | Free tiers are plenty for a trades business |
+| AI | Pay-as-you-go with your own key, typically a few cents per estimate |
+
+Quotes are shared as links from your own phone (text, WhatsApp, email), so there's no email service to pay for.
+Sign-in works with a password, so Supabase's built-in email (a few emails an hour) is enough.
+
+## For developers
+
+Prerequisites: Node 22+ and a Supabase project (see step 1).
 
 ```bash
-cp .env.example .env.local     # paste the values from step 1
-openssl rand -base64 32        # paste as ENCRYPTION_KEY
+cp .env.example .env.local     # paste the values from step 1, plus ENCRYPTION_KEY
 npm install
 npm run db:migrate             # tables, RLS policies, storage buckets
 npm run dev                    # http://localhost:3000
 ```
 
-3. Sign in at `/login` with an email link, then create your business at `/onboarding`.
-   For demo data: `SEED_EMAIL=you@example.com npm run db:seed`.
-
-Optional: `npm run mail:up` starts Mailpit (http://localhost:8025) to catch outgoing proposal emails.
-To use Google sign-in, enable the Google provider in Supabase → Authentication.
-
-AI features use your own provider key, set either in Settings → AI or as `ANTHROPIC_API_KEY` for the whole
-install. See [SPEC.md §7a](SPEC.md).
-
-## Scripts
+Sign in at `/login`, then create your business at `/onboarding`. For demo data, run
+`SEED_EMAIL=you@example.com npm run db:seed`. `npm run dev:lan` serves on your network so you can try it on a
+phone.
 
 | Script | What it does |
 |---|---|
 | `npm test` | Unit tests (Vitest) |
-| `npm run typecheck` | `tsc --noEmit` |
+| `npm run typecheck` | Route types and `tsc --noEmit` |
+| `npm run lint` | ESLint |
 | `npm run db:generate` | New migration from `src/db/schema.ts` changes |
-| `npm run db:migrate` | Apply migrations |
+| `npm run db:migrate` | Apply migrations (production builds on Vercel do this automatically) |
 | `npm run ai:try -- "job description"` | Run the AI estimate pipeline once with `ANTHROPIC_API_KEY` (no database) |
 
-## Layout
+**Stack:** Next.js (App Router, TypeScript, Tailwind) · Supabase (Postgres, Auth, Storage) with Drizzle ORM ·
+Vercel AI SDK with bring-your-own-key · Capacitor for the iPhone shell · Vitest. Product spec and data model:
+[SPEC.md](SPEC.md). Design system: [DESIGN.md](DESIGN.md).
 
-```
-src/
-  app/            Next.js routes
-  db/schema.ts    MVP data model (SPEC.md §4)
-  db/seed.ts      Synthetic demo data
-  lib/pricing.ts  Deterministic pricing: markup resolution, GST, margin
-drizzle/          Generated SQL migrations
-```
-
-## Design principles
+**Principles:**
 
 - **Money is integer cents, ex-GST.** GST is applied once, on the document total.
 - **The LLM proposes, code prices.** The model outputs structured line items; all arithmetic lives in
   `lib/pricing.ts`.
-- **Every change is a version.** AI and user edits write an `estimate_versions` snapshot, so they can be undone
-  and you can see what each client saw.
+- **Every change is a version.** AI and manual edits write an `estimate_versions` snapshot.
 
-## Disclaimer
+## License
 
-An independent project inspired by commercial trades-quoting tools. It contains no code, prompts or assets from
-any of them.
+[AGPL-3.0](LICENSE). You can use, change and share OpenQuote for free. If you run a modified version for other
+people to use over the internet, you must share your changes under the same license.
+
+OpenQuote is an independent project. It contains no code, prompts or assets from any commercial quoting tool.
+Estimates are a starting point; check every quote before you send it.

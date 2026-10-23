@@ -12,4 +12,5 @@ APP="../build/Build/Products/Debug-iphoneos/App.app"
 echo "Installing…"
 xcrun devicectl device install app --device "$DEVICE" "$APP"
 echo "Opening…"
-xcrun devicectl device process launch --device "$DEVICE" com.roriminogue.openquote || echo "Installed. Open OpenQuote on the phone (you may need to trust the developer first)."
+BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APP/Info.plist")
+xcrun devicectl device process launch --device "$DEVICE" "$BUNDLE_ID" || echo "Installed. Open OpenQuote on the phone (you may need to trust the developer first)."

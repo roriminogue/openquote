@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { getAuthUser } from "@/lib/auth";
+import { canCreateBusiness } from "@/lib/signups";
 
 const Onboarding = z.object({
   name: z.string().trim().min(1),
@@ -14,6 +15,10 @@ const Onboarding = z.object({
 export async function createOrganisation(formData: FormData) {
   const user = await getAuthUser();
   if (!user?.email) redirect("/login");
+
+  // Checked here too, not just on the page: the action can be called directly.
+  const allowed = await canCreateBusiness(user.email);
+  if (!allowed.ok) redirect(`/onboarding?error=${encodeURIComponent(allowed.reason)}`);
 
   const input = Onboarding.safeParse(Object.fromEntries(formData));
   if (!input.success) redirect("/onboarding?error=Fill+in+both+fields");

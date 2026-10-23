@@ -2,8 +2,9 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-const url = process.env.DATABASE_URL;
-if (!url) throw new Error("DATABASE_URL is not set (copy .env.example to .env.local)");
+// A missing DATABASE_URL doesn't crash on import, so /setup can explain it; the proxy sends every other page there.
+// postgres() connects lazily, so queries fail with a connection error rather than at start-up.
+const url = process.env.DATABASE_URL ?? "postgres://not-configured@127.0.0.1:1/missing";
 
 // Reuse one connection pool across hot reloads in dev.
 const globalForDb = globalThis as unknown as { pg?: ReturnType<typeof postgres> };
