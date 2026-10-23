@@ -3,7 +3,7 @@ import { z } from "zod";
 // Pure validation for editing an estimate by hand (no DB imports, so it can be unit tested).
 
 const LINE_TYPES = ["material", "labour", "subbie", "other"] as const;
-const SOURCES = ["ai", "rate_rule", "kit", "supplier", "manual"] as const;
+const SOURCES = ["ai", "rate_rule", "kit", "supplier", "manual", "price_book"] as const;
 
 export const EditLine = z.object({
   description: z.string().trim().min(1, "Every line needs a description.").max(500, "Keep line descriptions under 500 characters."),

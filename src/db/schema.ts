@@ -25,7 +25,7 @@ export const finishLevel = pgEnum("finish_level", ["basic", "standard", "premium
 export const userRole = pgEnum("user_role", ["owner", "admin", "member"]);
 export const rateType = pgEnum("rate_type", ["labour", "material"]);
 export const lineType = pgEnum("line_type", ["material", "labour", "subbie", "other"]);
-export const lineSource = pgEnum("line_source", ["ai", "rate_rule", "kit", "supplier", "manual"]);
+export const lineSource = pgEnum("line_source", ["ai", "rate_rule", "kit", "supplier", "manual", "price_book"]);
 export const estimateStatus = pgEnum("estimate_status", [
   "draft",
   "sent",
@@ -304,7 +304,7 @@ export const lineItems = pgTable(
     sort: integer("sort").notNull().default(0),
     notes: text("notes"),
     source: lineSource("source").notNull().default("manual"),
-    sourceRef: text("source_ref"), // e.g. rate_rule id
+    sourceRef: text("source_ref"), // e.g. rate_rule id, or price book item id
   },
   (t) => [index("line_items_group_id_idx").on(t.groupId)],
 ).enableRLS();

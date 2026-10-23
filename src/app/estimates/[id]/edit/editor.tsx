@@ -10,7 +10,7 @@ import type { EditLine } from "@/lib/estimate/edit-schema";
 import { parseQty } from "@/lib/estimate/edit-schema";
 import { estimateTotals, formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
 import { centsToDollars, dollarsToCents, RATE_UNITS } from "@/lib/rates-schema";
-import { saveEstimate } from "./actions";
+import { saveEstimate, saveLineAsRate } from "./actions";
 
 export type EditorGroup = { name: string; lines: EditLine[] };
 
@@ -489,7 +489,39 @@ function LineRow({
         <span className="text-ink-3">Amount</span>
         <Money cents={priceCents} className="font-medium text-ink" />
       </p>
+      <SaveAsRate l={l} onSaved={onChange} />
     </li>
+  );
+}
+
+/**
+ * Offered on a labour or material line whose price is the tradie's own or an AI guess: saving it as a rate means
+ * every future estimate uses it.
+ */
+function SaveAsRate({ l, onSaved }: { l: DraftLine; onSaved: (patch: Partial<DraftLine>) => void }) {
+  const [state, setState] = useState<{ busy: boolean; error: string | null; saved: boolean }>({ busy: false, error: null, saved: false });
+  const cents = dollarsToCents(l.cost);
+  const changed = cents !== null && cents !== l.originalCostCents;
+  const eligible =
+    (l.type === "labour" || l.type === "material") && cents !== null && cents > 0 && l.description.trim() !== "" && (changed || l.source === "ai");
+  if (state.saved) return <p className="text-xs text-ink-3">Saved to your rates. Future estimates will use it.</p>;
+  if (!eligible || l.source === "rate_rule") return null;
+
+  async function save() {
+    setState({ busy: true, error: null, saved: false });
+    const res = await saveLineAsRate({ title: l.description, cost: l.cost, unit: l.unit, type: l.type });
+    if (!res.ok) return setState({ busy: false, error: res.error, saved: false });
+    onSaved({ source: "rate_rule", sourceRef: res.id, originalCostCents: cents });
+    setState({ busy: false, error: null, saved: true });
+  }
+
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 text-xs">
+      <button type="button" onClick={save} disabled={state.busy} className="font-medium text-ink underline-offset-2 hover:underline disabled:opacity-50">
+        {state.busy ? "Saving…" : `Save $${l.cost.replace(/^\$/, "")} per ${l.unit || "unit"} as my rate`}
+      </button>
+      {state.error && <span className="text-danger">{state.error}</span>}
+    </p>
   );
 }
 

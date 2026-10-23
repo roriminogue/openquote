@@ -49,3 +49,6 @@ next-env.d.ts
 # iOS build output
 /ios/build/
 /ios/build.log
+
+# test bench output
+/.bench/

@@ -1,4 +1,6 @@
+import { DEFAULT_LABOUR_CENTS, priceBookItem } from "../price-book";
 import type { LineType } from "@/lib/pricing";
+import { buildDeck, buildFence, type LabourRate } from "./assemblies";
 import type { EstimateDraft } from "./draft";
 
 // Stage 6 + 7 of the pipeline (SPEC.md §5): deterministic pricing and sanity checks. The model proposes, code prices.
@@ -11,7 +13,7 @@ export type PricedLine = {
   qty: number;
   unit: string;
   unitCostCents: number;
-  source: "ai" | "rate_rule";
+  source: "ai" | "rate_rule" | "price_book";
   sourceRef: string | null;
   notes: string | null;
 };
@@ -23,28 +25,55 @@ export function toCents(dollars: number): number {
 }
 
 /**
- * Converts a model draft into stored lines. A line that cites a real rate rule of a matching type is always priced
- * at that rule's rate, whatever the model wrote; unknown or mismatched rule ids are ignored.
+ * The hourly rate calculator labour is priced at: the business's own hourly labour rate (a carpenter's if it has
+ * several), otherwise the price book's typical rate.
  */
-export function priceDraft(draft: Pick<EstimateDraft, "groups">, rateRules: RateRule[]): PricedGroup[] {
+export function labourRateFrom(rateRules: RateRule[]): LabourRate {
+  const hourly = rateRules.filter((r) => r.type === "labour" && /^(h|hr|hrs|hour|hours)$/i.test(r.unit.trim()));
+  const rule = hourly.find((r) => /carpent/i.test(r.title)) ?? hourly[0];
+  return rule
+    ? { cents: rule.rateCents, source: "rate_rule", ref: rule.id }
+    : { cents: DEFAULT_LABOUR_CENTS.carpenter, source: "price_book", ref: "labour:carpenter" };
+}
+
+type DraftToPrice = Pick<EstimateDraft, "groups"> & Partial<Pick<EstimateDraft, "fences" | "decks">>;
+
+/**
+ * Converts a model draft into stored lines. Fences and decks go through their calculators. For the rest, a line
+ * that cites a real rate rule of a matching type is always priced at that rule's rate, and a material that cites
+ * a price book item at the book's price, whatever the model wrote; unknown or mismatched ids are ignored and the
+ * model's own price stands (shown to the tradie as one to check).
+ */
+export function priceDraft(draft: DraftToPrice, rateRules: RateRule[]): PricedGroup[] {
+  const rate = labourRateFrom(rateRules);
+  const fences = draft.fences ?? [];
+  const decks = draft.decks ?? [];
+  const label = (kind: string, i: number, n: number) => (name: string) => (n > 1 ? `${kind} ${i + 1}: ${name}` : name);
+  const calculated = [
+    ...fences.flatMap((f, i) => buildFence(f, rate).map((g) => ({ ...g, name: label("Fence", i, fences.length)(g.name) }))),
+    ...decks.flatMap((d, i) => buildDeck(d, rate).map((g) => ({ ...g, name: label("Deck", i, decks.length)(g.name) }))),
+  ];
+
   const rules = new Map(rateRules.map((r) => [r.id, r]));
-  return draft.groups.map((g) => ({
+  const priced = draft.groups.map((g) => ({
     name: g.name.trim(),
-    lines: g.lines.map((l) => {
-      const rule = l.rateRuleId ? rules.get(l.rateRuleId) : undefined;
-      const ruleApplies = rule != null && rule.type === l.type;
-      return {
+    lines: g.lines.map((l): PricedLine => {
+      const base = {
         description: l.description.trim(),
         type: l.type,
         qty: Math.round(l.qty * 1000) / 1000, // numeric(12,3)
-        unit: ruleApplies ? rule.unit : l.unit.trim(),
-        unitCostCents: ruleApplies ? rule.rateCents : toCents(l.unitCost),
-        source: ruleApplies ? "rate_rule" : "ai",
-        sourceRef: ruleApplies ? rule.id : null,
         notes: l.notes?.trim() || null,
       };
+      const rule = l.rateRuleId ? rules.get(l.rateRuleId) : undefined;
+      if (rule != null && rule.type === l.type) {
+        return { ...base, unit: rule.unit, unitCostCents: rule.rateCents, source: "rate_rule", sourceRef: rule.id };
+      }
+      const item = l.type === "material" || l.type === "other" ? priceBookItem(l.priceBookId) : undefined;
+      if (item) return { ...base, unit: item.unit, unitCostCents: item.costCents, source: "price_book", sourceRef: item.id };
+      return { ...base, unit: l.unit.trim(), unitCostCents: toCents(l.unitCost), source: "ai", sourceRef: null };
     }),
   }));
+  return [...calculated, ...priced.filter((g) => g.lines.length > 0)];
 }
 
 const WET_AREA = /\b(bathroom|ensuite|shower|laundry|wet area)\b/i;

@@ -10,11 +10,13 @@ const draft: EstimateDraft = {
   scope: ["Build deck"],
   assumptions: ["Level site"],
   exclusions: ["Council permits"],
+  fences: [],
+  decks: [],
   groups: [
     {
       name: "Framing",
       lines: [
-        { description: "Carpenter", type: "labour", qty: 8, unit: "hour", unitCost: 95, rateRuleId: "R1", notes: null },
+        { description: "Carpenter", type: "labour", qty: 8, unit: "hour", unitCost: 95, rateRuleId: "R1", priceBookId: null, notes: null },
       ],
     },
   ],
@@ -62,7 +64,7 @@ describe("generateEstimateDraft", () => {
   });
 
   it("rejects output that doesn't match the schema", async () => {
-    const bad = JSON.stringify({ ...draft, groups: [] });
+    const bad = JSON.stringify({ ...draft, fences: [{ lengthM: -5 }] });
     await expect(generateEstimateDraft({ model: mockModel(bad), system: "s", prompt: "p" })).rejects.toThrow();
   });
 });

@@ -256,7 +256,8 @@ export function NewEstimate({
 function HowItWorks() {
   const points = [
     ["Stages, in order", "Each line with a quantity, unit and price, grouped the way the work happens."],
-    ["Your rates first", "Your rate rules are used wherever they fit. Anything else is marked as an AI price to check."],
+    ["Your rates first", "Your rate rules are used wherever they fit, then a checked price book. Anything else is marked to check."],
+    ["Fences and decks by the numbers", "Posts, rails, palings, joists, boards and hours are worked out from the measurements."],
     ["Scope and options", "What’s included, what isn’t, and ways to upgrade or save."],
     ["Sanity checks", "Warnings for anything that looks off, like a bathroom with no waterproofing."],
   ];

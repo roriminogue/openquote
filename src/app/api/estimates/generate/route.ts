@@ -100,7 +100,7 @@ export async function POST(request: Request) {
           ...g,
           lines: g.lines.map((l) => ({
             ...l,
-            sourceRef: l.sourceRef ? aliased.find((r) => r.id === l.sourceRef)!.dbId : null,
+            sourceRef: l.source === "rate_rule" ? (aliased.find((r) => r.id === l.sourceRef)?.dbId ?? null) : l.sourceRef,
           })),
         }));
 

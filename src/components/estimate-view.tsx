@@ -5,6 +5,7 @@ import type { SendTarget } from "@/components/send-quote";
 import { Money } from "@/components/money";
 import { Badge, GroupTitle, Panel, type Tone } from "@/components/ui";
 import { validateEstimate } from "@/lib/estimate/price";
+import { PRICE_BOOK, priceBookCheckedLabel } from "@/lib/price-book";
 import type { EstimateContext, GroupView, LineView } from "@/lib/estimate/queries";
 import { estimateAsText } from "@/lib/estimate/text";
 import { formatProjectNo } from "@/lib/project-schema";
@@ -273,13 +274,18 @@ function TotalRow({ label, cents }: { label: string; cents: number }) {
 export function SourceBadge({ source }: { source: LineView["source"] }) {
   if (source === "ai")
     return (
-      <span className="inline-flex h-5 items-center whitespace-nowrap rounded-full border border-dashed border-ink-3 px-2 text-xs font-medium text-ink">
-        AI price
+      <span
+        title="The AI estimated this price: nothing in your rates or the price book matched"
+        className="inline-flex h-5 items-center whitespace-nowrap rounded-full border border-dashed border-ink-3 px-2 text-xs font-medium text-ink"
+      >
+        Check price
       </span>
     );
-  const label = { rate_rule: "Your rate", kit: "Kit", supplier: "Supplier", manual: "Manual" }[source];
+  const label = { rate_rule: "Your rate", kit: "Kit", supplier: "Supplier", manual: "Manual", price_book: "Price book" }[source];
+  const title =
+    source === "price_book" ? `Typical price, ${PRICE_BOOK.region}, checked ${priceBookCheckedLabel()}` : undefined;
   return (
-    <span className="inline-flex h-5 items-center whitespace-nowrap rounded-full bg-subtle px-2 text-xs font-medium text-ink-3">
+    <span title={title} className="inline-flex h-5 items-center whitespace-nowrap rounded-full bg-subtle px-2 text-xs font-medium text-ink-3">
       {label}
     </span>
   );

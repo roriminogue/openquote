@@ -5,6 +5,8 @@ breaks it into stages and prices every line with your own rates. Edit it, send i
 they can accept it from their phone.
 
 - **Price a job in under a minute.** Stages, quantities, labour and materials, with your rates used first.
+- **Real prices, not guesses.** A built-in price book of checked material prices, and calculators that work out
+  fences and decks post by post and board by board. Anything the AI had to estimate is marked "Check price".
 - **Edit anything.** Change quantities, prices and descriptions, and add or remove lines and stages.
 - **Send it.** A branded quote page for your client with your logo and terms, plus Accept and Decline buttons.
 - **See what happened.** Know when they opened it, and who accepted or declined it.
@@ -103,6 +105,7 @@ phone.
 | `npm run db:generate` | New migration from `src/db/schema.ts` changes |
 | `npm run db:migrate` | Apply migrations (production builds on Vercel do this automatically) |
 | `npm run ai:try -- "job description"` | Run the AI estimate pipeline once with `ANTHROPIC_API_KEY` (no database) |
+| `npm run bench` | Run the reference jobs and compare them with earlier results and market prices (spends AI credit) |
 
 **Stack:** Next.js (App Router, TypeScript, Tailwind) · Supabase (Postgres, Auth, Storage) with Drizzle ORM ·
 Vercel AI SDK with bring-your-own-key · Capacitor for the iPhone shell · Vitest. Product spec and data model:
@@ -111,6 +114,8 @@ Vercel AI SDK with bring-your-own-key · Capacitor for the iPhone shell · Vites
 **Principles:**
 
 - **Money is integer cents, ex-GST.** GST is applied once, on the document total.
+- **Prices come from data.** `src/lib/price-book/items.json` holds the checked material prices (date, region and
+  sources included); `src/lib/estimate/assemblies.ts` holds the fence and deck rules.
 - **The LLM proposes, code prices.** The model outputs structured line items; all arithmetic lives in
   `lib/pricing.ts`.
 - **Every change is a version.** AI and manual edits write an `estimate_versions` snapshot.
