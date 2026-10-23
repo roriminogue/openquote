@@ -76,6 +76,7 @@ export const organisations = pgTable("organisations", {
   markupSubbiePct: pct("markup_subbie_pct"),
   markupOtherPct: pct("markup_other_pct"),
   termsMd: text("terms_md"),
+  quoteValidDays: integer("quote_valid_days").notNull().default(30),
   nextEstimateNo: integer("next_estimate_no").notNull().default(1001),
   nextProjectNo: integer("next_project_no").notNull().default(1),
   nextInvoiceNo: integer("next_invoice_no").notNull().default(1),
@@ -332,7 +333,7 @@ export const proposalSends = pgTable(
     id: id(),
     estimateId: uuid("estimate_id").notNull().references(() => estimates.id, { onDelete: "cascade" }),
     version: integer("version").notNull(),
-    toEmail: text("to_email").notNull(),
+    toEmail: text("to_email"), // null when shared as a link (text, WhatsApp) rather than emailed
     cc: text("cc").array().notNull().default([]),
     token: text("token").notNull().unique(), // public link /p/:token
     message: text("message"),

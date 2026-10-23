@@ -16,7 +16,7 @@ export async function saveEstimate(estimateId: string, raw: unknown): Promise<Sa
     return { ok: false, error: issue.message, path: issue.path.filter((p): p is string | number => typeof p !== "symbol") };
   }
   if (!(await saveEstimateEdits(member.orgId, estimateId, parsed.data))) {
-    return { ok: false, error: "That estimate couldn't be found. It may have been deleted." };
+    return { ok: false, error: "This estimate can't be changed: it was deleted, or the client has already accepted it." };
   }
   refresh();
   return { ok: true };

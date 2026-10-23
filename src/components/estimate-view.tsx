@@ -1,6 +1,7 @@
-import { ArrowDownRight, ArrowUpRight, TriangleAlert } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, CheckCircle2, Eye, Send, TriangleAlert, XCircle } from "lucide-react";
 import { Breakdown } from "@/components/breakdown";
 import { EstimateActions } from "@/components/estimate-actions";
+import type { SendTarget } from "@/components/send-quote";
 import { Money } from "@/components/money";
 import { Badge, GroupTitle, Panel, type Tone } from "@/components/ui";
 import { validateEstimate } from "@/lib/estimate/price";
@@ -43,12 +44,16 @@ export function EstimateView({
   groups,
   totals,
   context,
+  send,
+  activity,
 }: {
   context?: EstimateContext;
   estimate: Estimate;
   gstRatePct: number;
   groups: GroupView[];
   totals: EstimateTotals;
+  send?: SendTarget;
+  activity?: Activity | null;
 }) {
   const warnings = validateEstimate(e.description, groups);
   const markupCents = totals.subtotalCents - totals.costCents;
@@ -75,8 +80,8 @@ export function EstimateView({
 
   return (
     <article className="mt-4">
-      <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4 sm:flex-nowrap">
-        <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
+      <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4 xl:flex-nowrap">
+        <div className="min-w-0 basis-full xl:basis-0 xl:flex-1">
           <h1 className="max-w-3xl font-display text-title font-medium leading-8 tracking-[-0.01em]">{e.title}</h1>
           <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-ink-3">
             <EstimateStatus status={e.status} />
@@ -89,8 +94,10 @@ export function EstimateView({
             ))}
           </p>
         </div>
-        <EstimateActions text={text} editHref={`/estimates/${e.id}/edit`} />
+        <EstimateActions text={text} editHref={activity?.decision?.type === "accepted" ? undefined : `/estimates/${e.id}/edit`} send={send} />
       </header>
+
+      {activity && <ClientActivity activity={activity} />}
 
       <section aria-label="Totals" className="mt-8 grid gap-6 sm:grid-cols-3 sm:gap-0">
         <Stat
@@ -187,6 +194,64 @@ function Stat({ label, value, sub, big = false }: { label: string; value: React.
       <p className={`mt-1.5 font-semibold leading-none tracking-[-0.01em] text-ink ${big ? "text-figure" : "text-title"}`}>{value}</p>
       {sub && <p className="mt-2 text-xs text-ink-3">{sub}</p>}
     </div>
+  );
+}
+
+export type Activity = {
+  token: string;
+  sentAt: Date;
+  views: number;
+  lastViewedAt: Date | null;
+  decision: { type: "accepted" | "declined"; name: string | null; reason: string | null; at: Date } | null;
+};
+
+const whenFmt = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+
+/** What the client has done with the quote: sent, opened, accepted or declined. */
+function ClientActivity({ activity: a }: { activity: Activity }) {
+  const d = a.decision;
+  return (
+    <section
+      aria-label="Client activity"
+      className={`no-print mt-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-2 rounded-[10px] px-4 py-3 text-sm ${
+        d?.type === "accepted" ? "bg-ok-soft" : "bg-subtle"
+      }`}
+    >
+      <div className="flex items-start gap-2.5">
+        {d?.type === "accepted" ? (
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-ok" aria-hidden />
+        ) : d?.type === "declined" ? (
+          <XCircle className="mt-0.5 size-4 shrink-0 text-ink-3" aria-hidden />
+        ) : a.views ? (
+          <Eye className="mt-0.5 size-4 shrink-0 text-ink-3" aria-hidden />
+        ) : (
+          <Send className="mt-0.5 size-4 shrink-0 text-ink-3" aria-hidden />
+        )}
+        <div>
+          <p className="font-medium text-ink">
+            {d?.type === "accepted"
+              ? `Accepted by ${d.name} · ${whenFmt.format(d.at)}`
+              : d?.type === "declined"
+                ? `Declined · ${whenFmt.format(d.at)}`
+                : a.views
+                  ? `Opened ${a.views === 1 ? "once" : `${a.views} times`}, last ${whenFmt.format(a.lastViewedAt!)}`
+                  : "Sent, not opened yet"}
+          </p>
+          <p className="mt-0.5 text-ink-3">
+            {d?.type === "accepted"
+              ? "Accepted quotes are locked. Price any changes as a new estimate."
+              : d?.type === "declined"
+                ? d.reason
+                  ? `“${d.reason}”`
+                  : "No reason given."
+                : `Shared ${whenFmt.format(a.sentAt)}. You'll see here when they open, accept or decline it.`}
+          </p>
+        </div>
+      </div>
+      <a href={`/p/${a.token}`} target="_blank" rel="noreferrer" className="shrink-0 text-sm font-medium text-ink-2 underline underline-offset-2 hover:text-ink">
+        Client view
+      </a>
+    </section>
   );
 }
 

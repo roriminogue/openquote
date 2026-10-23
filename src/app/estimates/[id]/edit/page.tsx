@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
 import { getEstimate, markupSettings } from "@/lib/estimate/queries";
@@ -22,6 +22,8 @@ async function Editor({ params }: Pick<PageProps<"/estimates/[id]/edit">, "param
   const data = await getEstimate(member.orgId, id);
   if (!data) notFound();
   const { estimate, org, groups } = data;
+  // Accepted quotes are locked.
+  if (estimate.status === "accepted") redirect(`/estimates/${estimate.id}`);
 
   const initial: EditorGroup[] = groups.map((g) => ({
     name: g.name,

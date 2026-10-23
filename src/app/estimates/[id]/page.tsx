@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
 import { EstimateView } from "@/components/estimate-view";
 import { getEstimate } from "@/lib/estimate/queries";
+import { getClient } from "@/lib/projects";
+import { proposalActivity } from "@/lib/proposals";
 
 export const metadata: Metadata = { title: "Estimate" };
 
@@ -33,7 +35,30 @@ async function EstimateDetail({ params }: Pick<PageProps<"/estimates/[id]">, "pa
   const data = await getEstimate(member.orgId, id);
   if (!data) notFound();
 
-  return <EstimateView estimate={data.estimate} gstRatePct={data.org.gstRate} groups={data.groups} totals={data.totals} context={data.context} />;
+  const [activity, client] = await Promise.all([
+    proposalActivity(member.orgId, id),
+    data.estimate.clientId ? getClient(member.orgId, data.estimate.clientId) : null,
+  ]);
+  const name = client?.kind === "company" ? (client.contactName ?? client.name) : client?.name;
+
+  return (
+    <EstimateView
+      estimate={data.estimate}
+      gstRatePct={data.org.gstRate}
+      groups={data.groups}
+      totals={data.totals}
+      context={data.context}
+      activity={activity}
+      send={{
+        estimateId: id,
+        title: data.estimate.title,
+        businessName: data.org.name,
+        client: client ? { name: client.name, firstName: (name ?? client.name).split(" ")[0], phone: client.phone, email: client.email } : null,
+        detail: data.estimate.displayOptions?.detail ?? "groups",
+        sent: !!activity,
+      }}
+    />
+  );
 }
 
 function DetailSkeleton() {

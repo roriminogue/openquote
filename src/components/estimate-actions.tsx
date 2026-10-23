@@ -3,10 +3,11 @@
 import { Check, Copy, Pencil, Printer } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { SendQuoteButton, type SendTarget } from "./send-quote";
 import { Button, buttonClass } from "./ui";
 
-/** Edit the lines, copy the estimate as text, or print it (the browser's print dialog also saves a PDF). */
-export function EstimateActions({ text, editHref }: { text: string; editHref?: string }) {
+/** Send to the client, edit the lines, copy the estimate as text, or print it (print also saves a PDF). */
+export function EstimateActions({ text, editHref, send }: { text: string; editHref?: string; send?: SendTarget }) {
   const [copied, setCopied] = useState<"ok" | "failed" | null>(null);
 
   useEffect(() => {
@@ -26,8 +27,9 @@ export function EstimateActions({ text, editHref }: { text: string; editHref?: s
 
   return (
     <div className="no-print flex shrink-0 flex-wrap gap-2">
+      {send && <SendQuoteButton target={send} />}
       {editHref && (
-        <Link href={editHref} className={buttonClass("primary", "md")}>
+        <Link href={editHref} className={buttonClass(send ? "secondary" : "primary", "md")}>
           <Pencil className="size-3.5" aria-hidden />
           Edit
         </Link>

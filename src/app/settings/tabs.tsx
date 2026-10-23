@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { FilterTabs } from "@/components/records";
 
 const TABS = [
+  ["/settings/business", "Business"],
   ["/settings/rates", "Rates and pricing"],
   ["/settings/ai", "AI"],
   ["/settings/account", "Account"],
