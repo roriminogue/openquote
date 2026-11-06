@@ -19,17 +19,23 @@ the same thing.
 ## Steps
 
 1. **Sign Xcode in to your Apple ID.** In Xcode → Settings → Accounts, click **+** → **Apple ID**.
-2. **Point the app at your site and your Apple ID.** In Terminal, from the OpenQuote folder:
+2. **Point the app at your site and your Apple ID.**
+   - Add your site's address to `.env.local` in the OpenQuote folder (create the file if it isn't there):
+     `OPENQUOTE_APP_URL=https://your-site.vercel.app`
+   - Create `ios/signing.local.xcconfig` with a bundle identifier that's unique to you, and your team ID
+     (Xcode → Settings → Accounts → your Apple ID → the ID next to "Personal Team"):
+
+     ```
+     PRODUCT_BUNDLE_IDENTIFIER = com.yourname.openquote
+     DEVELOPMENT_TEAM = ABCDE12345
+     ```
+
+   Both files stay on your Mac and are never committed. Then, in Terminal from the OpenQuote folder:
 
    ```bash
    npm install
-   OPENQUOTE_APP_URL=https://your-site.vercel.app npx cap sync ios
-   open ios/App/App.xcodeproj
+   npx cap sync ios
    ```
-
-   In Xcode, click **App** in the left sidebar, then **Signing & Capabilities**:
-   - set **Team** to your name (Personal Team)
-   - change **Bundle Identifier** to something unique, like `com.yourname.openquote`
 
 3. **Get the iPhone ready.** Plug it in, unlock it and tap **Trust** if asked. Turn on **Developer Mode** in
    Settings → Privacy & Security (it appears after the first install attempt, and the phone restarts).

@@ -1,1 +1,8 @@
 CAPACITOR_DEBUG = true
+
+// Signing. Defaults that anyone can build with; put your own in ios/signing.local.xcconfig (not committed):
+//   DEVELOPMENT_TEAM = ABCDE12345
+//   PRODUCT_BUNDLE_IDENTIFIER = com.yourname.openquote
+// Your team ID is in Xcode → Settings → Accounts → your Apple ID (or leave it out and pick the team in Xcode).
+PRODUCT_BUNDLE_IDENTIFIER = com.example.openquote
+#include? "signing.local.xcconfig"

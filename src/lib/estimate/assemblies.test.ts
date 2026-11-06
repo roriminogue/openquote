@@ -113,7 +113,7 @@ describe("buildDeck", () => {
     const boards = byRef(g, "deck_merbau_90x19");
     expect(boards[0].qty).toBeCloseTo(138.9, 1); // 12 m² ÷ 95 mm + 10%
     expect(qty(g, "masonry_anchor_m12")).toBe(8);
-    // Sammy allowed 30 h for this job; market labour is about $140–220/m².
+    // Market labour is about $140–220/m².
     expect(hours(g)).toBeGreaterThanOrEqual(24);
     expect(hours(g)).toBeLessThanOrEqual(36);
   });

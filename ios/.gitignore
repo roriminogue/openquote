@@ -11,3 +11,6 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# Your own Apple signing settings (see debug.xcconfig)
+signing.local.xcconfig

@@ -1,11 +1,8 @@
-# OpenQuote — Product Spec (working name)
+# OpenQuote — Product Spec
 
 An open-source, AI-powered quoting and job-management app for trades businesses.
-Inspired by commercial tools in the space (Sammy AI, Tradify, Buildxact, ServiceM8). Clean-room: this spec is
-written from publicly available marketing pages and help-centre docs only. No code, prompts, copy or branding
-from any of those products is used.
-
-> Name is a placeholder. Pick something original before publishing.
+Clean-room: this spec was written from publicly available information about how trades businesses quote. No
+code, prompts, copy or branding from any commercial product is used.
 
 ---
 

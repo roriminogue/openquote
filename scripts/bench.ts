@@ -18,8 +18,8 @@ type Job = {
   description: string;
   /** Published installed price range for the whole job, inc GST, Melbourne 2026. */
   market: [number, number] | null;
-  /** Cost before markup from earlier runs, in dollars. */
-  before: { sammy: number; openquote: number };
+  /** Cost before markup from an earlier OpenQuote run, in dollars. */
+  before: number;
 };
 
 const JOBS: Job[] = [
@@ -28,28 +28,28 @@ const JOBS: Job[] = [
     description:
       "Build a 4 × 3 m merbau deck at the back of the house, about 600 mm off the ground, with two steps down to the lawn and an oil finish. Easy side access.",
     market: [5000, 11000],
-    before: { sammy: 6586.4, openquote: 8657.7 },
+    before: 8657.7,
   },
   {
     key: "fence",
     description:
       "Replace 20 m of 1.8 m high timber paling fence along the side boundary. Reuse the existing posts; new treated pine rails, palings and capping. Remove and dispose of the old palings and rails.",
     market: [1500, 3000],
-    before: { sammy: 3857, openquote: 4519 },
+    before: 4519,
   },
   {
     key: "bathroom",
     description:
       "Retile a 2.4 × 2 m bathroom floor to ceiling (2.4 m ceiling) with a new walk-in shower and frameless screen, same layout. Remove existing tiles, waterproof, supply mid-range tiles.",
     market: null,
-    before: { sammy: 15584.2, openquote: 14879 },
+    before: 14879,
   },
   {
     key: "paint",
     description:
       "Repaint the interior of a 3-bedroom house: walls and ceilings in the three bedrooms, living room, hallway and kitchen. About 120 m² of floor area with 2.7 m ceilings. Two coats, minor patching, Dulux low-sheen on walls and flat white on ceilings.",
     market: [4000, 10000],
-    before: { sammy: 10265, openquote: 5080 },
+    before: 5080,
   },
 ];
 
@@ -97,7 +97,7 @@ async function main() {
       }
     }
     const pct = (a: number, b: number) => `${a > b ? "+" : ""}${Math.round(((a - b) / b) * 100)}%`;
-    console.log(`  Cost ${formatAud(s.costCents)} (before: OpenQuote ${pct(cost, job.before.openquote)}, Sammy ${pct(cost, job.before.sammy)})`);
+    console.log(`  Cost ${formatAud(s.costCents)} (before: ${pct(cost, job.before)})`);
     console.log(
       `  Client price inc GST at ${MARKUP * 100}% markup: ${formatAud(Math.round(clientIncGst * 100))}` +
         (job.market ? ` · market ${formatAud(job.market[0] * 100)}–${formatAud(job.market[1] * 100)} ${clientIncGst < job.market[0] ? "(below)" : clientIncGst > job.market[1] ? "(above)" : "(inside)"}` : ""),

@@ -15,7 +15,7 @@ export async function shareQuote(estimateId: string, detail: DetailLevel): Promi
   const shared = await shareEstimate(member.orgId, estimateId, detail);
   if (!shared) return { ok: false, error: "That estimate couldn't be found." };
   const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "openquote-rust.vercel.app";
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   refresh();
   return { ok: true, url: `${proto}://${host}/p/${shared.token}` };

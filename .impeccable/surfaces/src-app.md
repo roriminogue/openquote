@@ -9,7 +9,7 @@ related_targets: []
 
 Mode: Operate. Audience: owner-operator tradies (phone on site, laptop at night). Redesign requested 2026-10-21: the
 owner found the tape-measure world "vibe coded"; critique scored 23/40. Owner pinned the reference: a calm, neutral,
-modern workspace app in the spirit of Gumloop's signed-in UI (studied passively; nothing copied), plus one small
+modern workspace app (neutral greys, quiet type, generous space), plus one small
 OpenQuote accent. The pinned direction beats the roll (seed a99e62f2, recorded as canon).
 
 ## Direction contract
@@ -31,7 +31,7 @@ margin, and a thin stage breakdown bar with a legend. Then the schedule: desktop
 Source | Amount grouped by stage; phones stacked rows. New estimate: one centred composer card (project row,
 description, examples, accent "Price this job").
 
-FORM: Owner-pinned reference (neutral workspace, Gumloop-like language). Raises from the critique: schedule grid and
+FORM: Owner-pinned reference (neutral workspace language). Raises from the critique: schedule grid and
 source stamps, units pluralised, markup only when it differs, actions on the estimate, no doubled primaries, 44px
 targets on phones, custom select chevrons, no textarea grip, sentence-case labels, text-wrap pretty, sidebar nav on
 desktop and a bottom bar with a central New on phones.

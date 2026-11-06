@@ -79,6 +79,13 @@ Your copy is a repository on your GitHub. When OpenQuote gets new features, open
 | Supabase and Vercel | Free tiers are plenty for a trades business |
 | AI | Pay-as-you-go with your own key, typically a few cents per estimate |
 
+**Free Supabase projects go to sleep after a week without use.** If your site suddenly can't load anything,
+open your project in Supabase and click **Restore project**. Using OpenQuote at least once a week keeps it awake.
+
+**Prices are a starting point for Melbourne, Victoria (checked October 2026).** The built-in price book covers
+fencing, decking and carpentry materials. Labour times haven't been checked by a tradie yet. Your own rates in
+**Settings → Rates and pricing** always come first, so set those up, especially outside Victoria.
+
 Quotes are shared as links from your own phone (text, WhatsApp, email), so there's no email service to pay for.
 Sign-in works with a password, so Supabase's built-in email (a few emails an hour) is enough.
 
@@ -119,6 +126,11 @@ Vercel AI SDK with bring-your-own-key · Capacitor for the iPhone shell · Vites
 - **The LLM proposes, code prices.** The model outputs structured line items; all arithmetic lives in
   `lib/pricing.ts`.
 - **Every change is a version.** AI and manual edits write an `estimate_versions` snapshot.
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). To report a security
+problem privately, see [SECURITY.md](SECURITY.md).
 
 ## License
 
