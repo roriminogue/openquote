@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import { AuthFrame } from "@/components/auth-frame";
 import { Button, Field, Input, Notice } from "@/components/ui";
 import { sendMagicLink, signInWithGoogle, signInWithPassword, verifyCode } from "./actions";
+import { CODE_ERRORS, LOGIN_ERRORS, messageFor } from "@/lib/auth-messages";
+import { z } from "zod";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -19,7 +21,12 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
 }
 
 async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchParams">) {
-  const { sent, error, codeError, email: lastEmail } = await searchParams;
+  const params = await searchParams;
+  // Only our own messages, and only a real email address, are ever shown from the URL.
+  const error = messageFor(LOGIN_ERRORS, params.error);
+  const codeError = messageFor(CODE_ERRORS, params.codeError);
+  const sent = typeof params.sent === "string" && z.email().safeParse(params.sent).success ? params.sent : undefined;
+  const lastEmail = typeof params.email === "string" && z.email().safeParse(params.email).success ? params.email : undefined;
   // The iPhone app adds this to its user agent. Google refuses to sign in inside embedded browsers.
   const inApp = (await headers()).get("user-agent")?.includes("OpenQuoteApp") ?? false;
 
@@ -53,7 +60,7 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
                 className="figures tracking-[0.2em]"
               />
             </Field>
-            {typeof codeError === "string" && <Notice tone="error">{codeError}</Notice>}
+            {codeError && <Notice tone="error">{codeError}</Notice>}
             <Button className="w-full">Sign in</Button>
           </form>
         </details>
@@ -76,7 +83,7 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
             autoComplete="username"
             inputMode="email"
             spellCheck={false}
-            defaultValue={typeof lastEmail === "string" ? lastEmail : undefined}
+            defaultValue={lastEmail}
             placeholder="you@business.com.au"
           />
         </Field>

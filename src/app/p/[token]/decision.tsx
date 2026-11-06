@@ -15,15 +15,28 @@ export function PrintButton() {
 }
 
 /** Accept (typed name + tick) or decline (optional reason). Shown until the client answers. */
-export function Decision({ token, business, prefillName, prefillEmail }: { token: string; business: string; prefillName: string; prefillEmail: string }) {
+export function Decision({
+  token,
+  version,
+  business,
+  prefillName,
+  prefillEmail,
+}: {
+  token: string;
+  /** The estimate version this page is showing. */
+  version: number;
+  business: string;
+  prefillName: string;
+  prefillEmail: string;
+}) {
   const [mode, setMode] = useState<"accept" | "decline">("accept");
   // Controlled, so a validation error doesn't wipe what the client typed (form actions reset uncontrolled fields).
   const [name, setName] = useState(prefillName);
   const [email, setEmail] = useState(prefillEmail);
   const [agree, setAgree] = useState(false);
   const [reason, setReason] = useState("");
-  const [accState, accept, accepting] = useActionState<DecisionState, FormData>(acceptQuote.bind(null, token), { status: "idle" });
-  const [decState, decline, declining] = useActionState<DecisionState, FormData>(declineQuote.bind(null, token), { status: "idle" });
+  const [accState, accept, accepting] = useActionState<DecisionState, FormData>(acceptQuote.bind(null, token, version), { status: "idle" });
+  const [decState, decline, declining] = useActionState<DecisionState, FormData>(declineQuote.bind(null, token, version), { status: "idle" });
 
   if (mode === "decline") {
     return (

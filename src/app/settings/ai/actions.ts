@@ -6,7 +6,7 @@ import { z } from "zod";
 import { db, schema } from "@/db";
 import { requireMember } from "@/lib/auth";
 import { decryptSecret, encryptSecret, lastFour } from "@/lib/crypto";
-import { PROVIDER_INFO, PROVIDERS, checkModel, listModels } from "@/lib/ai/providers";
+import { PROVIDER_INFO, PROVIDERS, checkModel, listModels, providerBaseUrl } from "@/lib/ai/providers";
 
 export type SaveState = {
   status: "idle" | "error" | "saved";
@@ -23,7 +23,6 @@ const optional = z
 const Input = z.object({
   provider: z.enum(PROVIDERS),
   apiKey: optional,
-  baseUrl: optional.pipe(z.url({ protocol: /^https?$/ }).nullable()),
   smartModel: optional,
   fastModel: optional,
   transcription: z.enum(["off", "openai", "local"]),
@@ -44,12 +43,11 @@ export async function saveAiSettings(_prev: SaveState, formData: FormData): Prom
   const parsed = Input.safeParse({
     provider: field("provider"),
     apiKey: field("apiKey"),
-    baseUrl: field("baseUrl"),
     smartModel: field("smartModel"),
     fastModel: field("fastModel"),
     transcription: field("transcription") || "off",
   });
-  if (!parsed.success) return { status: "error", message: "Check the base URL: it must start with http(s)://." };
+  if (!parsed.success) return { status: "error", message: "Check the settings and try again." };
   const input = parsed.data;
   const info = PROVIDER_INFO[input.provider];
 
@@ -59,7 +57,7 @@ export async function saveAiSettings(_prev: SaveState, formData: FormData): Prom
   const keyToTest =
     input.apiKey ?? (keepExistingKey ? decryptSecret(existing!.apiKeyCiphertext!) : null) ?? envKey ?? null;
 
-  const listed = await listModels(input.provider, { apiKey: keyToTest, baseUrl: input.baseUrl });
+  const listed = await listModels(input.provider, { apiKey: keyToTest, baseUrl: providerBaseUrl(input.provider) });
   if (!listed.ok) return { status: "error", message: listed.error };
 
   const smartModel = input.smartModel ?? info.defaultSmartModel;
@@ -77,7 +75,8 @@ export async function saveAiSettings(_prev: SaveState, formData: FormData): Prom
       : { apiKeyCiphertext: null, apiKeyLast4: null };
   const values = {
     provider: input.provider,
-    baseUrl: info.defaultBaseUrl ? input.baseUrl : null,
+    // Addresses are fixed per install (see providerBaseUrl); clear any saved by older versions.
+    baseUrl: null,
     smartModel: input.smartModel,
     fastModel: input.fastModel,
     transcription: input.transcription,

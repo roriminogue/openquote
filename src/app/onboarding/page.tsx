@@ -8,6 +8,7 @@ import { db, schema } from "@/db";
 import { getAuthUser } from "@/lib/auth";
 import { canCreateBusiness } from "@/lib/signups";
 import { createOrganisation } from "./actions";
+import { ONBOARDING_ERRORS, messageFor } from "@/lib/auth-messages";
 
 export const metadata: Metadata = { title: "Set up your business" };
 
@@ -27,7 +28,7 @@ async function OnboardingForm({ searchParams }: Pick<PageProps<"/onboarding">, "
   const [member] = await db.select().from(schema.users).where(eq(schema.users.id, user.id));
   if (member) redirect("/estimates");
 
-  const { error } = await searchParams;
+  const error = messageFor(ONBOARDING_ERRORS, (await searchParams).error);
   const allowed = await canCreateBusiness(user.email ?? "");
   if (!allowed.ok) {
     return (

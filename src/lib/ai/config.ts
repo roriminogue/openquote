@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { decryptSecret } from "@/lib/crypto";
-import { PROVIDER_INFO, type Provider } from "./providers";
+import { PROVIDER_INFO, providerBaseUrl, type Provider } from "./providers";
 
 export type AiConfig = {
   provider: Provider;
@@ -22,7 +22,8 @@ export async function resolveAiConfig(orgId: string): Promise<AiConfig> {
     smartModel: row?.smartModel ?? info.defaultSmartModel,
     fastModel: row?.fastModel ?? info.defaultFastModel,
   };
-  const baseUrl = row?.baseUrl ?? info.defaultBaseUrl ?? null;
+  // Never a saved address: a shared key must only ever go to the provider itself.
+  const baseUrl = providerBaseUrl(provider);
 
   if (row?.apiKeyCiphertext) {
     return { provider, apiKey: decryptSecret(row.apiKeyCiphertext), baseUrl, ...models, source: "business" };
