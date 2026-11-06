@@ -6,7 +6,15 @@ import { DEFAULT_DISPLAY, displayOptionsFor, isProposalToken, newProposalToken, 
 // Sending quotes to clients. Drizzle bypasses RLS: member-facing functions filter by orgId, and the public
 // functions only ever find a quote by its unguessable token.
 
-export type Decision = { type: "accepted" | "declined"; name: string | null; email: string | null; reason: string | null; at: Date };
+export type Decision = {
+  type: "accepted" | "declined";
+  name: string | null;
+  email: string | null;
+  reason: string | null;
+  /** Total inc GST the client answered, when recorded (older answers have none). */
+  totalCents: number | null;
+  at: Date;
+};
 
 /**
  * The share link for an estimate: reuses the existing one (so a link already sent keeps working), records what
@@ -58,7 +66,9 @@ async function latestDecision(sendIds: string[]): Promise<Decision | null> {
     .where(and(inArray(schema.proposalEvents.sendId, sendIds), inArray(schema.proposalEvents.type, ["accepted", "declined"])))
     .orderBy(desc(schema.proposalEvents.at))
     .limit(1);
-  return e ? { type: e.type as Decision["type"], name: e.actorName, email: e.actorEmail, reason: e.reason, at: e.at } : null;
+  return e
+    ? { type: e.type as Decision["type"], name: e.actorName, email: e.actorEmail, reason: e.reason, totalCents: e.totalCents, at: e.at }
+    : null;
 }
 
 /** Everything the client-facing quote page shows, or null for an unknown link. */
@@ -98,25 +108,51 @@ export async function recordView(sendId: string) {
   await db.insert(schema.proposalEvents).values({ sendId, type: "viewed" });
 }
 
-/** Records the client's answer once. Returns false if the quote was already accepted or declined. */
+export type DecideResult = "ok" | "missing" | "answered" | "expired" | "changed";
+
+/**
+ * Records the client's answer, once. `seenVersion` is the estimate version on the client's screen: if the business
+ * has edited the quote since, nothing is recorded and the client is asked to reload, so nobody accepts a price they
+ * didn't see. Expired quotes can't be answered.
+ */
 export async function decide(
   token: string,
+  seenVersion: number,
   decision: { type: "accepted"; name: string; email: string | null } | { type: "declined"; reason: string | null },
-) {
-  const send = await sendByToken(token);
-  if (!send) return false;
-  if (await latestDecision([send.id])) return false;
-  await db.transaction(async (tx) => {
+): Promise<DecideResult> {
+  const q = await getPublicProposal(token);
+  if (!q) return "missing";
+  if (q.decision) return "answered";
+  if (q.expired) return "expired";
+  if (q.estimate.currentVersion !== seenVersion) return "changed";
+
+  return db.transaction(async (tx) => {
+    // Lock this link, then check again inside the lock: two answers at the same moment must not both count, and
+    // an edit saved in the meantime must not slip in.
+    await tx.select({ id: schema.proposalSends.id }).from(schema.proposalSends).where(eq(schema.proposalSends.id, q.send.id)).for("update");
+    const [answered] = await tx
+      .select({ id: schema.proposalEvents.id })
+      .from(schema.proposalEvents)
+      .where(and(eq(schema.proposalEvents.sendId, q.send.id), inArray(schema.proposalEvents.type, ["accepted", "declined"])))
+      .limit(1);
+    if (answered) return "answered";
+    const [estimate] = await tx
+      .update(schema.estimates)
+      .set({ status: decision.type, updatedAt: new Date() })
+      .where(and(eq(schema.estimates.id, q.send.estimateId), eq(schema.estimates.currentVersion, seenVersion)))
+      .returning({ id: schema.estimates.id });
+    if (!estimate) return "changed";
     await tx.insert(schema.proposalEvents).values({
-      sendId: send.id,
+      sendId: q.send.id,
       type: decision.type,
       actorName: decision.type === "accepted" ? decision.name : null,
       actorEmail: decision.type === "accepted" ? decision.email : null,
       reason: decision.type === "declined" ? decision.reason : null,
+      estimateVersion: seenVersion,
+      totalCents: q.totals.totalCents,
     });
-    await tx.update(schema.estimates).set({ status: decision.type, updatedAt: new Date() }).where(eq(schema.estimates.id, send.estimateId));
+    return "ok";
   });
-  return true;
 }
 
 /** For the estimate page: the link, when it was sent, how often it was viewed and the client's answer. */

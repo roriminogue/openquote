@@ -203,7 +203,7 @@ export type Activity = {
   sentAt: Date;
   views: number;
   lastViewedAt: Date | null;
-  decision: { type: "accepted" | "declined"; name: string | null; reason: string | null; at: Date } | null;
+  decision: { type: "accepted" | "declined"; name: string | null; reason: string | null; totalCents: number | null; at: Date } | null;
 };
 
 const whenFmt = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
@@ -240,7 +240,7 @@ function ClientActivity({ activity: a }: { activity: Activity }) {
           </p>
           <p className="mt-0.5 text-ink-3">
             {d?.type === "accepted"
-              ? "Accepted quotes are locked. Price any changes as a new estimate."
+              ? `${d.totalCents !== null ? `Accepted at ${formatAud(d.totalCents)} inc GST. ` : ""}Accepted quotes are locked. Price any changes as a new estimate.`
               : d?.type === "declined"
                 ? d.reason
                   ? `“${d.reason}”`

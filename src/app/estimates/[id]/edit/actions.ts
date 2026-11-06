@@ -28,6 +28,7 @@ export type SaveRateResult = { ok: true; id: string } | { ok: false; error: stri
 /** Saves a line's price as one of the business's rates, so future estimates use it. */
 export async function saveLineAsRate(raw: { title: string; cost: string; unit: string; type: string }): Promise<SaveRateResult> {
   const member = await requireMember();
+  if (member.role === "member") return { ok: false, error: "Only owners and admins can add rates." };
   const parsed = RateInput.safeParse({ ...raw, title: raw.title.trim().slice(0, 120) });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
   const rate = await createRate(member.orgId, parsed.data);

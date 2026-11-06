@@ -1,5 +1,6 @@
 "use server";
 
+import { passwordProblem } from "@/lib/password";
 import { createClient } from "@/lib/supabase/server";
 
 export type PasswordState = { status: "idle" | "error" | "saved"; message?: string; field?: string };
@@ -8,7 +9,8 @@ export type PasswordState = { status: "idle" | "error" | "saved"; message?: stri
 export async function setPassword(_prev: PasswordState, formData: FormData): Promise<PasswordState> {
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
-  if (password.length < 8) return { status: "error", field: "password", message: "Use at least 8 characters." };
+  const problem = passwordProblem(password);
+  if (problem) return { status: "error", field: "password", message: problem };
   if (password !== confirm) return { status: "error", field: "confirm", message: "The two passwords don’t match." };
 
   const supabase = await createClient();

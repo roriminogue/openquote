@@ -209,7 +209,7 @@ async function Quote({ params }: Pick<PageProps<"/p/[token]">, "params">) {
                 Happy to go ahead?
               </h2>
               <p className="mb-4 mt-1 text-sm text-ink-3">Accept below and {org.name} will be in touch to book the work.</p>
-              <Decision token={token} business={org.name} prefillName={client?.kind === "individual" ? client.name : (client?.contactName ?? "")} prefillEmail={client?.email ?? ""} />
+              <Decision token={token} version={e.currentVersion} business={org.name} prefillName={client?.kind === "individual" ? client.name : (client?.contactName ?? "")} prefillEmail={client?.email ?? ""} />
             </>
           )}
         </section>

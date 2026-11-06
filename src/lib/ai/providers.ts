@@ -63,6 +63,16 @@ export const PROVIDER_INFO: Record<Provider, ProviderInfo> = {
   },
 };
 
+/**
+ * Where the server calls a provider. Fixed per install: businesses can't change it, so a shared (instance) key is
+ * never sent to an address someone typed in, and nobody can point the server at other machines on its network.
+ * Whoever runs the install can set OLLAMA_BASE_URL for a self-hosted Ollama.
+ */
+export function providerBaseUrl(provider: Provider, env: Record<string, string | undefined> = process.env): string | null {
+  if (provider === "ollama") return (env.OLLAMA_BASE_URL?.trim() || PROVIDER_INFO.ollama.defaultBaseUrl!).replace(/\/+$/, "");
+  return PROVIDER_INFO[provider].defaultBaseUrl ?? null;
+}
+
 export function isProvider(value: unknown): value is Provider {
   return typeof value === "string" && (PROVIDERS as readonly string[]).includes(value);
 }

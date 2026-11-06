@@ -1,9 +1,10 @@
 import { NoObjectGeneratedError } from "ai";
-import { eq } from "drizzle-orm";
+import { and, count, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { resolveAiConfig } from "@/lib/ai/config";
 import { costMicroUsd } from "@/lib/ai/cost";
+import { dailyLimit, overLimit } from "@/lib/ai/limits";
 import { AiNotConfiguredError, languageModel } from "@/lib/ai/models";
 import { getAuthUser } from "@/lib/auth";
 import { generateEstimateDraft } from "@/lib/estimate/generate";
@@ -49,6 +50,21 @@ export async function POST(request: Request) {
   } catch (e) {
     if (e instanceof AiNotConfiguredError) return Response.json({ error: e.message }, { status: 409 });
     throw e;
+  }
+
+  // The install's shared key is capped per business per day; a business's own key isn't.
+  if (config.source === "instance") {
+    const limit = dailyLimit(process.env.AI_DAILY_LIMIT);
+    const [{ n }] = await db
+      .select({ n: count() })
+      .from(schema.aiUsage)
+      .where(and(eq(schema.aiUsage.orgId, member.orgId), gt(schema.aiUsage.createdAt, new Date(Date.now() - 24 * 3600 * 1000))));
+    if (overLimit(n, limit)) {
+      return Response.json(
+        { error: `This OpenQuote allows ${limit} AI estimates a day per business on its shared key. Add your own key in Settings → AI to keep going.` },
+        { status: 429 },
+      );
+    }
   }
 
   // A project supplies the client and, unless one was typed, the site address. It must belong to this org.

@@ -93,7 +93,6 @@ async function AiSettings() {
           initial={{
             provider,
             hasSavedKey: !!settings?.apiKeyLast4,
-            baseUrl: settings?.baseUrl ?? "",
             smartModel: settings?.smartModel ?? "",
             fastModel: settings?.fastModel ?? "",
             transcription: settings?.transcription ?? "off",

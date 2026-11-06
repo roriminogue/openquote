@@ -8,7 +8,6 @@ import { saveAiSettings, type SaveState } from "./actions";
 type Initial = {
   provider: Provider;
   hasSavedKey: boolean;
-  baseUrl: string;
   smartModel: string;
   fastModel: string;
   transcription: "off" | "openai" | "local";
@@ -53,15 +52,9 @@ export function AiSettingsForm({ initial }: { initial: Initial }) {
             </Row>
           )}
 
-          {info.defaultBaseUrl && (
-            <Row label="Base URL" htmlFor="baseUrl" hint="Only change this for a proxy or a self-hosted server.">
-              <Input
-                id="baseUrl"
-                name="baseUrl"
-                type="url"
-                defaultValue={provider === initial.provider ? initial.baseUrl : ""}
-                placeholder={info.defaultBaseUrl}
-              />
+          {provider === "ollama" && (
+            <Row label="Ollama address" hint="Set by whoever runs this OpenQuote, with OLLAMA_BASE_URL.">
+              <p className="text-sm text-ink-2">{info.defaultBaseUrl} unless they&apos;ve changed it.</p>
             </Row>
           )}
 

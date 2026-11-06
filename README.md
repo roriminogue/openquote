@@ -60,6 +60,10 @@ Your copy is private: only the first business can be created. To let more people
 business), add `ALLOWED_EMAILS` in Vercel → Settings → Environment Variables, for example
 `you@gmail.com, @yourbusiness.com.au`, then redeploy.
 
+If you share your own AI key with other businesses (by setting `ANTHROPIC_API_KEY` in Vercel), each business can
+make up to 100 estimates a day with it. Change that with `AI_DAILY_LIMIT` (`0` means no limit). Businesses that add
+their own key in Settings → AI aren't limited.
+
 ### Put it on your phone
 
 - **Quickest:** open your site in Safari (iPhone) or Chrome (Android), then tap **Share → Add to Home Screen**.

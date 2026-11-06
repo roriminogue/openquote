@@ -19,10 +19,11 @@ export async function createOrganisation(formData: FormData) {
 
   // Checked here too, not just on the page: the action can be called directly.
   const allowed = await canCreateBusiness(user.email);
-  if (!allowed.ok) redirect(`/onboarding?error=${encodeURIComponent(allowed.reason)}`);
+  // The page explains why when sign-ups are closed, so no reason travels in the URL.
+  if (!allowed.ok) redirect("/onboarding");
 
   const input = Onboarding.safeParse(Object.fromEntries(formData));
-  if (!input.success) redirect("/onboarding?error=Fill+in+both+fields");
+  if (!input.success) redirect("/onboarding?error=missing_fields");
 
   const created = await db.transaction(async (tx) => {
     // One business at a time, then check again under the lock: on a fresh install, two people signing up at the
@@ -40,6 +41,6 @@ export async function createOrganisation(formData: FormData) {
       .values({ id: user.id, orgId: org.id, name: input.data.name, email: user.email!, role: "owner" });
     return { ok: true as const };
   });
-  if (!created.ok) redirect(`/onboarding?error=${encodeURIComponent(created.reason)}`);
+  if (!created.ok) redirect("/onboarding");
   redirect("/estimates");
 }

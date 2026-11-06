@@ -14,14 +14,14 @@ export function PasswordForm({ email }: { email: string }) {
         <input type="email" name="username" autoComplete="username" value={email} readOnly hidden />
         <Panel>
           <Rows>
-            <Row label="New password" htmlFor="password" hint="At least 8 characters. Sign in with it instead of an emailed link.">
+            <Row label="New password" htmlFor="password" hint="At least 12 characters (a few words together works well). Sign in with it instead of an emailed link.">
               <Input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="new-password"
                 required
-                minLength={8}
+                minLength={12}
                 aria-invalid={state.field === "password" || undefined}
               />
             </Row>

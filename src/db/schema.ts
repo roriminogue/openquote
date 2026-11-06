@@ -354,6 +354,9 @@ export const proposalEvents = pgTable(
     actorPosition: text("actor_position"),
     signatureSvg: text("signature_svg"),
     reason: text("reason"),
+    // What the client answered: the estimate version on their screen and its total inc GST.
+    estimateVersion: integer("estimate_version"),
+    totalCents: integer("total_cents"),
     at: createdAt(),
   },
   (t) => [index("proposal_events_send_id_idx").on(t.sendId)],

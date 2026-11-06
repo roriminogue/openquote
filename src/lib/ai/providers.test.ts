@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { checkModel, listModels } from "./providers";
+import { checkModel, listModels, providerBaseUrl } from "./providers";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -65,5 +65,16 @@ describe("checkModel", () => {
     expect(checkModel("claude-nope", ["claude-sonnet-5-5", "gpt-x"])).toBe(
       '"claude-nope" isn\'t available to this key. Try: claude-sonnet-5-5.',
     );
+  });
+});
+
+describe("providerBaseUrl", () => {
+  it("is fixed per provider, so a shared key only goes to the provider", () => {
+    expect(providerBaseUrl("openrouter", {})).toBe("https://openrouter.ai/api/v1");
+    expect(providerBaseUrl("anthropic", {})).toBeNull();
+  });
+  it("lets whoever runs the install move Ollama, and nobody else", () => {
+    expect(providerBaseUrl("ollama", {})).toBe("http://localhost:11434");
+    expect(providerBaseUrl("ollama", { OLLAMA_BASE_URL: "http://gpu-box:11434/" })).toBe("http://gpu-box:11434");
   });
 });
