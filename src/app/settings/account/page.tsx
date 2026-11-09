@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Panel, Row, Rows, GroupTitle } from "@/components/ui";
 import { requireMember } from "@/lib/auth";
-import { PasswordForm } from "./form";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -25,13 +24,12 @@ async function Account() {
             <Row label="Name">
               <span className="text-sm font-medium">{member.name}</span>
             </Row>
-            <Row label="Email" hint="You sign in with this.">
+            <Row label="Email" hint="You sign in with a code sent here.">
               <span className="break-all text-sm font-medium">{member.email}</span>
             </Row>
           </Rows>
         </Panel>
       </section>
-      <PasswordForm email={member.email} />
     </>
   );
 }

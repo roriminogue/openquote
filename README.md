@@ -49,9 +49,21 @@ some API credit for the AI. US$5 goes a long way.
 
 1. Open your new site and go to **`/setup`** (for example `https://openquote-abc.vercel.app/setup`). It checks
    everything and tells you exactly what to fix if anything is missing.
-2. Do the one step it can't do for you: in Supabase → **Authentication → URL Configuration**, set **Site URL**
-   to your site's address, and add `https://your-site/**` under **Redirect URLs**.
-3. Sign in with your email, create your business, then go to **Settings**:
+2. Do the one step it can't do for you: make the sign-in email show a code. OpenQuote signs you in with a
+   6-digit code on every device, with no links or passwords. In Supabase → **Authentication → Emails**, open the
+   **Magic link** template, then the **Confirm sign up** template, and in each one replace the subject and body
+   with:
+
+   **Subject:** `Your OpenQuote code`
+
+   ```html
+   <h2>Your OpenQuote sign-in code</h2>
+   <p>Enter this code to sign in:</p>
+   <p style="font-size: 28px; font-weight: 600; letter-spacing: 6px;">{{ .Token }}</p>
+   <p>It expires in an hour. If you didn't ask for it, you can ignore this email.</p>
+   ```
+
+3. Sign in with your email and the code, create your business, then go to **Settings**:
    - **Business:** your name, logo, ABN and quote terms
    - **Rates and pricing:** your hourly rate, the materials you use often, and your markup
    - **AI:** your Anthropic key
@@ -91,7 +103,9 @@ fencing, decking and carpentry materials. Labour times haven't been checked by a
 **Settings → Rates and pricing** always come first, so set those up, especially outside Victoria.
 
 Quotes are shared as links from your own phone (text, WhatsApp, email), so there's no email service to pay for.
-Sign-in works with a password, so Supabase's built-in email (a few emails an hour) is enough.
+Sign-in sends a code by email. You stay signed in on each device, so codes are rare, and Supabase's built-in email
+(a few emails an hour) is enough for a small business. If your team signs in a lot, add a free email service
+under Supabase → Authentication → Emails → SMTP Settings.
 
 ## For developers
 

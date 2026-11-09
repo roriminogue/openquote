@@ -51,8 +51,8 @@ the same thing.
 
 ## Signing in inside the app
 
-Use your email and password (set one in **Settings → Account** on the website first). Email sign-in links also
-work: tap the link in the email on the phone, and it hands you back to the app.
+Enter your email, and type in the 6-digit code that arrives by email. iPhone usually offers the code above the
+keyboard, so it's one tap.
 
 ## If something goes wrong
 
