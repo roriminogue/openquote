@@ -10,8 +10,9 @@ import { Segmented } from "@/components/record-forms";
 export type ThemeChoice = "system" | "light" | "dark";
 const KEY = "oq-theme";
 
-/** Runs in <head> before anything paints. Kept tiny and dependency-free. */
-export const THEME_SCRIPT = `try{var t=localStorage.getItem("${KEY}");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
+/** Runs in <head> before anything paints. Kept tiny and dependency-free. A client's quote (/p/…) is always light:
+ * it's a document, and should look like paper on the client's phone whatever their setting. */
+export const THEME_SCRIPT = `try{var t=location.pathname.indexOf("/p/")===0?"light":localStorage.getItem("${KEY}");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
 
 function read(): ThemeChoice {
   try {

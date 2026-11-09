@@ -10,8 +10,10 @@ import type { EstimateContext, GroupView, LineView } from "@/lib/estimate/querie
 import { estimateAsText } from "@/lib/estimate/text";
 import { formatProjectNo } from "@/lib/project-schema";
 import { formatAud, formatEstimateNo, type EstimateTotals } from "@/lib/pricing";
-import { formatQty, unitLabel } from "@/lib/units";
+import { formatQty, keepUnits, unitLabel } from "@/lib/units";
 import type { schema } from "@/db";
+import { LocalTime } from "@/components/local-time";
+import { dateFormat } from "@/lib/dates";
 
 type Estimate = typeof schema.estimates.$inferSelect;
 
@@ -36,7 +38,7 @@ export function EstimateStatus({ status }: { status: Estimate["status"] }) {
   return <Badge tone={tone}>{label}</Badge>;
 }
 
-const dateFmt = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "long", year: "numeric" });
+const dateFmt = dateFormat({ day: "numeric", month: "long", year: "numeric" });
 
 /** The estimate as the tradie checks it: the number up top, where it goes, then the schedule line by line. */
 export function EstimateView({
@@ -83,7 +85,7 @@ export function EstimateView({
     <article className="mt-4">
       <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4 xl:flex-nowrap">
         <div className="min-w-0 basis-full xl:basis-0 xl:flex-1">
-          <h1 className="max-w-3xl font-display text-title font-medium leading-8 tracking-[-0.01em]">{e.title}</h1>
+          <h1 className="max-w-3xl font-display text-title font-medium leading-8 tracking-[-0.01em]">{e.title ? keepUnits(e.title) : e.title}</h1>
           <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-ink-3">
             <EstimateStatus status={e.status} />
             <span className="figures text-ink-2">{formatEstimateNo(e.number)}</span>
@@ -206,7 +208,6 @@ export type Activity = {
   decision: { type: "accepted" | "declined"; name: string | null; reason: string | null; totalCents: number | null; at: Date } | null;
 };
 
-const whenFmt = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 
 /** What the client has done with the quote: sent, opened, accepted or declined. */
 function ClientActivity({ activity: a }: { activity: Activity }) {
@@ -231,11 +232,11 @@ function ClientActivity({ activity: a }: { activity: Activity }) {
         <div>
           <p className="font-medium text-ink">
             {d?.type === "accepted"
-              ? `Accepted by ${d.name} · ${whenFmt.format(d.at)}`
+              ? <>Accepted by {d.name} · <LocalTime date={d.at} /></>
               : d?.type === "declined"
-                ? `Declined · ${whenFmt.format(d.at)}`
+                ? <>Declined · <LocalTime date={d.at} /></>
                 : a.views
-                  ? `Opened ${a.views === 1 ? "once" : `${a.views} times`}, last ${whenFmt.format(a.lastViewedAt!)}`
+                  ? <>Opened {a.views === 1 ? "once" : `${a.views} times`}, last <LocalTime date={a.lastViewedAt!} /></>
                   : "Sent, not opened yet"}
           </p>
           <p className="mt-0.5 text-ink-3">
@@ -245,7 +246,7 @@ function ClientActivity({ activity: a }: { activity: Activity }) {
                 ? d.reason
                   ? `“${d.reason}”`
                   : "No reason given."
-                : `Shared ${whenFmt.format(a.sentAt)}. You'll see here when they open, accept or decline it.`}
+                : <>Shared <LocalTime date={a.sentAt} />. You&apos;ll see here when they open, accept or decline it.</>}
           </p>
         </div>
       </div>
@@ -291,12 +292,16 @@ export function SourceBadge({ source }: { source: LineView["source"] }) {
   );
 }
 
+/**
+ * The rate the client pays (your cost plus this line's markup), so quantity × rate = amount on the page. Showing
+ * the cost here made "2 hrs at $75" read as $180. Your cost is in the tooltip, the summary and the editor.
+ */
 function Rate({ l }: { l: LineView }) {
+  const rate = l.qty > 0 ? Math.round(l.priceCents / l.qty) : l.unitCostCents;
   return (
-    <>
-      {formatAud(l.unitCostCents)}
-      {l.markupPct !== l.defaultMarkupPct && <span className="text-ink-3"> +{l.markupPct}%</span>}
-    </>
+    <span title={`Your cost ${formatAud(l.unitCostCents)} + ${l.markupPct}% markup`}>
+      {formatAud(rate)}
+    </span>
   );
 }
 

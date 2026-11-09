@@ -63,3 +63,13 @@ export function unitLabel(unit: string, qty: number) {
 export function formatQtyUnit(qty: number, unit: string) {
   return `${formatQty(qty)} ${unitLabel(unit, qty)}`;
 }
+
+/**
+ * Keeps a number with its unit ("1.8 m", "600 mm", "20 m²", "3 hrs") and with a "×" next to it, so a title never
+ * breaks between them: those spaces become non-breaking. For titles and other text shown as written.
+ */
+export function keepUnits(text: string) {
+  return text
+    .replace(/(\d)\s+(?=(?:mm|cm|m²|m³|m2|m3|m|lm|kg|L|hrs?|h|ea|sheets?|bags?|packs?)(?![\p{L}]))/gu, "$1 ")
+    .replace(/×\s+(?=\d)/g, "× ");
+}

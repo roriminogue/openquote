@@ -75,6 +75,8 @@ export function NewEstimate({
 
   async function generate(e: React.FormEvent) {
     e.preventDefault();
+    // Only this form's own submit prices the job, never one bubbling up from a sheet opened inside it.
+    if (e.target !== e.currentTarget) return;
     const controller = new AbortController();
     abortRef.current = controller;
     setPhase({ kind: "streaming", draft: {} });
@@ -163,7 +165,11 @@ export function NewEstimate({
               minLength={10}
               maxLength={8000}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                // An old "describe it in more detail" or provider error shouldn't sit there once they've fixed it.
+                if (phase.kind === "error") setPhase({ kind: "idle" });
+              }}
               onKeyDown={submitOnShortcut}
               disabled={busy}
               readOnly={dictation.busy}
@@ -186,7 +192,6 @@ export function NewEstimate({
               {ai && (
                 <span id="description-hint" className="hidden min-w-0 truncate text-xs text-ink-3 sm:inline">
                   {ai.provider}
-                  {ai.model ? ` · ${ai.model}` : ""}
                 </span>
               )}
               <span className="ml-auto max-sm:w-full">

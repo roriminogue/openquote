@@ -151,6 +151,13 @@ export async function decide(
       estimateVersion: seenVersion,
       totalCents: q.totals.totalCents,
     });
+    // Won the job: a project still marked Quoting becomes Active (a status set by hand is left alone).
+    if (decision.type === "accepted" && q.estimate.projectId) {
+      await tx
+        .update(schema.projects)
+        .set({ status: "active", updatedAt: new Date() })
+        .where(and(eq(schema.projects.id, q.estimate.projectId), eq(schema.projects.status, "quoting")));
+    }
     return "ok";
   });
 }

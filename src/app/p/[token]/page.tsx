@@ -9,15 +9,16 @@ import { getAuthUser } from "@/lib/auth";
 import { DEFAULT_TERMS, formatAbn } from "@/lib/business-schema";
 import { formatEstimateNo } from "@/lib/pricing";
 import { getPublicProposal, recordView } from "@/lib/proposals";
-import { formatQty, unitLabel } from "@/lib/units";
+import { formatQty, keepUnits, unitLabel } from "@/lib/units";
 import { Decision, PrintButton } from "./decision";
+import { dateFormat } from "@/lib/dates";
 
 // The client-facing quote: no app chrome, a printable document with the business's branding, and one clear
 // way to say yes. Reached only through its unguessable link.
 
 export const metadata: Metadata = { title: "Quote", robots: { index: false, follow: false } };
 
-const dateFmt = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "long", year: "numeric" });
+const dateFmt = dateFormat({ day: "numeric", month: "long", year: "numeric" });
 
 export default function QuotePage({ params }: PageProps<"/p/[token]">) {
   return (
@@ -94,7 +95,7 @@ async function Quote({ params }: Pick<PageProps<"/p/[token]">, "params">) {
         </dl>
 
         <section className="py-6">
-          <h1 className="font-display text-title font-medium leading-8">{e.title}</h1>
+          <h1 className="font-display text-title font-medium leading-8">{e.title ? keepUnits(e.title) : e.title}</h1>
           {e.summary && <p className="mt-3 max-w-[68ch] text-[0.9375rem] leading-relaxed text-ink-2">{e.summary}</p>}
         </section>
 

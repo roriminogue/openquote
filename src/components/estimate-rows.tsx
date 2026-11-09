@@ -4,11 +4,10 @@ import { formatEstimateNo } from "@/lib/pricing";
 import { EstimateStatus } from "./estimate-view";
 import { Money } from "./money";
 import { ListFrame, listHeader, listRow } from "./records";
+import { dateFormat } from "@/lib/dates";
+import { keepUnits } from "@/lib/units";
 
-const dateFmt = new Intl.DateTimeFormat("en-AU", {
-  day: "numeric",
-  month: "short",
-});
+const dateFmt = dateFormat({ day: "numeric", month: "short" });
 
 type Rows = Awaited<ReturnType<typeof listEstimates>>;
 
@@ -43,7 +42,7 @@ export function EstimateRows({
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium text-ink">
-                  {e.title}
+                  {e.title ? keepUnits(e.title) : e.title}
                 </span>
                 <span className="mt-0.5 block truncate text-caption text-ink-3">
                   <span className="figures md:hidden">

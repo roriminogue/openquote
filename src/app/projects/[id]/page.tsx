@@ -7,6 +7,8 @@ import { requireMember } from "@/lib/auth";
 import { listEstimates } from "@/lib/estimate/queries";
 import { getClient, getProject, listClients } from "@/lib/projects";
 import { ProjectView } from "@/components/views/project-view";
+import { deleteProjectRecord } from "@/app/actions/delete";
+import { DeleteRecord } from "@/components/delete-record";
 
 export const metadata: Metadata = { title: "Project" };
 
@@ -35,5 +37,20 @@ async function Project({ params }: Pick<PageProps<"/projects/[id]">, "params">) 
     listEstimates(member.orgId, { projectId: id }),
     listClients(member.orgId),
   ]);
-  return <ProjectView project={project} client={client} estimates={estimates} clients={clients} />;
+  return (
+    <>
+      <ProjectView project={project} client={client} estimates={estimates} clients={clients} />
+      <DeleteRecord
+        label="Delete project"
+        question={`Delete ${project.name}?`}
+        consequence={
+          estimates.length
+            ? `Its ${estimates.length === 1 ? "estimate stays" : `${estimates.length} estimates stay`} in Estimates, just no longer in a project.`
+            : "It has no estimates."
+        }
+        action={deleteProjectRecord.bind(null, id)}
+        then="/projects"
+      />
+    </>
+  );
 }

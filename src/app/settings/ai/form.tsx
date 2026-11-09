@@ -68,17 +68,16 @@ export function AiSettingsForm({ initial }: { initial: Initial }) {
           <ModelField
             name="fastModel"
             label="Fast model"
-            help="Sorts jobs and reads documents."
+            help="Tidies up spoken job descriptions (trade words, measurements)."
             placeholder={info.defaultFastModel ?? "Save to load models…"}
             defaultValue={provider === initial.provider ? initial.fastModel : ""}
           />
 
-          <Row label="Voice notes" htmlFor="transcription" hint="Turn spoken job descriptions into text.">
-            <Select id="transcription" name="transcription" defaultValue={initial.transcription}>
-              <option value="off">Off (type descriptions)</option>
-              <option value="openai">OpenAI Whisper (uses an OpenAI key)</option>
-              <option value="local">Local whisper.cpp (self-hosted)</option>
-            </Select>
+          <Row label="Talk" hint="Nothing to set up.">
+            <p className="text-sm text-ink-2">
+              Talk uses your phone or browser&apos;s own speech recognition, then the fast model above fixes misheard trade
+              words.
+            </p>
           </Row>
         </Rows>
         <datalist id="models">

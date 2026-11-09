@@ -56,7 +56,12 @@ export function Sheet({
       className="sheet m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-bg p-0 text-ink backdrop:bg-ink/20 open:flex open:flex-col sm:ml-auto sm:max-w-[28rem] sm:border-l sm:border-border sm:shadow-lg"
     >
       <form
-        onSubmit={onSubmit}
+        onSubmit={(e) => {
+          // React passes events up through portals: without this, saving a sheet opened from inside another form
+          // (New project from the estimate composer) also submitted that form.
+          e.stopPropagation();
+          onSubmit?.(e);
+        }}
         onKeyDown={(e) => {
           if (action && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();

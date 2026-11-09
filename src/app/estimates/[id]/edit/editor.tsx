@@ -131,12 +131,28 @@ export function EstimateEditor({
     focusNext.current = null;
   });
 
-  // Warn before throwing away unsaved edits.
+  // Warn before throwing away unsaved edits: closing or reloading the tab (beforeunload), and following any link
+  // inside the app (Cancel, Back, the sidebar, the phone tab bar), which beforeunload never sees because Next.js
+  // navigates without unloading the page. Runs in the capture phase so it gets in before the link's own handler.
   useEffect(() => {
     if (!dirty) return;
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    const leaving = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const link = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!link || link.target === "_blank" || link.hasAttribute("download")) return;
+      const to = new URL(link.href, window.location.href);
+      if (to.origin !== window.location.origin || to.pathname === window.location.pathname) return;
+      if (window.confirm("Leave without saving? Your changes to this estimate will be lost.")) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
     window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
+    document.addEventListener("click", leaving, true);
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+      document.removeEventListener("click", leaving, true);
+    };
   }, [dirty]);
 
   const update = (fn: (gs: DraftGroup[]) => DraftGroup[]) => {

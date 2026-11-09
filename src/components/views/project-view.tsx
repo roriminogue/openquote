@@ -8,8 +8,9 @@ import { mapsUrl, StatusPill } from "@/components/records";
 import { EmptyState, GroupTitle, KeyValue, LinkButton, Panel } from "@/components/ui";
 import type { listEstimates } from "@/lib/estimate/queries";
 import { formatProjectNo, type ClientOption } from "@/lib/project-schema";
+import { dateFormat } from "@/lib/dates";
 
-const dateFmt = new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", year: "numeric" });
+const dateFmt = dateFormat({ day: "numeric", month: "short", year: "numeric" });
 const fmtDate = (d: string | null) => (d ? dateFmt.format(new Date(`${d}T00:00:00`)) : null);
 
 type Estimates = Awaited<ReturnType<typeof listEstimates>>;

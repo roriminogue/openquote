@@ -8,6 +8,9 @@ import { EstimateView } from "@/components/estimate-view";
 import { getEstimate } from "@/lib/estimate/queries";
 import { getClient } from "@/lib/projects";
 import { proposalActivity } from "@/lib/proposals";
+import { deleteEstimateRecord } from "@/app/actions/delete";
+import { DeleteRecord } from "@/components/delete-record";
+import { formatEstimateNo } from "@/lib/pricing";
 
 export const metadata: Metadata = { title: "Estimate" };
 
@@ -41,23 +44,35 @@ async function EstimateDetail({ params }: Pick<PageProps<"/estimates/[id]">, "pa
   ]);
   const name = client?.kind === "company" ? (client.contactName ?? client.name) : client?.name;
 
+  const number = formatEstimateNo(data.estimate.number);
   return (
-    <EstimateView
-      estimate={data.estimate}
-      gstRatePct={data.org.gstRate}
-      groups={data.groups}
-      totals={data.totals}
-      context={data.context}
-      activity={activity}
-      send={{
-        estimateId: id,
-        title: data.estimate.title,
-        businessName: data.org.name,
-        client: client ? { name: client.name, firstName: (name ?? client.name).split(" ")[0], phone: client.phone, email: client.email } : null,
-        detail: data.estimate.displayOptions?.detail ?? "groups",
-        sent: !!activity,
-      }}
-    />
+    <>
+      {/* React puts this in <head>: each estimate's tab reads "EST-1010 Fence replacement", not just "Estimate". */}
+      <title>{`${number} ${data.estimate.title ?? "Estimate"} · OpenQuote AU`}</title>
+      <EstimateView
+        estimate={data.estimate}
+        gstRatePct={data.org.gstRate}
+        groups={data.groups}
+        totals={data.totals}
+        context={data.context}
+        activity={activity}
+        send={{
+          estimateId: id,
+          title: data.estimate.title,
+          businessName: data.org.name,
+          client: client ? { name: client.name, firstName: (name ?? client.name).split(" ")[0], phone: client.phone, email: client.email } : null,
+          detail: data.estimate.displayOptions?.detail ?? "groups",
+          sent: !!activity,
+        }}
+      />
+      <DeleteRecord
+        label="Delete estimate"
+        question={`Delete ${number}?`}
+        consequence={activity ? "Its lines, history and the client's link go with it, so the link stops working." : "Its lines and history go with it."}
+        action={deleteEstimateRecord.bind(null, id)}
+        then="/estimates"
+      />
+    </>
   );
 }
 
