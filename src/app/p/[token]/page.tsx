@@ -219,7 +219,7 @@ async function Quote({ params }: Pick<PageProps<"/p/[token]">, "params">) {
           </p>
         )}
       </article>
-      <p className="no-print mt-6 text-center text-xs text-ink-3">Sent with OpenQuote</p>
+      <p className="no-print mt-6 text-center text-xs text-ink-3">Sent with OpenQuote AU</p>
     </main>
   );
 }

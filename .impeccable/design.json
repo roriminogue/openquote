@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-10-21T10:47:19+00:00",
-  "title": "Design System: OpenQuote",
+  "title": "Design System: OpenQuote AU",
   "extensions": {
     "colorMeta": {
       "bg": {
@@ -1018,7 +1018,7 @@
   ],
   "narrative": {
     "northStar": "The Quiet Workbench",
-    "overview": "OpenQuote is a calm, neutral workspace: an off-white page, zinc greys, hairlines and dashed row rules, cards outlined by a 1px ring with a barely-there layered shadow, and near-black actions. Nothing decorates. The total, the price of each line, where each price came from, and the next action are the only things allowed to speak. One hi-vis orange accent, the colour of site safety gear, appears only when a job is being priced, is still in flight, or needs checking; everything else stays grey so that orange always means \"this is live, look here\".\n\nDensity is a compact desktop workspace from 640px (28 to 36px controls, 12 to 14px labels, 28px nav items, open tables) and stacked and thumb-sized on a phone (44px targets, bottom tab bar, full-screen sheets). Two faces split the work: Figtree at medium weight for headings (page titles, greeting lines, sheet titles), Geist for everything a user operates or reads in a row, with tabular figures wherever money or quantity appears. A dark zinc theme follows the system setting for evening admin. The system refuses both a costume (no trade metaphors drawn into the UI) and the generic SaaS starter (no heavy display type, no icon tiles, no colour on every status).",
+    "overview": "OpenQuote AU is a calm, neutral workspace: an off-white page, zinc greys, hairlines and dashed row rules, cards outlined by a 1px ring with a barely-there layered shadow, and near-black actions. Nothing decorates. The total, the price of each line, where each price came from, and the next action are the only things allowed to speak. One hi-vis orange accent, the colour of site safety gear, appears only when a job is being priced, is still in flight, or needs checking; everything else stays grey so that orange always means \"this is live, look here\".\n\nDensity is a compact desktop workspace from 640px (28 to 36px controls, 12 to 14px labels, 28px nav items, open tables) and stacked and thumb-sized on a phone (44px targets, bottom tab bar, full-screen sheets). Two faces split the work: Figtree at medium weight for headings (page titles, greeting lines, sheet titles), Geist for everything a user operates or reads in a row, with tabular figures wherever money or quantity appears. A dark zinc theme follows the system setting for evening admin. The system refuses both a costume (no trade metaphors drawn into the UI) and the generic SaaS starter (no heavy display type, no icon tiles, no colour on every status).",
     "keyCharacteristics": [
       "Neutral zinc ramp on an off-white page carries all structure; primary buttons are a short near-black gradient with a top highlight.",
       "One orange accent, reserved: \"Price this job\", live progress, in-flight status dots, warnings.",

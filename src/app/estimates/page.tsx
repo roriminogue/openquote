@@ -45,7 +45,7 @@ function FirstEstimate() {
       <div className="mx-auto max-w-lg rounded-[14px] bg-surface p-5 shadow-raised sm:p-6">
         <h2 className="font-display text-xl font-medium">Price your first job</h2>
         <p className="mt-1 text-sm text-ink-3">
-          Describe it the way you&rsquo;d tell a mate on the phone. OpenQuote breaks it into stages and prices each line
+          Describe it the way you&rsquo;d tell a mate on the phone. OpenQuote AU breaks it into stages and prices each line
           with your rates, usually in under a minute.
         </p>
         <LinkButton href="/estimates/new" variant="accent" className="mt-5">

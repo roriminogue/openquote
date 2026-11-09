@@ -1,5 +1,5 @@
 ---
-name: OpenQuote
+name: OpenQuote AU
 description: Open-source AI quoting for trades, in a calm neutral workspace where the number and the next action speak.
 colors:
   bg: "#fcfcfc"
@@ -230,13 +230,13 @@ components:
     height: "28px"
 ---
 
-# Design System: OpenQuote
+# Design System: OpenQuote AU
 
 ## Overview
 
 **Creative North Star: "The Quiet Workbench"**
 
-OpenQuote is a calm, neutral workspace: an off-white page, zinc greys, hairlines and dashed row rules, cards outlined by a 1px ring with a barely-there layered shadow, and near-black actions. Nothing decorates. The total, the price of each line, where each price came from, and the next action are the only things allowed to speak. One hi-vis orange accent, the colour of site safety gear, appears only when a job is being priced, is still in flight, or needs checking; everything else stays grey so that orange always means "this is live, look here".
+OpenQuote AU is a calm, neutral workspace: an off-white page, zinc greys, hairlines and dashed row rules, cards outlined by a 1px ring with a barely-there layered shadow, and near-black actions. Nothing decorates. The total, the price of each line, where each price came from, and the next action are the only things allowed to speak. One hi-vis orange accent, the colour of site safety gear, appears only when a job is being priced, is still in flight, or needs checking; everything else stays grey so that orange always means "this is live, look here".
 
 Density is a compact desktop workspace from 640px (28 to 36px controls, 12 to 14px labels, 28px nav items, open tables) and stacked and thumb-sized on a phone (44px targets, bottom tab bar, full-screen sheets). Two faces split the work: Figtree at medium weight for headings (page titles, greeting lines, sheet titles), Geist for everything a user operates or reads in a row, with tabular figures wherever money or quantity appears. A dark zinc theme follows the system setting for evening admin. The system refuses both a costume (no trade metaphors drawn into the UI) and the generic SaaS starter (no heavy display type, no icon tiles, no colour on every status).
 
@@ -392,7 +392,7 @@ The white composer card sits in a grey wrapper with an attached address strip (1
 A dotted grid (ink-4 at 45% dots on a 16px grid) on a 60% Subtle panel, 14px corners, at least 15rem tall, centred title (14px medium), one sentence of purpose in ink-3 and the one action. The first-run estimates list holds a white 14px Raised card with a Figtree title inside a 16px dotted wrapper. Sign-in and onboarding put a 26rem white 14px Raised card on the dotted page, the wordmark above and one line of what the app does below.
 
 ### Brand Mark
-A near-black rounded square (6.5/24 radius) holding two ground-coloured lines and a short orange last line, the total. The wordmark sets "OpenQuote" in Figtree semibold at 17px, -0.01em, beside a 22px mark.
+A near-black rounded square (6.5/24 radius) holding two ground-coloured lines and a short orange last line, the total. The wordmark sets "OpenQuote AU" in Figtree semibold at 17px, -0.01em, beside a 22px mark.
 
 ### Motion, Print and Reduced Motion
 - **Motion:** state changes at 150ms ease-out; entrances on `cubic-bezier(0.16, 1, 0.3, 1)`: rise 220ms (4px), sheet 280ms, backdrop fade 200ms. Nothing loops except the live dot and the voice bars while listening.

@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     const limit = dailyLimit(process.env.AI_DAILY_LIMIT);
     if (overLimit(await usageLast24h(member.orgId, "generate"), limit)) {
       return Response.json(
-        { error: `This OpenQuote allows ${limit} AI estimates a day per business on its shared key. Add your own key in Settings → AI to keep going.` },
+        { error: `This OpenQuote AU allows ${limit} AI estimates a day per business on its shared key. Add your own key in Settings → AI to keep going.` },
         { status: 429 },
       );
     }

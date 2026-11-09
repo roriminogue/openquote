@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { PageTitle } from "@/components/ui";
 import { requireMember } from "@/lib/auth";
 import { resolveAiConfig } from "@/lib/ai/config";
 import { PROVIDER_INFO } from "@/lib/ai/providers";
@@ -15,8 +16,7 @@ export default function NewEstimatePage({ searchParams }: PageProps<"/estimates/
   return (
     <>
       <div className="mx-auto max-w-[50rem]">
-        <h1 className="font-display text-title font-medium leading-8 text-ink-3">New estimate</h1>
-        <p className="font-display text-xl font-medium leading-7 text-ink">What&rsquo;s the job? OpenQuote prices it line by line.</p>
+        <PageTitle title="New estimate" description="Describe the job and it’s priced line by line, using your rates first." />
       </div>
       <Suspense>
         <Loader searchParams={searchParams} />

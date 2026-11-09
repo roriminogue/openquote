@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-// Sent with every page. Framing is blocked everywhere, so no other site can show OpenQuote (say, a quote's Accept
+// Sent with every page. Framing is blocked everywhere, so no other site can show OpenQuote AU (say, a quote's Accept
 // button) inside a hidden frame. Quote links carry their token in the path, so they never send a referrer.
 const securityHeaders = [
   { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" },

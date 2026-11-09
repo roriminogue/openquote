@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* OpenQuote: a calm, neutral workspace on an off-white page. Hairlines and dashed row rules carry the structure,
+/* OpenQuote AU: a calm, neutral workspace on an off-white page. Hairlines and dashed row rules carry the structure,
    near-black gradient buttons carry actions, and one hi-vis orange accent marks the moment that matters (pricing a
    job, live progress). Geist for the interface, Figtree for page headings. See DESIGN.md. */
 
@@ -44,8 +44,10 @@
     0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02);
 }
 
+/* Dark theme: follows the device unless someone picks Light or Dark in Settings → Account (data-theme on <html>,
+   set before first paint by the script in layout.tsx). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #0f0f10;
     --surface: #161618;
     --sidebar: #0f0f10;
@@ -76,7 +78,46 @@
     --shadow-card: 0 0 0 1px var(--border-strong);
     --shadow-raised: 0 0 0 1px var(--border-strong), 0 8px 24px -12px rgb(0 0 0 / 0.6);
     --shadow-raised-focus: 0 0 0 1px var(--ink-4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f0f10;
+  --surface: #161618;
+  --sidebar: #0f0f10;
+  --subtle: #1a1a1d;
+  --hover: #1f1f23;
+  --border: #232328;
+  --border-strong: #2e2e34;
+  --ink: #f4f4f5;
+  --ink-2: #d4d4d8;
+  --ink-3: #a1a1aa;
+  --ink-4: #52525b;
+  --label: #a1a1aa;
+  --primary: #e4e4e7;
+  --primary-top: #fafafa;
+  --primary-hover: #ffffff;
+  --on-primary: #18181b;
+  --accent-hover: #ff7a2e;
+  --accent-soft: #2a170b;
+  --accent-ink: #ff9a5c;
+  --danger: #f87171;
+  --danger-soft: #2a1213;
+  --ok: #4ade80;
+  --ok-soft: #0f2416;
+  --focus: #f4f4f5;
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 16px 40px -12px rgb(0 0 0 / 0.7);
+  --shadow-card: 0 0 0 1px var(--border-strong);
+  --shadow-raised: 0 0 0 1px var(--border-strong), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-raised-focus: 0 0 0 1px var(--ink-4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 /* Type ramp: Tailwind's xs–2xl plus these steps. */

@@ -31,7 +31,7 @@ export default function SetupPage() {
     <div className="flex-1 bg-subtle">
       <main className="mx-auto w-full max-w-2xl px-4 py-10 sm:py-14">
         <Wordmark />
-        <h1 className="mt-8 font-display text-title font-medium leading-8">Set up OpenQuote</h1>
+        <h1 className="mt-8 font-display text-title font-medium leading-8">Set up OpenQuote AU</h1>
         <Suspense fallback={<div className="mt-8 h-80 animate-pulse rounded-[10px] bg-hover" aria-busy="true" />}>
           <Checks />
         </Suspense>
@@ -62,7 +62,7 @@ async function Checks() {
     if (!user) {
       return (
         <Panel className="mt-8 px-5 py-5">
-          <p className="text-sm text-ink-2">This OpenQuote is set up. Sign in to see its setup details.</p>
+          <p className="text-sm text-ink-2">This OpenQuote AU is set up. Sign in to see its setup details.</p>
           <Link href="/login" className={buttonClass("primary", "md", "mt-4")}>
             Sign in
           </Link>
@@ -135,7 +135,7 @@ async function Checks() {
       title: "Sign-in emails show a code",
       detail: (
         <>
-          OpenQuote signs people in with a 6-digit code. In Supabase → Authentication → Emails, connect your own email
+          OpenQuote AU signs people in with a 6-digit code. In Supabase → Authentication → Emails, connect your own email
           service under SMTP Settings, then paste the code template from the README into the Magic link and Confirm sign
           up templates. Until then, emails carry a sign-in link that works in the same browser.
         </>

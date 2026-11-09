@@ -15,7 +15,7 @@ export default function AiSettingsPage() {
   return (
     <>
       <p className="mt-6 max-w-[68ch] text-sm text-ink-3">
-        OpenQuote uses your own AI provider account. Your key is encrypted, never leaves the server, and you pay the
+        OpenQuote AU uses your own AI provider account. Your key is encrypted, never leaves the server, and you pay the
         provider directly.
       </p>
       <Suspense>

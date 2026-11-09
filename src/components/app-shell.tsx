@@ -20,7 +20,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
     <span className={`flex items-center gap-2 text-ink ${className}`}>
       <Mark className="size-[22px] shrink-0" />
       <span translate="no" className="font-display text-[1.0625rem] font-semibold tracking-[-0.01em]">
-        OpenQuote
+        OpenQuote<span className="ml-[0.3em] font-medium text-ink-3">AU</span>
       </span>
     </span>
   );
@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-h-dvh flex-1">
         <div className="no-print hidden w-64 shrink-0 border-r border-border bg-sidebar md:block">
           <aside className="sticky top-0 flex h-dvh flex-col px-3 pb-3">
-            <Link href="/estimates" className="flex h-14 items-center px-1.5" aria-label="OpenQuote estimates">
+            <Link href="/estimates" className="flex h-14 items-center px-1.5" aria-label="OpenQuote AU estimates">
               <Wordmark />
             </Link>
             <Suspense fallback={<SidebarNav pathname="" />}>
@@ -56,7 +56,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="no-print sticky top-0 z-20 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b border-border bg-bg px-4 pt-[env(safe-area-inset-top)] md:hidden">
-            <Link href="/estimates" aria-label="OpenQuote estimates">
+            <Link href="/estimates" aria-label="OpenQuote AU estimates">
               <Wordmark />
             </Link>
             <Suspense>

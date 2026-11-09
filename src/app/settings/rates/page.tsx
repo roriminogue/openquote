@@ -24,7 +24,7 @@ async function Rates() {
   return (
     <>
       <p className="mt-6 max-w-[68ch] text-sm text-ink-3">
-        OpenQuote prices every line from your cost plus markup. Your own rates are used wherever they fit, and changes
+        OpenQuote AU prices every line from your cost plus markup. Your own rates are used wherever they fit, and changes
         apply to new estimates only.
       </p>
       {!canEdit && <p className="mt-3 text-sm text-ink-3">Only owners and admins can change these.</p>}

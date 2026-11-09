@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ThemeSwitch } from "@/components/theme";
 import { Panel, Row, Rows, GroupTitle } from "@/components/ui";
 import { requireMember } from "@/lib/auth";
 
@@ -26,6 +27,16 @@ async function Account() {
             </Row>
             <Row label="Email" hint="You sign in with a code sent here.">
               <span className="break-all text-sm font-medium">{member.email}</span>
+            </Row>
+          </Rows>
+        </Panel>
+      </section>
+      <section aria-labelledby="appearance" className="mt-10">
+        <GroupTitle id="appearance">Appearance</GroupTitle>
+        <Panel>
+          <Rows>
+            <Row label="Theme" hint="System follows your device. Saved on this device.">
+              <ThemeSwitch />
             </Row>
           </Rows>
         </Panel>

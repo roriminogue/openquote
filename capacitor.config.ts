@@ -7,12 +7,12 @@ import { config as loadEnv } from "dotenv";
 loadEnv({ path: ".env.local", quiet: true });
 const APP_URL = process.env.OPENQUOTE_APP_URL;
 if (!APP_URL) {
-  throw new Error("Set OPENQUOTE_APP_URL to your OpenQuote site (e.g. https://your-site.vercel.app) in .env.local, then run this again.");
+  throw new Error("Set OPENQUOTE_APP_URL to your OpenQuote AU site (e.g. https://your-site.vercel.app) in .env.local, then run this again.");
 }
 
 const config: CapacitorConfig = {
   appId: process.env.OPENQUOTE_APP_ID ?? "com.example.openquote",
-  appName: "OpenQuote",
+  appName: "OpenQuote AU",
   webDir: "mobile/www",
   // The web app hides Google sign-in when it sees this (Google blocks sign-in inside embedded web views).
   appendUserAgent: "OpenQuoteApp",
@@ -23,7 +23,7 @@ const config: CapacitorConfig = {
   },
   ios: {
     contentInset: "never",
-    scheme: "OpenQuote",
+    scheme: "OpenQuote AU",
   },
 };
 

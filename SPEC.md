@@ -1,4 +1,4 @@
-# OpenQuote — Product Spec
+# OpenQuote AU — Product Spec
 
 An open-source, AI-powered quoting and job-management app for trades businesses.
 Clean-room: this spec was written from publicly available information about how trades businesses quote. No
@@ -218,7 +218,7 @@ within ±X%, and structure. Run it in CI on prompt changes.
 
 ## 7a. AI configuration (bring your own key)
 
-OpenQuote ships no AI credits. Each install or business brings its own provider key.
+OpenQuote AU ships no AI credits. Each install or business brings its own provider key.
 
 **Where the key comes from** (first match wins)
 1. **Business key:** pasted in Settings → AI. Stored per organisation in `ai_settings`.

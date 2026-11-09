@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Sign in" };
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
-    <AuthFrame title="Sign in to OpenQuote" intro="Quote jobs from the site in minutes, priced with your own rates.">
+    <AuthFrame title="Sign in to OpenQuote AU" intro="Quote jobs from the site in minutes, priced with your own rates.">
       <Suspense>
         <LoginForm searchParams={searchParams} />
       </Suspense>

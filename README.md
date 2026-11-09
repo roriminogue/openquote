@@ -1,6 +1,6 @@
-# OpenQuote
+# OpenQuote AU
 
-Free, open-source AI quoting for tradies. Describe a job the way you'd tell a mate on the phone, and OpenQuote
+Free, open-source AI quoting for tradies. Describe a job the way you'd tell a mate on the phone, and OpenQuote AU
 breaks it into stages and prices every line with your own rates. Edit it, send it to your client as a link, and
 they can accept it from their phone.
 
@@ -10,9 +10,9 @@ they can accept it from their phone.
 - **Edit anything.** Change quantities, prices and descriptions, and add or remove lines and stages.
 - **Send it.** A branded quote page for your client with your logo and terms, plus Accept and Decline buttons.
 - **See what happened.** Know when they opened it, and who accepted or declined it.
-- **Your own AI key.** You pay your AI provider directly (a few cents a quote). OpenQuote itself is free.
+- **Your own AI key.** You pay your AI provider directly (a few cents a quote). OpenQuote AU itself is free.
 
-## Run your own OpenQuote (free)
+## Run your own OpenQuote AU (free)
 
 You get your own private copy, on free accounts that you control. Nobody else can see your quotes. It takes about
 20 minutes, and you don't need to write any code.
@@ -52,14 +52,14 @@ some API credit for the AI. US$5 goes a long way.
 
 1. Open your new site and go to **`/setup`** (for example `https://openquote-abc.vercel.app/setup`). It checks
    everything and tells you exactly what to fix if anything is missing.
-2. Make sign-in emails show a code. OpenQuote signs you in with a 6-digit code on every device. Supabase only
+2. Make sign-in emails show a code. OpenQuote AU signs you in with a 6-digit code on every device. Supabase only
    lets you change its emails once they go through your own email service, so:
    - In Supabase → **Authentication → Emails → SMTP Settings**, connect a free email service. A Gmail account
      with an [app password](https://myaccount.google.com/apppasswords) works (host `smtp.gmail.com`, port `465`),
      or [Brevo](https://www.brevo.com), which lets you send from your own email address without owning a domain.
    - Then open the **Magic link** and **Confirm sign up** templates and paste in
      [docs/email-code-template.html](docs/email-code-template.html), with the subject
-     `Your OpenQuote code: {{ .Token }}`.
+     `Your OpenQuote AU code: {{ .Token }}`.
 
    Until you do, Supabase's own emails contain a sign-in link instead of a code. That still works, as long as you
    open the link in the same browser you signed in from.
@@ -85,19 +85,19 @@ their own key in Settings → AI aren't limited.
 
 ### Updates
 
-Your copy is a repository on your GitHub. When OpenQuote gets new features, open it on GitHub and click
+Your copy is a repository on your GitHub. When OpenQuote AU gets new features, open it on GitHub and click
 **Sync fork** (or copy the changes across). Vercel redeploys automatically and updates your database on the way.
 
 ## What it costs
 
 | | |
 |---|---|
-| OpenQuote | Free (AGPL-3.0) |
+| OpenQuote AU | Free (AGPL-3.0) |
 | Supabase and Vercel | Free tiers are plenty for a trades business |
 | AI | Pay-as-you-go with your own key, typically a few cents per estimate |
 
 **Free Supabase projects go to sleep after a week without use.** If your site suddenly can't load anything,
-open your project in Supabase and click **Restore project**. Using OpenQuote at least once a week keeps it awake.
+open your project in Supabase and click **Restore project**. Using OpenQuote AU at least once a week keeps it awake.
 
 **Prices are a starting point for Melbourne, Victoria (checked October 2026).** The built-in price book covers
 fencing, decking and carpentry materials. Labour times haven't been checked by a tradie yet. Your own rates in
@@ -152,8 +152,8 @@ problem privately, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-[AGPL-3.0](LICENSE). You can use, change and share OpenQuote for free. If you run a modified version for other
+[AGPL-3.0](LICENSE). You can use, change and share OpenQuote AU for free. If you run a modified version for other
 people to use over the internet, you must share your changes under the same license.
 
-OpenQuote is an independent project. It contains no code, prompts or assets from any commercial quoting tool.
+OpenQuote AU is an independent project. It contains no code, prompts or assets from any commercial quoting tool.
 Estimates are a starting point; check every quote before you send it.

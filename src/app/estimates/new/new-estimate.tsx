@@ -143,7 +143,7 @@ export function NewEstimate({
         {!ai && (
           <div className="mb-4">
             <Notice tone="info">
-              Add an AI key first. OpenQuote uses your own provider account.{" "}
+              Add an AI key first. OpenQuote AU uses your own provider account.{" "}
               <Link href="/settings/ai" className="font-medium text-ink underline underline-offset-2">
                 Set up AI
               </Link>

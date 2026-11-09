@@ -53,7 +53,7 @@ export function AiSettingsForm({ initial }: { initial: Initial }) {
           )}
 
           {provider === "ollama" && (
-            <Row label="Ollama address" hint="Set by whoever runs this OpenQuote, with OLLAMA_BASE_URL.">
+            <Row label="Ollama address" hint="Set by whoever runs this OpenQuote AU, with OLLAMA_BASE_URL.">
               <p className="text-sm text-ink-2">{info.defaultBaseUrl} unless they&apos;ve changed it.</p>
             </Row>
           )}

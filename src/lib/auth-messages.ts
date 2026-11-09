@@ -4,7 +4,7 @@
 export const LOGIN_ERRORS = {
   invalid_email: "Enter a valid email.",
   link_expired: "That sign-in link didn’t work here. Open it in the browser where you asked for it, or send a new code.",
-  signups_closed: "This OpenQuote isn’t taking new sign-ups.",
+  signups_closed: "This OpenQuote AU isn’t taking new sign-ups.",
   rate_limited: "Too many codes sent. Wait a few minutes, then try again.",
   failed: "Sign-in didn’t work. Try again.",
 } as const;

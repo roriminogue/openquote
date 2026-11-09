@@ -16,7 +16,7 @@ const empty: Draft = { title: "", rate: "", unit: "hour", type: "labour" };
 
 const toDraft = (r: RateRow): Draft => ({ title: r.title, rate: centsToDollars(r.rateCents), unit: r.unit, type: r.type });
 
-/** The tradie's own prices. OpenQuote uses these instead of guessing wherever a line matches one. */
+/** The tradie's own prices. OpenQuote AU uses these instead of guessing wherever a line matches one. */
 export function RatesList({ rates: initial, canEdit }: { rates: RateRow[]; canEdit: boolean }) {
   const [rates, setRates] = useState(initial);
   const [editing, setEditing] = useState<RateRow | "new" | null>(null);

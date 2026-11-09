@@ -5,12 +5,12 @@ primary_target: "src/app"
 related_targets: []
 ---
 
-# OpenQuote app (all signed-in screens, sheets, sign-in, onboarding)
+# OpenQuote AU app (all signed-in screens, sheets, sign-in, onboarding)
 
 Mode: Operate. Audience: owner-operator tradies (phone on site, laptop at night). Redesign requested 2026-10-21: the
 owner found the tape-measure world "vibe coded"; critique scored 23/40. Owner pinned the reference: a calm, neutral,
 modern workspace app (neutral greys, quiet type, generous space), plus one small
-OpenQuote accent. The pinned direction beats the roll (seed a99e62f2, recorded as canon).
+OpenQuote AU accent. The pinned direction beats the roll (seed a99e62f2, recorded as canon).
 
 ## Direction contract
 
