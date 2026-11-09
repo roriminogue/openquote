@@ -1,10 +1,11 @@
 import { NoObjectGeneratedError } from "ai";
-import { and, count, eq, gt } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { resolveAiConfig } from "@/lib/ai/config";
 import { costMicroUsd } from "@/lib/ai/cost";
 import { dailyLimit, overLimit } from "@/lib/ai/limits";
+import { usageLast24h } from "@/lib/ai/usage";
 import { AiNotConfiguredError, languageModel } from "@/lib/ai/models";
 import { getAuthUser } from "@/lib/auth";
 import { generateEstimateDraft } from "@/lib/estimate/generate";
@@ -55,11 +56,7 @@ export async function POST(request: Request) {
   // The install's shared key is capped per business per day; a business's own key isn't.
   if (config.source === "instance") {
     const limit = dailyLimit(process.env.AI_DAILY_LIMIT);
-    const [{ n }] = await db
-      .select({ n: count() })
-      .from(schema.aiUsage)
-      .where(and(eq(schema.aiUsage.orgId, member.orgId), gt(schema.aiUsage.createdAt, new Date(Date.now() - 24 * 3600 * 1000))));
-    if (overLimit(n, limit)) {
+    if (overLimit(await usageLast24h(member.orgId, "generate"), limit)) {
       return Response.json(
         { error: `This OpenQuote allows ${limit} AI estimates a day per business on its shared key. Add your own key in Settings → AI to keep going.` },
         { status: 429 },
