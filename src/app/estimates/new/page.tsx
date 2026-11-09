@@ -5,6 +5,8 @@ import { resolveAiConfig } from "@/lib/ai/config";
 import { PROVIDER_INFO } from "@/lib/ai/providers";
 import { getOrg, gstRatePct, hasEstimates, markupSettings } from "@/lib/estimate/queries";
 import { listClients, listProjects } from "@/lib/projects";
+import { listRates } from "@/lib/rates";
+import { voiceHints } from "@/lib/voice/terms";
 import { NewEstimate } from "./new-estimate";
 
 export const metadata: Metadata = { title: "New estimate" };
@@ -25,13 +27,14 @@ export default function NewEstimatePage({ searchParams }: PageProps<"/estimates/
 
 async function Loader({ searchParams }: Pick<PageProps<"/estimates/new">, "searchParams">) {
   const member = await requireMember();
-  const [org, ai, sp, projects, clients, experienced] = await Promise.all([
+  const [org, ai, sp, projects, clients, experienced, rates] = await Promise.all([
     getOrg(member.orgId),
     resolveAiConfig(member.orgId),
     searchParams,
     listProjects(member.orgId),
     listClients(member.orgId),
     hasEstimates(member.orgId),
+    listRates(member.orgId),
   ]);
   const describe = typeof sp.describe === "string" ? sp.describe.slice(0, 500) : "";
   const initialProject = typeof sp.project === "string" ? (projects.find((p) => p.id === sp.project) ?? null) : null;
@@ -45,6 +48,7 @@ async function Loader({ searchParams }: Pick<PageProps<"/estimates/new">, "searc
       initialProject={initialProject}
       markup={markupSettings(org)}
       gstRatePct={gstRatePct(org)}
+      voiceHints={voiceHints(rates.map((r) => r.title))}
       ai={
         ai.source === "none"
           ? null
