@@ -1,33 +1,32 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { loginErrorFor } from "@/lib/auth-messages";
 import { createClient } from "@/lib/supabase/server";
 
-async function callbackUrl() {
-  const h = await headers();
-  const origin = h.get("origin") ?? "http://localhost:3000";
-  // From the iPhone app the emailed link opens Safari, so route it through a page that hands it back to the app.
-  const inApp = h.get("user-agent")?.includes("OpenQuoteApp") ?? false;
-  return `${origin}/auth/${inApp ? "open-app" : "callback"}`;
-}
+// Sign-in is one way only, on every device: enter your email, get a 6-digit code, type it in. No links (they only
+// work in the browser that asked for them), no passwords, no Google.
 
-export async function sendMagicLink(formData: FormData) {
-  const email = z.email().safeParse(formData.get("email"));
+/** Emails a one-time code. A new email gets an account too; whether it can create a business is decided later. */
+export async function sendCode(formData: FormData) {
+  const email = z.email().safeParse(String(formData.get("email") ?? "").trim());
   if (!email.success) redirect("/login?error=invalid_email");
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email: email.data,
-    options: { emailRedirectTo: await callbackUrl() },
-  });
-  if (error) redirect(`/login?error=${loginErrorFor(error)}`);
-  redirect(`/login?sent=${encodeURIComponent(email.data)}`);
+  const { error } = await supabase.auth.signInWithOtp({ email: email.data, options: { shouldCreateUser: true } });
+  const sent = `/login?sent=${encodeURIComponent(email.data)}`;
+  if (error) {
+    const code = loginErrorFor(error);
+    // Supabase allows one code a minute per email. Hitting that almost always means a code was just sent (a
+    // second tap while the first was sending), so go to the code box rather than leaving them stuck here.
+    if (code === "rate_limited") redirect(`${sent}&notice=recent`);
+    redirect(`/login?error=${code}&email=${encodeURIComponent(email.data)}`);
+  }
+  redirect(sent);
 }
 
-/** Signs in with the 6-digit code from the email, so the iPhone app never has to open the link in Safari. */
+/** Signs in with the code from the email. */
 export async function verifyCode(formData: FormData) {
   const email = z.email().safeParse(formData.get("email"));
   const token = String(formData.get("code") ?? "").replace(/\s/g, "");
@@ -37,29 +36,9 @@ export async function verifyCode(formData: FormData) {
 
   const supabase = await createClient();
   const { error } = await supabase.auth.verifyOtp({ email: email.data, token, type: "email" });
-  if (error) redirect(`${sent}&codeError=${loginErrorFor(error) === "rate_limited" ? "rate_limited" : "wrong"}`);
-  redirect("/onboarding");
-}
-
-export async function signInWithPassword(formData: FormData) {
-  const email = z.email().safeParse(formData.get("email"));
-  const password = String(formData.get("password") ?? "");
-  if (!email.success || !password) redirect("/login?error=missing_password");
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email: email.data, password });
   if (error) {
-    redirect(`/login?error=${loginErrorFor(error)}&email=${encodeURIComponent(email.data)}`);
+    const code = loginErrorFor(error);
+    redirect(`${sent}&codeError=${code === "rate_limited" ? "rate_limited" : code === "link_expired" ? "expired" : "wrong"}`);
   }
   redirect("/onboarding");
-}
-
-export async function signInWithGoogle() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: await callbackUrl() },
-  });
-  if (error) redirect(`/login?error=${loginErrorFor(error)}`);
-  redirect(data.url);
 }

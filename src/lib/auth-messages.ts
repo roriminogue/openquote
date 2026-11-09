@@ -3,12 +3,9 @@
 
 export const LOGIN_ERRORS = {
   invalid_email: "Enter a valid email.",
-  missing_password: "Enter your email and password.",
-  wrong_password: "That email and password don’t match. If you haven’t set a password yet, use an email link.",
-  link_expired: "That sign-in link expired or was already used. Send a new one.",
-  not_confirmed: "Confirm your email first: open the link we emailed you.",
+  link_expired: "That sign-in link didn’t work here. Open it in the browser where you asked for it, or send a new code.",
   signups_closed: "This OpenQuote isn’t taking new sign-ups.",
-  rate_limited: "Too many tries. Wait a minute, then try again.",
+  rate_limited: "Too many codes sent. Wait a few minutes, then try again.",
   failed: "Sign-in didn’t work. Try again.",
 } as const;
 export type LoginError = keyof typeof LOGIN_ERRORS;
@@ -16,7 +13,12 @@ export type LoginError = keyof typeof LOGIN_ERRORS;
 export const CODE_ERRORS = {
   format: "Enter the code from the email.",
   wrong: "That code didn’t work. Check it, or send a new one.",
+  expired: "That code expired. Send a new one.",
   rate_limited: "Too many tries. Wait a minute, then try again.",
+} as const;
+
+export const CODE_NOTICES = {
+  recent: "A code was sent a moment ago, so use that one. To get a new code, wait a minute.",
 } as const;
 
 export const ONBOARDING_ERRORS = {
@@ -31,10 +33,6 @@ export function messageFor<T extends Record<string, string>>(table: T, code: unk
 /** Maps a Supabase Auth error to one of our codes, so its own wording never travels through a URL. */
 export function loginErrorFor(error: { code?: string; status?: number }): LoginError {
   switch (error.code) {
-    case "invalid_credentials":
-      return "wrong_password";
-    case "email_not_confirmed":
-      return "not_confirmed";
     case "signup_disabled":
     case "otp_disabled":
       return "signups_closed";

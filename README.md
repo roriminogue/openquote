@@ -49,9 +49,19 @@ some API credit for the AI. US$5 goes a long way.
 
 1. Open your new site and go to **`/setup`** (for example `https://openquote-abc.vercel.app/setup`). It checks
    everything and tells you exactly what to fix if anything is missing.
-2. Do the one step it can't do for you: in Supabase → **Authentication → URL Configuration**, set **Site URL**
-   to your site's address, and add `https://your-site/**` under **Redirect URLs**.
-3. Sign in with your email, create your business, then go to **Settings**:
+2. Make sign-in emails show a code. OpenQuote signs you in with a 6-digit code on every device. Supabase only
+   lets you change its emails once they go through your own email service, so:
+   - In Supabase → **Authentication → Emails → SMTP Settings**, connect a free email service. A Gmail account
+     with an [app password](https://myaccount.google.com/apppasswords) works (host `smtp.gmail.com`, port `465`),
+     or [Brevo](https://www.brevo.com), which lets you send from your own email address without owning a domain.
+   - Then open the **Magic link** and **Confirm sign up** templates and paste in
+     [docs/email-code-template.html](docs/email-code-template.html), with the subject
+     `Your OpenQuote code: {{ .Token }}`.
+
+   Until you do, Supabase's own emails contain a sign-in link instead of a code. That still works, as long as you
+   open the link in the same browser you signed in from.
+
+3. Sign in with your email and the code, create your business, then go to **Settings**:
    - **Business:** your name, logo, ABN and quote terms
    - **Rates and pricing:** your hourly rate, the materials you use often, and your markup
    - **AI:** your Anthropic key
@@ -91,7 +101,8 @@ fencing, decking and carpentry materials. Labour times haven't been checked by a
 **Settings → Rates and pricing** always come first, so set those up, especially outside Victoria.
 
 Quotes are shared as links from your own phone (text, WhatsApp, email), so there's no email service to pay for.
-Sign-in works with a password, so Supabase's built-in email (a few emails an hour) is enough.
+Sign-in sends a code by email through your own free email service (step 3). You stay signed in on each device,
+so codes are rare.
 
 ## For developers
 

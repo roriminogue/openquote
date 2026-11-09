@@ -1,7 +1,6 @@
 import { count, sql } from "drizzle-orm";
 import { CheckCircle2, CircleAlert, Info } from "lucide-react";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
@@ -43,9 +42,6 @@ export default function SetupPage() {
 
 async function Checks() {
   await connection();
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "your-site.vercel.app";
-  const origin = `${h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -136,11 +132,12 @@ async function Checks() {
     },
     {
       ok: "info",
-      title: "Sign-in links come back here",
+      title: "Sign-in emails show a code",
       detail: (
         <>
-          In Supabase → Authentication → URL Configuration, set Site URL to <Code>{origin}</Code> and add{" "}
-          <Code>{`${origin}/**`}</Code> to Redirect URLs.
+          OpenQuote signs people in with a 6-digit code. In Supabase → Authentication → Emails, connect your own email
+          service under SMTP Settings, then paste the code template from the README into the Magic link and Confirm sign
+          up templates. Until then, emails carry a sign-in link that works in the same browser.
         </>
       ),
     },

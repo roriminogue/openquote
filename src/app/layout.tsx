@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Geist } from "next/font/google";
-import { AppLinks } from "@/components/app-links";
 import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
@@ -26,7 +25,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en-AU" className={`${geist.variable} ${figtree.variable} h-full`}>
       <body className="min-h-full flex flex-col">
         {children}
-        <AppLinks />
       </body>
     </html>
   );
