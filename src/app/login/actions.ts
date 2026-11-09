@@ -15,8 +15,15 @@ export async function sendCode(formData: FormData) {
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({ email: email.data, options: { shouldCreateUser: true } });
-  if (error) redirect(`/login?error=${loginErrorFor(error)}&email=${encodeURIComponent(email.data)}`);
-  redirect(`/login?sent=${encodeURIComponent(email.data)}`);
+  const sent = `/login?sent=${encodeURIComponent(email.data)}`;
+  if (error) {
+    const code = loginErrorFor(error);
+    // Supabase allows one code a minute per email. Hitting that almost always means a code was just sent (a
+    // second tap while the first was sending), so go to the code box rather than leaving them stuck here.
+    if (code === "rate_limited") redirect(`${sent}&notice=recent`);
+    redirect(`/login?error=${code}&email=${encodeURIComponent(email.data)}`);
+  }
+  redirect(sent);
 }
 
 /** Signs in with the code from the email. */

@@ -2,9 +2,10 @@ import { Mail } from "lucide-react";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AuthFrame } from "@/components/auth-frame";
-import { Button, Field, Input, Notice } from "@/components/ui";
+import { SubmitButton, SubmitLink } from "@/components/submit-button";
+import { Field, Input, Notice } from "@/components/ui";
 import { sendCode, verifyCode } from "./actions";
-import { CODE_ERRORS, LOGIN_ERRORS, messageFor } from "@/lib/auth-messages";
+import { CODE_ERRORS, CODE_NOTICES, LOGIN_ERRORS, messageFor } from "@/lib/auth-messages";
 import { z } from "zod";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -24,6 +25,7 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
   // Only our own messages, and only a real email address, are ever shown from the URL.
   const error = messageFor(LOGIN_ERRORS, params.error);
   const codeError = messageFor(CODE_ERRORS, params.codeError);
+  const notice = messageFor(CODE_NOTICES, params.notice);
   const sent = typeof params.sent === "string" && z.email().safeParse(params.sent).success ? params.sent : undefined;
   const lastEmail = typeof params.email === "string" && z.email().safeParse(params.email).success ? params.email : undefined;
 
@@ -55,13 +57,15 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
               className="figures tracking-[0.2em]"
             />
           </Field>
-          {codeError && <Notice tone="error">{codeError}</Notice>}
-          <Button className="w-full">Sign in</Button>
+          {codeError ? <Notice tone="error">{codeError}</Notice> : notice && <Notice tone="info">{notice}</Notice>}
+          <SubmitButton className="w-full" pendingLabel="Signing in…">
+            Sign in
+          </SubmitButton>
         </form>
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
           <form action={sendCode}>
             <input type="hidden" name="email" value={sent} />
-            <button className="font-medium text-ink-2 underline underline-offset-4 hover:text-ink">Send a new code</button>
+            <SubmitLink pendingLabel="Sending…">Send a new code</SubmitLink>
           </form>
           <a href="/login" className="font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
             Use a different email
@@ -88,7 +92,9 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
         />
       </Field>
       {error && <Notice tone="error">{error}</Notice>}
-      <Button className="w-full">Email me a code</Button>
+      <SubmitButton className="w-full" pendingLabel="Sending your code…">
+        Email me a code
+      </SubmitButton>
     </form>
   );
 }

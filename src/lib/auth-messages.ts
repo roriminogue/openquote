@@ -17,6 +17,10 @@ export const CODE_ERRORS = {
   rate_limited: "Too many tries. Wait a minute, then try again.",
 } as const;
 
+export const CODE_NOTICES = {
+  recent: "A code was sent a moment ago, so use that one. To get a new code, wait a minute.",
+} as const;
+
 export const ONBOARDING_ERRORS = {
   missing_fields: "Fill in both fields.",
 } as const;

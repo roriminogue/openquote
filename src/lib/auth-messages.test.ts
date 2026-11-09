@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LOGIN_ERRORS, loginErrorFor, messageFor } from "./auth-messages";
+import { CODE_NOTICES, LOGIN_ERRORS, loginErrorFor, messageFor } from "./auth-messages";
 
 describe("messageFor", () => {
   it("only shows our own messages", () => {
@@ -8,6 +8,7 @@ describe("messageFor", () => {
     expect(messageFor(LOGIN_ERRORS, "toString")).toBeNull();
     expect(messageFor(LOGIN_ERRORS, ["invalid_email"])).toBeNull();
     expect(messageFor(LOGIN_ERRORS, undefined)).toBeNull();
+    expect(messageFor(CODE_NOTICES, "recent")).toBe(CODE_NOTICES.recent);
   });
 });
 
