@@ -35,7 +35,7 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
           <Mail className="mt-0.5 size-5 shrink-0 text-ink-2" aria-hidden />
           <p className="text-body">
             We emailed a 6-digit code to <strong className="break-all font-medium">{sent}</strong>. It can take a minute to
-            arrive, so check your junk folder too.
+            arrive, so check your junk folder too. If the email has a Sign in link instead, open it in this browser.
           </p>
         </div>
         <form action={verifyCode} className="space-y-3">

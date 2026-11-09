@@ -135,8 +135,9 @@ async function Checks() {
       title: "Sign-in emails show a code",
       detail: (
         <>
-          OpenQuote signs people in with a 6-digit code. In Supabase → Authentication → Emails, put{" "}
-          <Code>{"{{ .Token }}"}</Code> in the Magic link and Confirm sign up templates (the README has the exact text).
+          OpenQuote signs people in with a 6-digit code. In Supabase → Authentication → Emails, connect your own email
+          service under SMTP Settings, then paste the code template from the README into the Magic link and Confirm sign
+          up templates. Until then, emails carry a sign-in link that works in the same browser.
         </>
       ),
     },

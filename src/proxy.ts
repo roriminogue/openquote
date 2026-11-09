@@ -39,6 +39,14 @@ export async function proxy(request: NextRequest) {
   // The app's front door: estimates when signed in, sign-in otherwise.
   if (path === "/") {
     const to = request.nextUrl.clone();
+    // Supabase's default email (used until an install sets up its own email service) has a link instead of a code,
+    // and it lands on the site's home page with ?code=…: finish that sign-in rather than dropping it.
+    const code = request.nextUrl.searchParams.get("code");
+    if (code) {
+      to.pathname = "/auth/callback";
+      to.search = `?code=${encodeURIComponent(code)}`;
+      return NextResponse.redirect(to);
+    }
     to.pathname = data?.claims ? "/estimates" : "/login";
     to.search = "";
     return NextResponse.redirect(to);
