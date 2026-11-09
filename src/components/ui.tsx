@@ -51,7 +51,7 @@ export function LinkButton({
 
 // 16px text on phones so iOS doesn't zoom on focus; 14px from 640px.
 const control =
-  "w-full rounded-lg border border-border bg-bg px-3 text-base text-ink transition-[border-color,box-shadow] duration-150 placeholder:text-ink-3 hover:border-border-strong focus:border-ink-4 focus:outline-none focus:ring-3 focus:ring-ink/5 disabled:opacity-60 aria-invalid:border-danger aria-invalid:ring-danger/10 sm:text-sm";
+  "w-full rounded-lg border border-border bg-bg px-3 text-base text-ink transition-[border-color,box-shadow] duration-150 placeholder:text-ink-3 hover:border-border-strong focus:border-ink-4 focus:outline-none disabled:opacity-60 aria-invalid:border-danger aria-invalid:ring-danger/10 sm:text-sm";
 
 export function Input({ className = "", ...props }: ComponentProps<"input">) {
   return <input className={`${control} h-11 sm:h-9 ${className}`} {...props} />;

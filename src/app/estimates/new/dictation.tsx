@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, Square } from "lucide-react";
+import { Mic } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { dictationKind, startDictation, type Dictation, type DictationKind } from "@/lib/voice/dictation";
 import { joinSpoken } from "@/lib/voice/text";
@@ -95,40 +95,41 @@ export function useDictation({
     status,
     busy: status !== "idle",
     toggle,
+    // Shaped like the project chip beside it: a quiet ghost control, not a button shouting for attention. While
+    // listening, four orange bars move (the live state) and the label becomes Stop with a running time.
     button: kind ? (
       <button
         type="button"
         onClick={toggle}
         disabled={status === "starting" || status === "tidying"}
         aria-pressed={status === "listening"}
-        aria-label={status === "listening" ? "Stop talking" : "Talk instead of typing"}
-        title={status === "listening" ? "Stop" : "Talk instead of typing"}
-        className={`inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-[0.9375rem] font-medium transition-[background-color,border-color,color] duration-150 disabled:opacity-60 sm:h-8 sm:px-2.5 sm:text-xs ${
-          status === "listening"
-            ? "border-accent-hover bg-accent-soft text-accent-ink"
-            : "border-border-strong bg-bg text-ink hover:bg-hover"
+        aria-label={status === "listening" ? `Stop talking (${elapsedFmt(elapsed)})` : "Talk instead of typing"}
+        className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg px-2 text-sm font-medium transition-colors duration-150 disabled:text-ink-3 sm:h-7 sm:text-xs ${
+          status === "listening" ? "bg-hover text-ink" : "text-ink hover:bg-hover"
         }`}
       >
         {status === "listening" ? (
           <>
-            <span aria-hidden className="size-2 rounded-full bg-accent motion-safe:animate-pulse" />
-            <span className="figures">{elapsedFmt(elapsed)}</span>
-            <Square className="size-3 fill-current" aria-hidden />
+            <span aria-hidden className="voice-bars">
+              <span />
+              <span />
+              <span />
+              <span />
+            </span>
             <span>Stop</span>
+            <span className="figures font-normal text-ink-3">{elapsedFmt(elapsed)}</span>
           </>
         ) : (
           <>
-            <Mic className="size-4 sm:size-3.5" aria-hidden />
-            <span className={status === "idle" ? "max-sm:sr-only" : ""}>
-              {status === "starting" ? "Starting…" : status === "tidying" ? "Checking words…" : "Talk"}
-            </span>
+            <Mic className={`size-4 shrink-0 sm:size-3.5 ${status === "idle" ? "" : "motion-safe:animate-pulse"}`} aria-hidden />
+            <span>{status === "starting" ? "Starting…" : status === "tidying" ? "Checking words…" : "Talk"}</span>
           </>
         )}
       </button>
     ) : null,
     statusLine:
       status === "listening" ? (
-        <p className="text-xs text-ink-3">Listening. Talk it through like you would on the phone, then tap Stop.</p>
+        <p className="sr-only">Listening. Talk it through, then press Stop.</p>
       ) : problem ? (
         <p className="text-xs text-danger">{problem}</p>
       ) : tidied && value === tidied.result ? (

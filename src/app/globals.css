@@ -39,6 +39,9 @@
     0 6px 6px -3px rgb(0 0 0 / 0.015);
   --shadow-raised: 0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.03), 0 3px 3px -1.5px rgb(0 0 0 / 0.03),
     0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02);
+  /* The composer while you type in it: the same lift, with its edge darkened instead of a glow around it. */
+  --shadow-raised-focus: 0 0 0 1px var(--ink-4), 0 1px 1px -0.5px rgb(0 0 0 / 0.03), 0 3px 3px -1.5px rgb(0 0 0 / 0.03),
+    0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,6 +75,7 @@
     --shadow-lg: 0 16px 40px -12px rgb(0 0 0 / 0.7);
     --shadow-card: 0 0 0 1px var(--border-strong);
     --shadow-raised: 0 0 0 1px var(--border-strong), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    --shadow-raised-focus: 0 0 0 1px var(--ink-4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
   }
 }
 
@@ -149,6 +153,57 @@ body {
 :focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* Focus rings are for the keyboard. After a click or tap (PointerFocus sets data-pointer until the next Tab),
+   nothing gets an outline; pressing Tab brings them straight back. */
+html[data-pointer] :focus-visible {
+  outline: none;
+}
+
+/* Voice input: four short bars that move while the microphone is listening (the live state, so orange). */
+@keyframes voice-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.voice-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+
+.voice-bars > span {
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--accent);
+  transform: scaleY(0.35);
+  transform-origin: center;
+  animation: voice-bar 900ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.voice-bars > span:nth-child(2) {
+  animation-delay: -150ms;
+}
+.voice-bars > span:nth-child(3) {
+  animation-delay: -450ms;
+}
+.voice-bars > span:nth-child(4) {
+  animation-delay: -300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-bars > span {
+    animation: none;
+    transform: scaleY(0.7);
+  }
 }
 
 a {

@@ -325,7 +325,7 @@ Depth is ring-first. The page is off-white; cards sit on it outlined by a 1px bo
 - **Raised** (`box-shadow: 0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.03), 0 3px 3px -1.5px rgb(0 0 0 / 0.03), 0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02)`): the composer card, auth card, empty-estimates card, account menu.
 - **Sheet** (`box-shadow: 0 12px 32px -12px rgb(24 24 27 / 0.22), 0 2px 6px rgb(24 24 27 / 0.06)`): the right-hand sheet from 640px, over a 20% ink backdrop.
 - **Button highlight** (`box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16)`, 0.22 on accent): the top edge of gradient buttons and the New tile.
-- **Focus halo** (3px ring of ink at 5%, border to ink-4): inputs on focus; the composer card adds a 4px halo on focus-within.
+- **Focus edge** (border to ink-4, no halo): inputs on focus; the composer card darkens its ring to ink-4 on focus-within (`--shadow-raised-focus`).
 
 ### Named Rules
 **The Hairline First Rule.** Separate with a 1px line (a ring, a hairline or a dashed row rule) before reaching for shadow or tint. Anything heavier than Raised belongs only to an overlay.
@@ -349,7 +349,7 @@ Dense on a desk, thumb-sized on site.
 
 ### Inputs / Fields
 - **Style:** page colour, 1px border hairline (border-strong on hover), 8px radius, 12px inset, 36px tall with 14px text from 640px; 44px with 16px text on phones (no iOS zoom); placeholders in ink-3.
-- **Focus:** border to ink-4 plus the 3px focus halo; the global `:focus-visible` is a 2px focus-colour outline offset 2px.
+- **Focus:** border to ink-4, no halo. The global `:focus-visible` is a 2px focus-colour outline offset 2px, shown for the keyboard only: after a click or tap (`html[data-pointer]`, set by PointerFocus) no outline is drawn until the next Tab.
 - **Select:** native, with a 14px ink-3 up-down chevron and 36px right padding.
 - **Textarea:** no resize grip, relaxed leading.
 - **Field:** label in Label type; "Optional" in regular ink-3 beside it (never an asterisk); hint in 12px ink-3 below.
@@ -386,7 +386,7 @@ Stat columns sit straight on the page, split by vertical hairlines with 24px eit
 Description in ink, the line type in caption ink-3 below, notes in caption ink-3. Quantities read as a tradie writes them: abbreviated and pluralised (3 hrs, 1 hr, 36 bags, 12 lm, 4.5 m², 1 lot). The rate shows a markup suffix (+30%) only when the line's markup differs from the default. Stage headers carry an ink-4 number and a semibold subtotal over a dashed rule; the schedule closes with price ex GST, GST, and a Total row (16px semibold) over a hairline.
 
 ### Composer and Live Preview (signature)
-The white composer card sits in a grey wrapper with an attached address strip (12px text, map pin) and takes a focus halo as a whole. Example chips are 28px (36px on phones) grey pills. The footer row carries the project chip, the provider and model in caption ink-3, and the accent "Price this job". While a quote streams, the preview card (14px, Card ring) shows a pulsing orange dot beside the status line, the Figtree title, a running total in Stat type with a line count, the breakdown bar, and stages entering with a 4px rise; each newly arrived line flashes the orange wash and fades back over 500ms.
+The white composer card sits in a grey wrapper with an attached address strip (12px text, map pin); on focus its ring darkens to ink-4. No example chips. The footer row carries the Talk chip (same ghost shape as the project chip; while listening, four 2px orange bars move, the label becomes Stop with a running time in ink-3), the project chip, the provider and model in caption ink-3, and the accent "Price this job". While a quote streams, the preview card (14px, Card ring) shows a pulsing orange dot beside the status line, the Figtree title, a running total in Stat type with a line count, the breakdown bar, and stages entering with a 4px rise; each newly arrived line flashes the orange wash and fades back over 500ms.
 
 ### Empty States
 A dotted grid (ink-4 at 45% dots on a 16px grid) on a 60% Subtle panel, 14px corners, at least 15rem tall, centred title (14px medium), one sentence of purpose in ink-3 and the one action. The first-run estimates list holds a white 14px Raised card with a Figtree title inside a 16px dotted wrapper. Sign-in and onboarding put a 26rem white 14px Raised card on the dotted page, the wordmark above and one line of what the app does below.
@@ -395,7 +395,7 @@ A dotted grid (ink-4 at 45% dots on a 16px grid) on a 60% Subtle panel, 14px cor
 A near-black rounded square (6.5/24 radius) holding two ground-coloured lines and a short orange last line, the total. The wordmark sets "OpenQuote" in Figtree semibold at 17px, -0.01em, beside a 22px mark.
 
 ### Motion, Print and Reduced Motion
-- **Motion:** state changes at 150ms ease-out; entrances on `cubic-bezier(0.16, 1, 0.3, 1)`: rise 220ms (4px), sheet 280ms, backdrop fade 200ms. Nothing loops except the live dot.
+- **Motion:** state changes at 150ms ease-out; entrances on `cubic-bezier(0.16, 1, 0.3, 1)`: rise 220ms (4px), sheet 280ms, backdrop fade 200ms. Nothing loops except the live dot and the voice bars while listening.
 - **Print:** `.no-print` drops the shell, nav and actions; pages print black on white with 16mm by 14mm margins, and the schedule keeps its columns on paper.
 - **Reduced motion:** every animation and transition collapses to 0.01ms; the live ping is hidden.
 

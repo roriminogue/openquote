@@ -40,13 +40,6 @@ function previewGroups(draft: PartialDraft, markup: MarkupSettings) {
     });
 }
 
-const EXAMPLES = [
-  ["Deck", "Build a 4 × 3 m merbau deck, 600 mm high, two steps down to the lawn, oil finish"],
-  ["Bathroom", "Retile a 2.4 × 2 m bathroom floor to ceiling, walk-in shower, new vanity and toilet, same layout"],
-  ["Fence", "Replace 20 m of 1.8 m paling fence, reuse the posts, treated pine palings and capping"],
-  ["Pergola", "Freestanding 4 × 4 m treated pine pergola on concrete footings, Colorbond roof"],
-] as const;
-
 export function NewEstimate({
   initialDescription,
   firstTime = false,
@@ -158,7 +151,7 @@ export function NewEstimate({
           </div>
         )}
         <div className="rounded-2xl bg-subtle">
-          <div className="rounded-[14px] bg-surface shadow-raised transition-shadow duration-150 focus-within:shadow-[var(--shadow-raised),0_0_0_4px_color-mix(in_oklab,var(--ink)_5%,transparent)]">
+          <div className="rounded-[14px] bg-surface shadow-raised transition-shadow duration-150 focus-within:shadow-[var(--shadow-raised-focus)]">
             <label htmlFor="description" className="sr-only">
               Describe the job
             </label>
@@ -182,20 +175,6 @@ export function NewEstimate({
               }
               className="block min-h-28 w-full resize-none rounded-t-[14px] bg-transparent px-4 pb-2 pt-4 text-base leading-relaxed text-ink placeholder:text-ink-3 focus:outline-none disabled:opacity-60 sm:text-sm"
             />
-            {!description.trim() && !busy && !dictation.busy && (
-              <div className="flex flex-wrap gap-1.5 px-4 pb-2" aria-label="Start from an example">
-                {EXAMPLES.map(([label, text]) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => setDescription(text)}
-                    className="h-9 rounded-full bg-subtle px-3 text-sm font-medium text-ink-2 transition-colors hover:bg-hover hover:text-ink sm:h-7 sm:px-2.5 sm:text-xs"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
             {dictation.statusLine && (
               <div aria-live="polite" className="px-4 pb-1">
                 {dictation.statusLine}
