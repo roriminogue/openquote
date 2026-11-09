@@ -66,6 +66,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>OpenQuote listens while you tap Talk, so you can describe a job out loud instead of typing it.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>OpenQuote turns what you say into the job description, using Apple's speech recognition.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

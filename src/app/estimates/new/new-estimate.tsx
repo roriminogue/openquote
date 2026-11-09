@@ -9,6 +9,7 @@ import { Money } from "@/components/money";
 import { Button, Notice } from "@/components/ui";
 import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";
+import { useDictation } from "./dictation";
 import { ProjectField } from "./project-flow";
 
 type PartialLine = { description?: string; type?: LineType; qty?: number; unit?: string; unitCost?: number };
@@ -55,6 +56,7 @@ export function NewEstimate({
   markup,
   gstRatePct,
   ai,
+  voiceHints,
 }: {
   initialDescription: string;
   /** No estimates yet: explain what comes back under the composer. */
@@ -65,6 +67,8 @@ export function NewEstimate({
   markup: MarkupSettings;
   gstRatePct: number;
   ai: { provider: string; model: string; canEdit: boolean } | null;
+  /** Trade words that help the phone's recogniser (the business's rate names first). */
+  voiceHints: string[];
 }) {
   const router = useRouter();
   const [description, setDescription] = useState(initialDescription);
@@ -74,6 +78,7 @@ export function NewEstimate({
   const abortRef = useRef<AbortController | null>(null);
   const previewRef = useRef<HTMLElement>(null);
   const busy = phase.kind === "streaming" || phase.kind === "saving";
+  const dictation = useDictation({ value: description, onChange: setDescription, hints: voiceHints, canTidy: !!ai });
 
   async function generate(e: React.FormEvent) {
     e.preventDefault();
@@ -168,11 +173,16 @@ export function NewEstimate({
               onChange={(e) => setDescription(e.target.value)}
               onKeyDown={submitOnShortcut}
               disabled={busy}
+              readOnly={dictation.busy}
               aria-describedby="description-hint"
-              placeholder="Describe the job: size, materials, access, finish. Whatever you’d tell a mate on the phone."
+              placeholder={
+                dictation.supported
+                  ? "Describe the job, or tap Talk: size, materials, access, finish. Whatever you’d tell a mate on the phone."
+                  : "Describe the job: size, materials, access, finish. Whatever you’d tell a mate on the phone."
+              }
               className="block min-h-28 w-full resize-none rounded-t-[14px] bg-transparent px-4 pb-2 pt-4 text-base leading-relaxed text-ink placeholder:text-ink-3 focus:outline-none disabled:opacity-60 sm:text-sm"
             />
-            {!description.trim() && !busy && (
+            {!description.trim() && !busy && !dictation.busy && (
               <div className="flex flex-wrap gap-1.5 px-4 pb-2" aria-label="Start from an example">
                 {EXAMPLES.map(([label, text]) => (
                   <button
@@ -186,7 +196,13 @@ export function NewEstimate({
                 ))}
               </div>
             )}
+            {dictation.statusLine && (
+              <div aria-live="polite" className="px-4 pb-1">
+                {dictation.statusLine}
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-2 px-3 pb-3 pt-1">
+              {!busy && dictation.button}
               <ProjectField projects={projects} clients={clients} value={project} onChange={setProject} disabled={busy} />
               {ai && (
                 <span id="description-hint" className="hidden min-w-0 truncate text-xs text-ink-3 sm:inline">
@@ -201,7 +217,7 @@ export function NewEstimate({
                     Stop
                   </Button>
                 ) : (
-                  <Button type="submit" variant="accent" className="max-sm:w-full" disabled={!ai}>
+                  <Button type="submit" variant="accent" className="max-sm:w-full" disabled={!ai || dictation.busy}>
                     Price this job
                     <kbd className="hidden rounded border border-on-accent/20 px-1 font-sans text-2xs font-medium text-on-accent/70 sm:inline">
                       ⌘↵
