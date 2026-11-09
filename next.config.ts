@@ -22,6 +22,11 @@ const nextConfig: NextConfig = {
   // Let phones on the same Wi-Fi load the dev server, e.g. DEV_ORIGINS=192.168.4.20 in .env.local.
   allowedDevOrigins: process.env.DEV_ORIGINS?.split(",").map((o) => o.trim()).filter(Boolean),
   partialPrefetching: true,
+  experimental: {
+    // Keep pages you've just visited in the browser for a minute, so going back to a tab is instant instead of
+    // asking the server again. Saving anything still refreshes straight away (actions call refresh()).
+    staleTimes: { dynamic: 60 },
+  },
   turbopack: {
     rules: {
       "*.css": {

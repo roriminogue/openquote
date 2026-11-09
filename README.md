@@ -42,6 +42,9 @@ some API credit for the AI. US$5 goes a long way.
 
    [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Froriminogue%2Fopenquote&project-name=openquote&repository-name=openquote&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,DATABASE_URL,ENCRYPTION_KEY&envDescription=Your%20Supabase%20project%20details%20and%20an%20encryption%20key&envLink=https%3A%2F%2Fgithub.com%2Froriminogue%2Fopenquote%23step-2-put-it-online)
 
+   The server runs in Sydney (`vercel.json`), next to an Australian database. If you picked a different Supabase
+   region, change `syd1` in `vercel.json` to the [Vercel region](https://vercel.com/docs/regions) closest to it,
+   or every page will be slow.
 3. Paste in the four values: the Supabase Project URL, the publishable key, the pooler string (as
    `DATABASE_URL`) and your encryption key. Click **Deploy**. The first deploy also sets up your database tables.
 
