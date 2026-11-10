@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Figtree, Geist } from "next/font/google";
+import { Figtree } from "next/font/google";
 import { PointerFocus } from "@/components/pointer-focus";
 import { THEME_SCRIPT } from "@/components/theme";
+import { Providers } from "./providers";
 import "./globals.css";
 
-const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
-const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"], weight: ["500", "600"] });
+// One family everywhere. Figtree is a variable font, so every weight comes in a single file.
+const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: { default: "OpenQuote AU", template: "%s · OpenQuote AU" },
@@ -24,14 +25,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html suppressHydrationWarning lang="en-AU" className={`${geist.variable} ${figtree.variable} h-full`}>
+    <html suppressHydrationWarning lang="en-AU" className={`${figtree.variable} h-full`}>
       <head>
         {/* Applies a saved Light or Dark choice before the first paint (see components/theme.tsx). */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col">
         <PointerFocus />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

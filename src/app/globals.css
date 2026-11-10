@@ -1,8 +1,23 @@
-@import "tailwindcss";
+/* OpenQuote AU is built on the Astryx design system (https://astryx.design), themed in src/themes/openquote.
+   Layer order matters: Tailwind's reset first, then Astryx's base and theme, then utilities on top so a utility
+   class can still adjust a component. See DESIGN.md. */
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 
-/* OpenQuote AU: a calm, neutral workspace on an off-white page. Hairlines and dashed row rules carry the structure,
-   near-black gradient buttons carry actions, and one hi-vis orange accent marks the moment that matters (pricing a
-   job, live progress). Geist for the interface, Figtree for page headings. See DESIGN.md. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "../themes/openquote/openquote.css";
+@import "@astryxdesign/core/tailwind-theme.css";
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* The saved Light/Dark choice is put on <html> before first paint (see THEME_SCRIPT in components/theme.tsx). Until
+   React wakes up, the themed wrapper has no choice of its own, so it follows the page's. */
+html[data-theme] [data-astryx-theme]:not([data-theme]) {
+  color-scheme: inherit;
+}
+
+/* ---- Legacy tokens: the pre-Astryx kit. Removed once every screen is rebuilt. ---- */
 
 :root {
   --bg: #fcfcfc;
@@ -157,8 +172,8 @@
   --color-danger-soft: var(--danger-soft);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-figtree), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
   --shadow-lg: var(--shadow-lg);
@@ -181,7 +196,6 @@ body {
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.5;
-  font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   caret-color: var(--ink);
 }
@@ -191,9 +205,12 @@ body {
   color: var(--ink);
 }
 
-:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+/* Layered, so Astryx components keep their own focus ring. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
 }
 
 /* Focus rings are for the keyboard. After a click or tap (PointerFocus sets data-pointer until the next Tab),

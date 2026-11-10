@@ -1,4 +1,4 @@
-// Money in tabular Geist figures, cents set back a touch so the dollars read first.
+// Money in tabular figures, cents set back a touch so the dollars read first.
 
 const dollars = new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 });
 
