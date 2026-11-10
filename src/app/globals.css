@@ -338,7 +338,9 @@ dialog.sheet[open]::backdrop {
   @page {
     margin: 16mm 14mm;
   }
-  .no-print {
+  .no-print,
+  .astryx-app-shell-header,
+  .astryx-app-shell-sidenav {
     display: none !important;
   }
   body {

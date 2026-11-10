@@ -1,92 +1,80 @@
 import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
+import { AppShell as Shell } from "@astryxdesign/core/AppShell";
+import { TopNav } from "@astryxdesign/core/TopNav";
 import { getAuthUser } from "@/lib/auth";
 import { AccountMenu } from "./account-menu";
-import { ActiveBottomNav, ActiveSidebarNav, BottomNav, SidebarNav } from "./nav-links";
+import { ActiveSideNav, ActiveTabBar, SideNavLinks, TabBar } from "./nav-links";
 
 /** Mark: a quote sheet whose last line, the total, is set in hi-vis orange. */
 export function Mark({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
       <rect width="24" height="24" rx="6.5" fill="currentColor" />
-      <path d="M7 8h10M7 12h10" stroke="var(--bg)" strokeWidth="2" strokeLinecap="round" />
-      <path d="M12.5 16.5H17" stroke="var(--accent)" strokeWidth="2.25" strokeLinecap="round" />
+      <path d="M7 8h10M7 12h10" stroke="var(--color-background-surface)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M12.5 16.5H17" stroke="var(--color-accent)" strokeWidth="2.25" strokeLinecap="round" />
     </svg>
   );
 }
 
 export function Wordmark({ className = "" }: { className?: string }) {
   return (
-    <span className={`flex items-center gap-2 text-ink ${className}`}>
+    <span className={`flex items-center gap-2 text-(--color-text-primary) ${className}`}>
       <Mark className="size-[22px] shrink-0" />
-      <span translate="no" className="font-display text-[1.0625rem] font-semibold tracking-[-0.01em]">
-        OpenQuote<span className="ml-[0.3em] font-medium text-ink-3">AU</span>
+      <span translate="no" className="text-[1.0625rem] font-semibold tracking-[-0.01em]">
+        OpenQuote<span className="ml-[0.3em] font-medium text-(--color-text-secondary)">AU</span>
       </span>
     </span>
   );
 }
 
 /**
- * Signed-in frame. From 768px: a 256px sidebar on the page colour behind a hairline, grouped nav with small grey
- * labels and the account at the foot. On phones: a slim top bar and a bottom tab bar with New in the middle.
+ * Signed-in frame. On a phone: the wordmark and the account in a slim top bar, the page, and a tab bar with New in
+ * the middle. From 768px the tab bar gives way to a sidebar. The shell supplies the skip link and the main landmark.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <>
-      <a
-        href="#main"
-        className="sr-only z-40 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary focus:not-sr-only focus:fixed focus:left-4 focus:top-2"
+      <Shell
+        height="auto"
+        variant="section"
+        // Phones first: the server renders the phone layout, and there is no drawer to open, so no menu button.
+        mobileNav={{ hasToggle: false, defaultIsMobile: true }}
+        topNav={
+          <TopNav
+            label="OpenQuote AU"
+            heading={
+              <Link href="/estimates" aria-label="OpenQuote AU estimates" className="flex h-11 items-center rounded-lg">
+                <Wordmark />
+              </Link>
+            }
+            endContent={
+              <Suspense>
+                <Account />
+              </Suspense>
+            }
+          />
+        }
+        sideNav={
+          <Suspense fallback={<SideNavLinks pathname="" />}>
+            <ActiveSideNav />
+          </Suspense>
+        }
       >
-        Skip to content
-      </a>
-      <div className="flex min-h-dvh flex-1">
-        <div className="no-print hidden w-64 shrink-0 border-r border-border bg-sidebar md:block">
-          <aside className="sticky top-0 flex h-dvh flex-col px-3 pb-3">
-            <Link href="/estimates" className="flex h-14 items-center px-1.5" aria-label="OpenQuote AU estimates">
-              <Wordmark />
-            </Link>
-            <Suspense fallback={<SidebarNav pathname="" />}>
-              <ActiveSidebarNav />
-            </Suspense>
-            <Suspense fallback={<div className="h-9" />}>
-              <SidebarAccount />
-            </Suspense>
-          </aside>
+        {/* Bottom room on phones keeps the last row clear of the tab bar. */}
+        <div className="mx-auto w-full max-w-[60rem] px-4 pb-[6.5rem] pt-5 sm:px-6 md:px-10 md:pb-10 md:pt-8">
+          {children}
         </div>
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="no-print sticky top-0 z-20 flex h-[calc(3.5rem+env(safe-area-inset-top))] items-center justify-between border-b border-border bg-bg px-4 pt-[env(safe-area-inset-top)] md:hidden">
-            <Link href="/estimates" aria-label="OpenQuote AU estimates">
-              <Wordmark />
-            </Link>
-            <Suspense>
-              <MobileAccount />
-            </Suspense>
-          </header>
-          <main
-            id="main"
-            tabIndex={-1}
-            className="mx-auto w-full max-w-[60rem] flex-1 px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-6 outline-none sm:px-6 md:px-16 md:pb-8 md:pt-14"
-          >
-            {children}
-          </main>
-        </div>
-      </div>
-      <Suspense fallback={<BottomNav pathname="" />}>
-        <ActiveBottomNav />
+      </Shell>
+      <Suspense fallback={<TabBar pathname="" />}>
+        <ActiveTabBar />
       </Suspense>
     </>
   );
 }
 
-async function SidebarAccount() {
+async function Account() {
   const user = await getAuthUser();
   if (!user?.email) return null;
   return <AccountMenu email={user.email} />;
-}
-
-async function MobileAccount() {
-  const user = await getAuthUser();
-  if (!user?.email) return null;
-  return <AccountMenu email={user.email} compact />;
 }
