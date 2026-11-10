@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { PageTitle } from "@/components/ui";
+import { PageTitle } from "@/components/page-title";
 import { requireMember } from "@/lib/auth";
 import { resolveAiConfig } from "@/lib/ai/config";
 import { PROVIDER_INFO } from "@/lib/ai/providers";

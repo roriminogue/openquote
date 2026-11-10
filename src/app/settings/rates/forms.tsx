@@ -197,6 +197,7 @@ export function BusinessContextForm({ initial, canEdit }: { initial: Context; ca
               <input type="hidden" name="finishLevel" value={finish} />
               <Segmented
                 className="sm:w-[22rem]"
+                label="Finish level"
                 value={finish}
                 onChange={(v) => canEdit && setFinish(v)}
                 options={[

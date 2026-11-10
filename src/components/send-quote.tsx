@@ -99,6 +99,7 @@ export function SendQuoteButton({ target }: { target: SendTarget }) {
               <legend className="text-sm font-medium">What the client sees</legend>
               <Segmented
                 className="mt-1.5"
+                label="What the client sees"
                 value={detail}
                 onChange={setDetail}
                 options={DETAIL_LEVELS.map(([k, l]) => [k, l, k === "total" ? Receipt : k === "groups" ? Layers : ListTree] as const)}

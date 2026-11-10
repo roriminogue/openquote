@@ -1,5 +1,6 @@
 "use client";
 
+import { InternationalizationProvider } from "@astryxdesign/core/i18n";
 import { LinkProvider } from "@astryxdesign/core/Link";
 import { Theme } from "@astryxdesign/core/theme";
 import Link from "next/link";
@@ -9,14 +10,17 @@ import { useThemeChoice } from "@/components/theme";
 import { openquoteTheme } from "@/themes/openquote/openquote.js";
 
 /**
- * App-wide providers: the OpenQuote theme in the mode saved on this device (Settings → Account), and Next's
- * <Link> behind every Astryx link and link-button so in-app navigation stays client-side.
+ * App-wide providers: the OpenQuote theme in the mode saved on this device (Settings → Account), Next's
+ * <Link> behind every Astryx link and link-button so in-app navigation stays client-side, and Australian
+ * dates in every date field and calendar.
  */
 export function Providers({ children }: { children: React.ReactNode }) {
   const mode = useThemeChoice();
   return (
     <Theme theme={openquoteTheme} mode={mode}>
-      <LinkProvider component={Link}>{children}</LinkProvider>
+      <InternationalizationProvider locale="en-AU">
+        <LinkProvider component={Link}>{children}</LinkProvider>
+      </InternationalizationProvider>
     </Theme>
   );
 }

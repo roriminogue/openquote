@@ -148,6 +148,7 @@ function RateEditor({
           <legend className="text-sm font-medium">Type</legend>
           <Segmented
             className="mt-1.5"
+            label="Type"
             value={draft.type}
             onChange={(type) => setDraft((d) => ({ ...d, type, unit: d.unit === "hour" && type === "material" ? "each" : d.unit }))}
             options={RATE_TYPES.map(([k, l]) => [k, l, k === "labour" ? Hammer : Package] as const)}

@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@astryxdesign/core/Button";
+import { Icon } from "@astryxdesign/core/Icon";
 import { Pencil, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -16,13 +18,27 @@ import {
   type ProjectDraft,
 } from "./record-forms";
 import { Sheet } from "./sheet";
-import { buttonClass } from "./ui";
+
+/**
+ * Whether an editor's sheet is showing. The editor stays on the page while closed so the sheet can slide
+ * away; `key` changes on every `show`, so each opening starts from a clean form.
+ */
+export function useSheet() {
+  const [state, setState] = useState({ open: false, key: 0 });
+  return {
+    open: state.open,
+    key: state.key,
+    show: () => setState((s) => ({ open: true, key: s.key + 1 })),
+    hide: () => setState((s) => ({ ...s, open: false })),
+  };
+}
 
 /**
  * Create or edit a project in a sheet, with a nested step to add its client on the spot. Used by the
  * new-estimate flow and the Projects and Clients pages.
  */
 export function ProjectEditor({
+  open = true,
   projectId,
   initial = emptyProject,
   clients: initialClients,
@@ -30,6 +46,7 @@ export function ProjectEditor({
   onBack,
   onSaved,
 }: {
+  open?: boolean;
   projectId?: string;
   initial?: ProjectDraft;
   clients: ClientOption[];
@@ -74,12 +91,33 @@ export function ProjectEditor({
     setView("project");
   }
 
-  if (view === "client") {
-    return (
+  return (
+    <>
       <Sheet
-        open
+        open={open && view === "project"}
+        title={projectId ? "Edit project" : "New project"}
+        onClose={onClose}
+        onBack={onBack}
+        action={projectId ? "Save" : "Create"}
+        busy={busy}
+        onSubmit={saveProject}
+      >
+        <ProjectForm
+          value={project}
+          onChange={setProject}
+          clients={clients}
+          error={view === "project" ? error : null}
+          onNewClient={() => {
+            setError(null);
+            setView("client");
+          }}
+        />
+      </Sheet>
+      <Sheet
+        open={open && view === "client"}
         title="New client"
         onClose={onClose}
+        back="Back to the project"
         onBack={() => {
           setError(null);
           setView("project");
@@ -88,41 +126,20 @@ export function ProjectEditor({
         busy={busy}
         onSubmit={saveClient}
       >
-        <ClientForm value={client} onChange={setClient} error={error} />
+        <ClientForm value={client} onChange={setClient} error={view === "client" ? error : null} />
       </Sheet>
-    );
-  }
-
-  return (
-    <Sheet
-      open
-      title={projectId ? "Edit project" : "New project"}
-      onClose={onClose}
-      onBack={onBack}
-      action={projectId ? "Save" : "Create"}
-      busy={busy}
-      onSubmit={saveProject}
-    >
-      <ProjectForm
-        value={project}
-        onChange={setProject}
-        clients={clients}
-        error={error}
-        onNewClient={() => {
-          setError(null);
-          setView("client");
-        }}
-      />
-    </Sheet>
+    </>
   );
 }
 
 export function ClientEditor({
+  open = true,
   clientId,
   initial = emptyClient,
   onClose,
   onSaved,
 }: {
+  open?: boolean;
   clientId?: string;
   initial?: ClientDraft;
   onClose: () => void;
@@ -147,7 +164,7 @@ export function ClientEditor({
 
   return (
     <Sheet
-      open
+      open={open}
       title={clientId ? "Edit client" : "New client"}
       onClose={onClose}
       action={clientId ? "Save" : "Add client"}
@@ -172,18 +189,17 @@ export function NewProjectButton({
   variant?: "primary" | "secondary";
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const sheet = useSheet();
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={buttonClass(variant, "md")}>
-        <Plus className="size-4" aria-hidden />
-        {label}
-      </button>
-      {open && (
+      <Button label={label} variant={variant} icon={<Icon icon={Plus} />} onClick={sheet.show} />
+      {sheet.key > 0 && (
         <ProjectEditor
+          key={sheet.key}
+          open={sheet.open}
           clients={clients}
           initial={clientId ? { ...emptyProject, clientId, siteAddress: clients.find((c) => c.id === clientId)?.address ?? "" } : undefined}
-          onClose={() => setOpen(false)}
+          onClose={sheet.hide}
           onSaved={(p) => router.push(`/projects/${p.id}`)}
         />
       )}
@@ -193,21 +209,20 @@ export function NewProjectButton({
 
 export function EditProjectButton({ projectId, initial, clients }: { projectId: string; initial: ProjectDraft; clients: ClientOption[] }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const sheet = useSheet();
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={buttonClass("secondary", "md")}>
-        <Pencil className="size-4" aria-hidden />
-        Edit
-      </button>
-      {open && (
+      <Button label="Edit" variant="secondary" icon={<Icon icon={Pencil} />} onClick={sheet.show} />
+      {sheet.key > 0 && (
         <ProjectEditor
+          key={sheet.key}
+          open={sheet.open}
           projectId={projectId}
           initial={initial}
           clients={clients}
-          onClose={() => setOpen(false)}
+          onClose={sheet.hide}
           onSaved={() => {
-            setOpen(false);
+            sheet.hide();
             router.refresh();
           }}
         />
@@ -218,34 +233,32 @@ export function EditProjectButton({ projectId, initial, clients }: { projectId: 
 
 export function NewClientButton({ variant = "secondary" }: { variant?: "primary" | "secondary" }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const sheet = useSheet();
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={buttonClass(variant, "md")}>
-        <Plus className="size-4" aria-hidden />
-        New client
-      </button>
-      {open && <ClientEditor onClose={() => setOpen(false)} onSaved={(c) => router.push(`/clients/${c.id}`)} />}
+      <Button label="New client" variant={variant} icon={<Icon icon={Plus} />} onClick={sheet.show} />
+      {sheet.key > 0 && (
+        <ClientEditor key={sheet.key} open={sheet.open} onClose={sheet.hide} onSaved={(c) => router.push(`/clients/${c.id}`)} />
+      )}
     </>
   );
 }
 
 export function EditClientButton({ clientId, initial }: { clientId: string; initial: ClientDraft }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const sheet = useSheet();
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={buttonClass("secondary", "md")}>
-        <Pencil className="size-4" aria-hidden />
-        Edit
-      </button>
-      {open && (
+      <Button label="Edit" variant="secondary" icon={<Icon icon={Pencil} />} onClick={sheet.show} />
+      {sheet.key > 0 && (
         <ClientEditor
+          key={sheet.key}
+          open={sheet.open}
           clientId={clientId}
           initial={initial}
-          onClose={() => setOpen(false)}
+          onClose={sheet.hide}
           onSaved={() => {
-            setOpen(false);
+            sheet.hide();
             router.refresh();
           }}
         />
