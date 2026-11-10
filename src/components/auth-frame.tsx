@@ -1,23 +1,31 @@
 import type { ReactNode } from "react";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Text } from "@astryxdesign/core/Text";
 import { Wordmark } from "./app-shell";
 
 /**
- * Sign-in and onboarding: a narrow card on a dotted field, with a line of what the app does at the foot so the
- * first screen says something before anyone types.
+ * Sign-in and onboarding. On a phone everything starts at the top, so the fields stay in view above the keyboard,
+ * and a line of what the app does sits at the foot. On a wide screen the same column is centred.
  */
 export function AuthFrame({ title, intro, children }: { title: string; intro?: ReactNode; children: ReactNode }) {
   return (
-    <div className="dots flex min-h-dvh flex-1 flex-col bg-bg">
-      <main className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center px-4 py-12">
-        <Wordmark className="mb-8 justify-center" />
-        <div className="rounded-[14px] bg-surface p-6 shadow-raised sm:p-8">
-          <h1 className="font-display text-title font-medium leading-8">{title}</h1>
-          {intro && <div className="mt-1 text-sm text-ink-3">{intro}</div>}
-          <div className="mt-6">{children}</div>
+    <div className="flex min-h-dvh flex-1 flex-col bg-(--color-background-surface)">
+      <main className="mx-auto flex w-full max-w-[24rem] flex-1 flex-col px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(3.5rem,calc(env(safe-area-inset-top)+2rem))] sm:justify-center sm:py-16">
+        <Wordmark />
+        <div className="mt-10 flex flex-col gap-1.5">
+          <Heading level={1}>{title}</Heading>
+          {intro && (
+            <Text as="p" color="secondary">
+              {intro}
+            </Text>
+          )}
         </div>
-        <p className="mt-6 text-center text-xs text-ink-3">
-          Describe a job, get a priced estimate with your own rates. Open source.
-        </p>
+        <div className="mt-7">{children}</div>
+        <div className="mt-auto pt-12 sm:mt-0">
+          <Text as="p" type="supporting">
+            Describe a job, get a priced estimate with your own rates. Open source.
+          </Text>
+        </div>
       </main>
     </div>
   );

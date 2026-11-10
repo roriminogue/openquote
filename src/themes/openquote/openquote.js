@@ -471,6 +471,40 @@ export const openquoteTheme = {
             }
           }
         }
+      },
+      {
+        "when": {
+          "width": {
+            "below": "md"
+          }
+        },
+        "value": {
+          "tokens": {
+            "--size-element-sm": "36px",
+            "--size-element-md": "44px",
+            "--size-element-lg": "48px",
+            "--font-size-xs": "0.6875rem",
+            "--font-size-sm": "0.8125rem",
+            "--font-size-base": "1rem",
+            "--font-size-lg": "1.125rem"
+          }
+        }
+      },
+      {
+        "when": {
+          "pointer": "coarse"
+        },
+        "value": {
+          "tokens": {
+            "--size-element-sm": "36px",
+            "--size-element-md": "44px",
+            "--size-element-lg": "48px",
+            "--font-size-xs": "0.6875rem",
+            "--font-size-sm": "0.8125rem",
+            "--font-size-base": "1rem",
+            "--font-size-lg": "1.125rem"
+          }
+        }
       }
     ]
   },

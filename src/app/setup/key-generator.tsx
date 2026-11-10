@@ -1,8 +1,9 @@
 "use client";
 
+import { Button } from "@astryxdesign/core/Button";
+import { Icon } from "@astryxdesign/core/Icon";
 import { Check, Copy, KeyRound } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui";
 
 /** Makes a fresh ENCRYPTION_KEY in the browser (32 random bytes, base64), so nobody needs a terminal for it. */
 export function KeyGenerator() {
@@ -14,28 +15,24 @@ export function KeyGenerator() {
     setCopied(false);
   }
   return (
-    <div className="mt-2 space-y-2">
+    <div className="mt-3">
       {key ? (
         <div className="flex flex-wrap items-center gap-2">
-          <code className="break-all rounded-md bg-subtle px-2 py-1.5 font-mono text-xs text-ink">{key}</code>
+          <code className="break-all rounded-md bg-(--color-background-muted) px-2.5 py-2 font-mono text-[0.8125rem] text-(--color-text-primary)">
+            {key}
+          </code>
           <Button
-            type="button"
+            label={copied ? "Copied" : "Copy"}
             variant="secondary"
-            size="sm"
+            icon={<Icon icon={copied ? Check : Copy} />}
             onClick={async () => {
               await navigator.clipboard.writeText(key);
               setCopied(true);
             }}
-          >
-            {copied ? <Check className="size-3.5 text-ok" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
-            {copied ? "Copied" : "Copy"}
-          </Button>
+          />
         </div>
       ) : (
-        <Button type="button" variant="secondary" size="sm" onClick={make}>
-          <KeyRound className="size-3.5" aria-hidden />
-          Generate a key
-        </Button>
+        <Button label="Generate a key" variant="secondary" icon={<Icon icon={KeyRound} />} onClick={make} />
       )}
     </div>
   );
