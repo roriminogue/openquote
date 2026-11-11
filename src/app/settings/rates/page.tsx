@@ -1,16 +1,24 @@
+import { Skeleton } from "@astryxdesign/core/Skeleton";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
 import { getOrg } from "@/lib/estimate/queries";
 import { listRates } from "@/lib/rates";
 import { BusinessContextForm, MarkupForm } from "./forms";
+import { Intro } from "../parts";
 import { RatesList } from "./rates-list";
 
 export const metadata: Metadata = { title: "Rates and pricing" };
 
 export default function RatesPage() {
   return (
-    <Suspense fallback={<div className="mt-8 h-64 animate-pulse rounded-[10px] bg-hover" aria-busy="true" />}>
+    <Suspense
+      fallback={
+        <div className="mt-8" aria-busy="true" aria-label="Loading">
+          <Skeleton height={256} radius={4} />
+        </div>
+      }
+    >
       <Rates />
     </Suspense>
   );
@@ -23,11 +31,10 @@ async function Rates() {
 
   return (
     <>
-      <p className="mt-6 max-w-[68ch] text-sm text-ink-3">
-        OpenQuote AU prices every line from your cost plus markup. Your own rates are used wherever they fit, and changes
-        apply to new estimates only.
-      </p>
-      {!canEdit && <p className="mt-3 text-sm text-ink-3">Only owners and admins can change these.</p>}
+      <Intro>
+        OpenQuote AU prices every line from your cost plus markup. Your own rates are used wherever they fit, and
+        changes apply to new estimates only.{!canEdit && " Only owners and admins can change these."}
+      </Intro>
 
       <RatesList rates={rates} canEdit={canEdit} />
 

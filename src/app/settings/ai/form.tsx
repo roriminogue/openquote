@@ -1,8 +1,14 @@
 "use client";
 
+import { Button } from "@astryxdesign/core/Button";
+import { Selector } from "@astryxdesign/core/Selector";
+import { Text } from "@astryxdesign/core/Text";
+import { TextInput } from "@astryxdesign/core/TextInput";
 import { useActionState, useState } from "react";
+import { TextField } from "@/components/fields";
 import { PROVIDER_INFO, PROVIDERS, type Provider } from "@/lib/ai/providers";
-import { Button, Input, Notice, Panel, Row, Rows, Select } from "@/components/ui";
+import { FormFooter } from "../form-footer";
+import { Fields, SettingsSection } from "../parts";
 import { saveAiSettings, type SaveState } from "./actions";
 
 type Initial = {
@@ -13,126 +19,131 @@ type Initial = {
   transcription: "off" | "openai" | "local";
 };
 
+const PROVIDER_OPTIONS = PROVIDERS.map((p) => ({
+  value: p,
+  label: `${PROVIDER_INFO[p].label}${PROVIDER_INFO[p].advanced ? " (advanced)" : ""}`,
+}));
+
 export function AiSettingsForm({ initial }: { initial: Initial }) {
-  const [state, action, pending] = useActionState<SaveState, FormData>(saveAiSettings, { status: "idle" });
+  const [state, action] = useActionState<SaveState, FormData>(saveAiSettings, { status: "idle" });
   const [provider, setProvider] = useState<Provider>(initial.provider);
+  const [apiKey, setApiKey] = useState("");
   const info = PROVIDER_INFO[provider];
   // A saved key only applies to the provider it was saved for.
   const savedKeyApplies = initial.hasSavedKey && provider === initial.provider;
+  const same = provider === initial.provider;
 
   return (
-    <form action={action}>
-      <Panel>
-        <Rows>
-          <Row
+    <form action={action} noValidate>
+      <SettingsSection id="change" title="Provider and key">
+        <Fields>
+          <Selector
             label="Provider"
-            htmlFor="provider"
-            hint={info.advanced ? "Quality depends on the model. Pick one with good tool-use support." : "Who runs the AI. You pay them directly."}
-          >
-            <Select id="provider" name="provider" value={provider} onChange={(e) => setProvider(e.target.value as Provider)}>
-              {PROVIDERS.map((p) => (
-                <option key={p} value={p}>
-                  {PROVIDER_INFO[p].label}
-                  {PROVIDER_INFO[p].advanced ? " (advanced)" : ""}
-                </option>
-              ))}
-            </Select>
-          </Row>
+            description={
+              info.advanced
+                ? "Quality depends on the model. Pick one with good tool-use support."
+                : "Who runs the AI. You pay them directly."
+            }
+            htmlName="provider"
+            options={PROVIDER_OPTIONS}
+            value={provider}
+            onChange={(p) => setProvider(p as Provider)}
+            presentation="adaptive"
+            width="100%"
+          />
 
           {info.needsKey && (
-            <Row label="API key" htmlFor="apiKey" hint={savedKeyApplies ? "Leave blank to keep your saved key." : "From your provider’s console."}>
-              <Input
-                id="apiKey"
-                name="apiKey"
-                type="password"
-                autoComplete="off"
-                spellCheck={false}
-                placeholder={savedKeyApplies ? "••••••••••••" : info.keyHint}
-              />
-            </Row>
+            <TextInput
+              id="apiKey"
+              type="password"
+              label="API key"
+              description={savedKeyApplies ? "Leave blank to keep your saved key." : "From your provider’s console."}
+              htmlName="apiKey"
+              value={apiKey}
+              onChange={setApiKey}
+              autoComplete="off"
+              hasSpellCheck={false}
+              placeholder={savedKeyApplies ? "••••••••••••" : info.keyHint}
+              width="100%"
+            />
           )}
 
           {provider === "ollama" && (
-            <Row label="Ollama address" hint="Set by whoever runs this OpenQuote AU, with OLLAMA_BASE_URL.">
-              <p className="text-sm text-ink-2">{info.defaultBaseUrl} unless they&apos;ve changed it.</p>
-            </Row>
+            <div>
+              <Text as="p" display="block" type="label" color="secondary" weight="medium">
+                Ollama address
+              </Text>
+              <Text as="p" display="block" type="supporting">
+                {info.defaultBaseUrl} unless whoever runs this OpenQuote AU has changed it with OLLAMA_BASE_URL.
+              </Text>
+            </div>
           )}
 
-          <ModelField
+          {/* Remount when the provider changes, so each provider starts from its own saved model. */}
+          <TextField
+            key={`smart-${provider}`}
             name="smartModel"
             label="Smart model"
-            help="Writes and edits estimates."
+            description="Writes and edits estimates."
+            defaultValue={same ? initial.smartModel : ""}
             placeholder={info.defaultSmartModel ?? "Save to load models…"}
-            defaultValue={provider === initial.provider ? initial.smartModel : ""}
+            hasSpellCheck={false}
+            autoCapitalize="none"
+            {...{ list: "models" }}
           />
-          <ModelField
+          <TextField
+            key={`fast-${provider}`}
             name="fastModel"
             label="Fast model"
-            help="Tidies up spoken job descriptions (trade words, measurements)."
+            description="Tidies up spoken job descriptions (trade words, measurements)."
+            defaultValue={same ? initial.fastModel : ""}
             placeholder={info.defaultFastModel ?? "Save to load models…"}
-            defaultValue={provider === initial.provider ? initial.fastModel : ""}
+            hasSpellCheck={false}
+            autoCapitalize="none"
+            {...{ list: "models" }}
           />
 
-          <Row label="Talk" hint="Nothing to set up.">
-            <p className="text-sm text-ink-2">
-              Talk uses your phone or browser&apos;s own speech recognition, then the fast model above fixes misheard trade
-              words.
-            </p>
-          </Row>
-        </Rows>
+          <div>
+            <Text as="p" display="block" type="label" color="secondary" weight="medium">
+              Talk
+            </Text>
+            <Text as="p" display="block" type="supporting">
+              Nothing to set up. Talk uses your phone or browser&apos;s own speech recognition, then the fast model
+              above fixes misheard trade words.
+            </Text>
+          </div>
+        </Fields>
         <datalist id="models">
           {state.models?.map((m) => (
             <option key={m} value={m} />
           ))}
         </datalist>
-        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-dashed border-border px-4 py-4 sm:px-5">
-          {state.message && (
-            <div className="mr-auto min-w-0">
-              <Notice tone={state.status === "error" ? "error" : "ok"}>{state.message}</Notice>
-            </div>
-          )}
-          <Button className="max-sm:w-full" disabled={pending}>
-            {pending ? "Checking key…" : "Test and save"}
-          </Button>
-        </div>
-      </Panel>
+        <FormFooter
+          message={state.message}
+          error={state.status === "error"}
+          label="Test and save"
+          pendingLabel="Checking key…"
+        />
+      </SettingsSection>
     </form>
-  );
-}
-
-function ModelField(props: { name: string; label: string; help: string; placeholder: string; defaultValue: string }) {
-  return (
-    <Row label={props.label} htmlFor={props.name} hint={props.help}>
-      <Input
-        id={props.name}
-        name={props.name}
-        list="models"
-        spellCheck={false}
-        autoCapitalize="off"
-        defaultValue={props.defaultValue}
-        placeholder={props.placeholder}
-      />
-    </Row>
   );
 }
 
 /** Removing the key turns AI off for the whole business, so it takes a second, deliberate tap. */
 export function RemoveKey({ action }: { action: () => Promise<void> }) {
   const [confirming, setConfirming] = useState(false);
-  const link = "text-sm font-medium underline underline-offset-4 hover:no-underline";
   if (!confirming) {
-    return (
-      <button type="button" className={`${link} text-danger`} onClick={() => setConfirming(true)}>
-        Remove
-      </button>
-    );
+    return <Button label="Remove key" variant="ghost" size="sm" onClick={() => setConfirming(true)} />;
   }
   return (
-    <form action={action} className="flex items-baseline gap-3">
-      <button className={`${link} text-danger`}>Remove key and turn AI off</button>
-      <button type="button" className={`${link} text-ink-2`} onClick={() => setConfirming(false)}>
-        Keep
-      </button>
+    <form action={action} className="flex flex-col gap-2">
+      <Text as="p" display="block" type="supporting">
+        AI stops working for everyone in your business until a new key is saved.
+      </Text>
+      <div className="flex flex-wrap gap-2">
+        <Button label="Keep" size="sm" onClick={() => setConfirming(false)} />
+        <Button type="submit" label="Remove key and turn AI off" variant="destructive" size="sm" />
+      </div>
     </form>
   );
 }
