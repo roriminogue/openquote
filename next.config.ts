@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
     // Keep pages you've just visited in the browser for a minute, so going back to a tab is instant instead of
     // asking the server again. Saving anything still refreshes straight away (actions call refresh()).
     staleTimes: { dynamic: 60 },
+    // Build from scratch every time. Vercel restores .next/cache from an earlier deployment, and Turbopack's
+    // saved work there handed the 11 Nov 2026 production build an old stylesheet (old colours, no Astryx), so the
+    // live app went out unstyled. A clean build costs a few seconds and always matches the code.
+    turbopackFileSystemCacheForBuild: false,
   },
   turbopack: {
     rules: {
