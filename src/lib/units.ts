@@ -71,5 +71,6 @@ export function formatQtyUnit(qty: number, unit: string) {
 export function keepUnits(text: string) {
   return text
     .replace(/(\d)\s+(?=(?:mm|cm|m²|m³|m2|m3|m|lm|kg|L|hrs?|h|ea|sheets?|bags?|packs?)(?![\p{L}]))/gu, "$1 ")
-    .replace(/×\s+(?=\d)/g, "× ");
+    .replace(/×\s+(?=\d)/g, "× ")
+    .replace(/(\d)\s+(?=×)/g, "$1\u00a0");
 }

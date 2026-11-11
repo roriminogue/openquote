@@ -8,6 +8,9 @@ describe("keepUnits", () => {
     expect(keepUnits("Deck 600 mm off the ground")).toBe(`Deck 600${nb}mm off the ground`);
     expect(keepUnits("About 20 m² of wall")).toBe(`About 20${nb}m² of wall`);
   });
+  it("keeps a bare size like 4 × 3 m on one line", () => {
+    expect(keepUnits("Merbau deck 4 × 3 m, 600 mm high")).toBe(`Merbau deck 4${nb}×${nb}3${nb}m, 600${nb}mm high`);
+  });
   it("leaves ordinary words alone", () => {
     expect(keepUnits("2 men for 3 days, 4 mates")).toBe("2 men for 3 days, 4 mates");
   });
