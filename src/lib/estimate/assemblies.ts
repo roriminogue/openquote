@@ -96,11 +96,23 @@ function labour(description: string, hours: number, rate: LabourRate, notes: str
   };
 }
 
-/** The smallest skip that takes the waste, in m³ loose; very large amounts get several 6 m³ skips. */
-function skip(volumeM3: number, why: string): PricedLine {
-  if (volumeM3 <= 2) return other("skip_2m3", 1, why);
-  if (volumeM3 <= 4) return other("skip_4m3", 1, why);
-  return other("skip_6m3", ceil(volumeM3 / 6), why);
+/** A ute tray takes about this much loose waste in one run to the tip (about 10 m of old fence). */
+export const UTE_LOAD_M3 = 1.5;
+
+/**
+ * Getting rid of demolition waste. Up to one ute load (about 10 m of fence, or a 5 m² deck) goes to the tip in
+ * the ute: the tip fee plus an hour for the run. More than that gets the smallest skip that takes it, and very
+ * large amounts several 6 m³ skips.
+ */
+function disposal(volumeM3: number, why: string, rate: LabourRate): PricedLine[] {
+  if (volumeM3 <= UTE_LOAD_M3)
+    return [
+      other("tip_ute_load", 1, `${why}: one ute load`),
+      labour("Load the ute and take the waste to the tip", 1, rate, "About an hour there and back"),
+    ];
+  if (volumeM3 <= 2) return [other("skip_2m3", 1, why)];
+  if (volumeM3 <= 4) return [other("skip_4m3", 1, why)];
+  return [other("skip_6m3", ceil(volumeM3 / 6), why)];
 }
 
 const groups = (list: { name: string; lines: PricedLine[] }[]): PricedGroup[] => list.filter((g) => g.lines.length > 0);
@@ -163,7 +175,7 @@ export function buildFence(spec: FenceSpec, rate: LabourRate): PricedGroup[] {
         rate,
         `0.3 h per metre${oldPosts ? ` + 0.5 h per old post (${oldPosts})` : ""}`,
       ),
-      skip(L * (spec.newPosts ? 0.15 : 0.1), `Old fence waste, about ${spec.newPosts ? "0.15" : "0.1"} m³ loose per metre`),
+      ...disposal(L * (spec.newPosts ? 0.15 : 0.1), `Old fence waste, about ${spec.newPosts ? "0.15" : "0.1"} m³ loose per metre`, rate),
     );
   }
 
@@ -295,7 +307,7 @@ export function buildDeck(spec: DeckSpec, rate: LabourRate): PricedGroup[] {
   if (spec.removeOldDeck) {
     demo.push(
       labour("Demolish and remove the old deck", 0.5 * area * site, rate, "0.5 h per m²"),
-      skip(area * 0.3, `Old deck waste, about 0.3 m³ loose per m²`),
+      ...disposal(area * 0.3, "Old deck waste, about 0.3 m³ loose per m²", rate),
     );
   }
 

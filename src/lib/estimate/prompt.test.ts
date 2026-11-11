@@ -25,6 +25,13 @@ describe("buildGenerationPrompt", () => {
     );
   });
 
+  it("tells the model what the calculators use, so the text agrees with the price", () => {
+    const { system } = buildGenerationPrompt(ctx);
+    expect(system).toContain("palings 100×12");
+    expect(system).toContain("goes to the tip");
+    expect(system).toMatch(/never offer\s+something the calculator already uses/);
+  });
+
   it("says so when there are no rules or instructions", () => {
     const { system } = buildGenerationPrompt({ ...ctx, rateRules: [], instructions: [] });
     expect(system).toContain("(none yet)");
