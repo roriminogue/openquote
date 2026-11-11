@@ -6,12 +6,13 @@
     <title>OpenQuote AU</title>
     <style>
       :root { color-scheme: light dark; }
-      body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: #fcfcfc; color: #18191b;
-        font: 15px/1.5 -apple-system, system-ui, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
-      @media (prefers-color-scheme: dark) { body { background: #0f0f10; color: #f4f4f5; } }
-      p { color: #6b6b74; margin: 6px 0 20px; }
-      button { font: inherit; font-weight: 500; padding: 12px 20px; border-radius: 10px; border: 1px solid #262626;
-        background: linear-gradient(#404040, #262626); color: #fff; }
+      /* Matches the app's Astryx colours: white or near-black page, orange main button with dark text. */
+      body { margin: 0; min-height: 100dvh; display: grid; place-items: center; background: #ffffff; color: #000000;
+        font: 16px/1.5 -apple-system, system-ui, sans-serif; text-align: center; padding: 24px; box-sizing: border-box; }
+      p { color: #474747; margin: 6px 0 20px; }
+      @media (prefers-color-scheme: dark) { body { background: #262626; color: #ffffff; } p { color: #9e9e9e; } }
+      button { font: inherit; font-weight: 500; min-height: 44px; padding: 10px 20px; border-radius: 10px; border: 0;
+        background: #f26b1d; color: #18181b; }
     </style>
   </head>
   <body>

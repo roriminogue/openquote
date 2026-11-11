@@ -3,7 +3,7 @@ import { Skeleton } from "@astryxdesign/core/Skeleton";
 import { Text } from "@astryxdesign/core/Text";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { ThemeSwitch } from "@/components/theme";
+import { ThemeSwitch } from "@/components/theme-switch";
 import { requireMember } from "@/lib/auth";
 import { SettingsSection } from "../parts";
 
