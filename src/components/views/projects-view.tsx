@@ -32,7 +32,7 @@ export function ProjectsView({
       <PageHeader
         title="Projects"
         description="One job, at one site, for one client."
-        action={<NewProjectButton clients={clients} />}
+        action={all.length > 0 && <NewProjectButton clients={clients} />}
       />
 
       {all.length === 0 ? (

@@ -25,7 +25,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <TopNav
             label="OpenQuote AU"
             heading={
-              <Link href="/estimates" aria-label="OpenQuote AU estimates" className="flex h-11 items-center rounded-lg">
+              <Link href="/estimates" aria-label="OpenQuote AU estimates" className="flex h-11 items-center rounded-lg pl-2 sm:pl-4 md:pl-0">
                 <Wordmark />
               </Link>
             }

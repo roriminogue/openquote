@@ -122,11 +122,11 @@ export function QuoteDocument({ q, token }: { q: PublicQuote; token: string }) {
             {groups.map((g, gi) => (
               <li key={g.id} className="break-inside-avoid">
                 <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-(--color-border) pb-2">
-                  <h3>
+                  <h3 className="flex min-w-0 gap-2">
                     <Text weight="semibold">
-                      <span className="mr-2 tabular-nums text-(--color-text-secondary)">{gi + 1}</span>
-                      {g.name}
+                      <span className="tabular-nums text-(--color-text-secondary)">{gi + 1}</span>
                     </Text>
+                    <Text weight="semibold">{g.name}</Text>
                   </h3>
                   {display.showGroupTotals && (
                     <Text weight="semibold">
