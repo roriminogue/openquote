@@ -19,10 +19,11 @@ they can accept it from their phone.
   <img src="docs/screenshots/projects.png" width="200" alt="Projects, with the latest quote and status for each">
 </p>
 
-## Run your own OpenQuote AU (free)
+## Run your own OpenQuote AU
 
-You get your own private copy, on free accounts that you control. Nobody else can see your quotes. It takes about
-20 minutes, and you don't need to write any code.
+You get your own private copy, on accounts that you control. Nobody else can see your quotes. It takes about
+20 minutes, and you don't need to write any code. You can set it up and try it on free accounts; for real business
+use, see [What it costs](#what-it-costs).
 
 **You'll need:** a free [Supabase](https://supabase.com) account (the database), a free
 [Vercel](https://vercel.com) account (hosting), and an [Anthropic](https://console.anthropic.com) account with
@@ -100,11 +101,13 @@ Your copy is a repository on your GitHub. When OpenQuote AU gets new features, o
 | | |
 |---|---|
 | OpenQuote AU | Free (AGPL-3.0) |
-| Supabase and Vercel | Free tiers are plenty for a trades business |
+| Trying it out | Free: Supabase and Vercel's free plans are enough to set up and test |
+| Using it for your business | Vercel Pro, US$20 a month: Vercel's free Hobby plan is for [non-commercial use only](https://vercel.com/docs/limits/fair-use-guidelines), and quoting paid work is commercial. Supabase Pro, US$25 a month, is optional but stops the database going to sleep |
 | AI | Pay-as-you-go with your own key, typically a few cents per estimate |
 
 **Free Supabase projects go to sleep after a week without use.** If your site suddenly can't load anything,
-open your project in Supabase and click **Restore project**. Using OpenQuote AU at least once a week keeps it awake.
+open your project in Supabase and click **Restore project**. Using OpenQuote AU at least once a week keeps it awake,
+and Supabase Pro projects never sleep.
 
 **Prices are a starting point for Melbourne, Victoria (checked October 2026).** The built-in price book covers
 fencing, decking and carpentry materials. Labour times haven't been checked by a tradie yet. Your own rates in
