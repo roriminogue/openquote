@@ -1,17 +1,17 @@
 "use client";
 
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
+import { Icon } from "@astryxdesign/core/Icon";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { TextInput } from "@astryxdesign/core/TextInput";
 import { Check, Printer } from "lucide-react";
 import { startTransition, useActionState, useState, type FormEvent } from "react";
-import { Button, Field, Input, Notice, Textarea } from "@/components/ui";
 import { acceptQuote, declineQuote, type DecisionState } from "./actions";
 
 export function PrintButton() {
-  return (
-    <Button type="button" variant="secondary" size="sm" onClick={() => window.print()} className="no-print">
-      <Printer className="size-3.5" aria-hidden />
-      Save as PDF
-    </Button>
-  );
+  return <Button label="Save as PDF" size="sm" icon={<Icon icon={Printer} />} onClick={() => window.print()} />;
 }
 
 /** Accept (typed name + tick) or decline (optional reason). Shown until the client answers. */
@@ -35,8 +35,16 @@ export function Decision({
   const [email, setEmail] = useState(prefillEmail);
   const [agree, setAgree] = useState(false);
   const [reason, setReason] = useState("");
-  const [accState, accept, accepting] = useActionState<DecisionState, FormData>(acceptQuote.bind(null, token, version), { status: "idle" });
-  const [decState, decline, declining] = useActionState<DecisionState, FormData>(declineQuote.bind(null, token, version), { status: "idle" });
+  const [accState, accept, accepting] = useActionState<DecisionState, FormData>(
+    acceptQuote.bind(null, token, version),
+    {
+      status: "idle",
+    },
+  );
+  const [decState, decline, declining] = useActionState<DecisionState, FormData>(
+    declineQuote.bind(null, token, version),
+    { status: "idle" },
+  );
   // Submitted by hand rather than with <form action>: React resets a form after an action, which also unticked the
   // (controlled) "I accept" box behind React's back, so a client hitting an error had to tick it again.
   const submitWith = (dispatch: (data: FormData) => void) => (e: FormEvent<HTMLFormElement>) => {
@@ -44,49 +52,73 @@ export function Decision({
     const data = new FormData(e.currentTarget);
     startTransition(() => dispatch(data));
   };
+  const bad = (state: DecisionState, f: string) => (state.field === f ? ({ type: "error" } as const) : undefined);
 
   if (mode === "decline") {
     return (
-      <form onSubmit={submitWith(decline)} className="space-y-4">
-        <Field id="reason" label="Anything we should know?" optional hint={`Helps ${business} understand. For example price, timing or scope.`}>
-          <Textarea id="reason" name="reason" rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
-        </Field>
+      <form onSubmit={submitWith(decline)} noValidate className="flex flex-col gap-4">
+        <TextArea
+          label="Anything we should know?"
+          description={`Helps ${business} understand. For example price, timing or scope.`}
+          isOptional
+          htmlName="reason"
+          rows={3}
+          value={reason}
+          onChange={setReason}
+          width="100%"
+        />
         {decState.status === "error" && <Problem state={decState} />}
-        <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" disabled={declining}>
-            {declining ? "Sending…" : "Decline quote"}
-          </Button>
-          <Button type="button" variant="ghost" onClick={() => setMode("accept")}>
-            Back
-          </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button type="submit" label={declining ? "Sending…" : "Decline quote"} isLoading={declining} />
+          <Button label="Back" variant="ghost" onClick={() => setMode("accept")} />
         </div>
       </form>
     );
   }
 
   return (
-    <form onSubmit={submitWith(accept)} className="space-y-4">
+    <form onSubmit={submitWith(accept)} noValidate className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field id="name" label="Your full name">
-          <Input id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required aria-invalid={accState.field === "name" || undefined} />
-        </Field>
-        <Field id="email" label="Email" optional>
-          <Input id="email" name="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" aria-invalid={accState.field === "email" || undefined} />
-        </Field>
+        <TextInput
+          label="Your full name"
+          htmlName="name"
+          value={name}
+          onChange={setName}
+          autoComplete="name"
+          autoCapitalize="words"
+          status={bad(accState, "name")}
+          width="100%"
+        />
+        <TextInput
+          type="email"
+          label="Email"
+          isOptional
+          htmlName="email"
+          value={email}
+          onChange={setEmail}
+          autoComplete="email"
+          status={bad(accState, "email")}
+          width="100%"
+        />
       </div>
-      <label className="flex items-start gap-3 text-sm text-ink-2">
-        <input type="checkbox" name="agree" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[var(--accent)] sm:size-4" aria-invalid={accState.field === "agree" || undefined} />
-        <span>I accept this quote, its scope and its terms, and I&rsquo;m happy for {business} to go ahead.</span>
-      </label>
+      <CheckboxInput
+        label={`I accept this quote, its scope and its terms, and I’m happy for ${business} to go ahead.`}
+        htmlName="agree"
+        value={agree}
+        onChange={setAgree}
+      />
       {accState.status === "error" && <Problem state={accState} />}
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variant="accent" size="lg" disabled={accepting} className="max-sm:w-full">
-          <Check className="size-4" aria-hidden />
-          {accepting ? "Accepting…" : "Accept quote"}
-        </Button>
-        <Button type="button" variant="ghost" onClick={() => setMode("decline")} className="max-sm:w-full">
-          Decline
-        </Button>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <Button
+          type="submit"
+          label={accepting ? "Accepting…" : "Accept quote"}
+          variant="primary"
+          size="lg"
+          icon={<Icon icon={Check} />}
+          isLoading={accepting}
+          width="100%"
+        />
+        <Button label="Decline" variant="ghost" onClick={() => setMode("decline")} width="100%" />
       </div>
     </form>
   );
@@ -95,16 +127,16 @@ export function Decision({
 /** An answer that didn't go through. When the quote changed under them, offer the new version in one tap. */
 function Problem({ state }: { state: DecisionState }) {
   return (
-    <Notice tone="error">
-      {state.message}
-      {state.field === "version" && (
-        <>
-          {" "}
-          <button type="button" onClick={() => window.location.reload()} className="font-medium underline underline-offset-2">
-            Show the latest version
-          </button>
-        </>
-      )}
-    </Notice>
+    <Banner
+      status="error"
+      title={state.message ?? "That didn't go through. Try again."}
+      description={
+        state.field === "version" ? (
+          <span className="mt-1 inline-block">
+            <Button label="Show the latest version" size="sm" onClick={() => window.location.reload()} />
+          </span>
+        ) : undefined
+      }
+    />
   );
 }
