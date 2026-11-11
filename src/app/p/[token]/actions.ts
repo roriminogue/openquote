@@ -13,7 +13,7 @@ const PROBLEM: Record<Exclude<DecideResult, "ok">, string> = {
   missing: "This quote link isn't valid any more.",
   answered: "This quote has already been answered.",
   expired: "This quote has expired. Ask the business for an updated one.",
-  changed: "This quote was updated since you opened it. Reload the page to see the latest version.",
+  changed: "This quote was updated since you opened it.",
 };
 
 export async function acceptQuote(token: string, version: number, _prev: DecisionState, formData: FormData): Promise<DecisionState> {
@@ -27,7 +27,7 @@ export async function acceptQuote(token: string, version: number, _prev: Decisio
     return { status: "error", message: issue.message, field: String(issue.path[0] ?? "") };
   }
   const result = await decide(token, version, { type: "accepted", name: parsed.data.name, email: parsed.data.email });
-  if (result !== "ok") return { status: "error", message: PROBLEM[result] };
+  if (result !== "ok") return { status: "error", message: PROBLEM[result], field: result === "changed" ? "version" : undefined };
   refresh();
   return { status: "done" };
 }
@@ -36,7 +36,7 @@ export async function declineQuote(token: string, version: number, _prev: Decisi
   const parsed = DeclineInput.safeParse({ reason: String(formData.get("reason") ?? "") });
   if (!parsed.success) return { status: "error", message: "Keep the reason under 1,000 characters." };
   const result = await decide(token, version, { type: "declined", reason: parsed.data.reason });
-  if (result !== "ok") return { status: "error", message: PROBLEM[result] };
+  if (result !== "ok") return { status: "error", message: PROBLEM[result], field: result === "changed" ? "version" : undefined };
   refresh();
   return { status: "done" };
 }

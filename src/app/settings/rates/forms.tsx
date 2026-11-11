@@ -1,11 +1,16 @@
 "use client";
 
-import { Gem, Hammer, Sparkles } from "lucide-react";
+import { InputGroup, InputGroupText } from "@astryxdesign/core/InputGroup";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { Switch } from "@astryxdesign/core/Switch";
+import { Text } from "@astryxdesign/core/Text";
+import { TextInput } from "@astryxdesign/core/TextInput";
 import { useActionState, useState } from "react";
+import { TextField } from "@/components/fields";
 import { Money } from "@/components/money";
-import { Segmented } from "@/components/record-forms";
-import { Button, GroupTitle, Input, Notice, Panel, Row, Rows } from "@/components/ui";
 import { FINISH_LEVELS } from "@/lib/rates-schema";
+import { FormFooter } from "../form-footer";
+import { Fields, SettingsSection } from "../parts";
 import { saveBusinessContext, saveMarkup, type FormState } from "./actions";
 
 type Markup = {
@@ -27,9 +32,20 @@ const TYPES = [
 
 const pctText = (n: number | null) => (n === null ? "" : String(n));
 
-/** A percentage input with the % sign set inside the field. */
-function Pct({ id, value, onChange, placeholder, disabled, invalid }: {
-  id: string;
+/** A percentage field with the % sign set beside it. */
+function Pct({
+  name,
+  label,
+  description,
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  invalid,
+}: {
+  name: string;
+  label: string;
+  description?: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
@@ -37,44 +53,31 @@ function Pct({ id, value, onChange, placeholder, disabled, invalid }: {
   invalid?: boolean;
 }) {
   return (
-    <span className="relative block">
-      <Input
-        id={id}
-        name={id}
+    <InputGroup
+      label={label}
+      description={description}
+      isDisabled={disabled}
+      status={invalid ? { type: "error" } : undefined}
+    >
+      <TextInput
+        id={name}
+        label={label}
+        htmlName={name}
         inputMode="decimal"
         autoComplete="off"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={onChange}
         placeholder={placeholder}
-        disabled={disabled}
-        aria-invalid={invalid || undefined}
-        className="figures pr-8 text-right"
+        controlClassName="[&_input]:text-right [&_input]:tabular-nums"
       />
-      <span aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-ink-3">
-        %
-      </span>
-    </span>
-  );
-}
-
-function Footer({ state, pending, disabled }: { state: FormState; pending: boolean; disabled: boolean }) {
-  return (
-    <div className="flex flex-wrap items-center justify-end gap-3 border-t border-dashed border-border px-4 py-4 sm:px-5">
-      {state.message && (
-        <div className="mr-auto min-w-0" aria-live="polite">
-          <Notice tone={state.status === "error" ? "error" : "ok"}>{state.message}</Notice>
-        </div>
-      )}
-      <Button className="max-sm:w-full" disabled={pending || disabled}>
-        {pending ? "Saving…" : "Save"}
-      </Button>
-    </div>
+      <InputGroupText>%</InputGroupText>
+    </InputGroup>
   );
 }
 
 /** Markup and GST, with a worked example that updates as you type. */
 export function MarkupForm({ initial, canEdit }: { initial: Markup; canEdit: boolean }) {
-  const [state, action, pending] = useActionState<FormState, FormData>(saveMarkup, { status: "idle" });
+  const [state, action] = useActionState<FormState, FormData>(saveMarkup, { status: "idle" });
   const [values, setValues] = useState({
     defaultMarkupPct: pctText(initial.defaultMarkupPct),
     markupMaterialsPct: pctText(initial.markupMaterialsPct),
@@ -92,79 +95,74 @@ export function MarkupForm({ initial, canEdit }: { initial: Markup; canEdit: boo
   const incGst = gst ? Math.round(exGst * (1 + initial.gstRate / 100)) : exGst;
 
   return (
-    <section aria-labelledby="markup" className="mt-10">
-      <GroupTitle id="markup">Markup and GST</GroupTitle>
-      <form action={action}>
-        <Panel>
-          <Rows>
-            <Row label="Default markup" htmlFor="defaultMarkupPct" hint="Added on top of your cost for every line.">
-              <div className="sm:w-32 sm:min-w-0">
+    <form action={action} noValidate>
+      <SettingsSection id="markup" title="Markup and GST">
+        <Fields>
+          <div className="max-w-48">
+            <Pct
+              name="defaultMarkupPct"
+              label="Default markup"
+              description="Added on top of your cost for every line."
+              value={values.defaultMarkupPct}
+              onChange={set("defaultMarkupPct")}
+              disabled={!canEdit}
+              invalid={state.field === "defaultMarkupPct"}
+            />
+          </div>
+          <div>
+            <Text as="p" display="block" type="label" color="secondary" weight="medium">
+              Markup by line type
+            </Text>
+            <Text as="p" display="block" type="supporting">
+              Leave blank to use the default.
+            </Text>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:max-w-md">
+              {TYPES.map(([key, label]) => (
                 <Pct
-                  id="defaultMarkupPct"
-                  value={values.defaultMarkupPct}
-                  onChange={set("defaultMarkupPct")}
+                  key={key}
+                  name={key}
+                  label={label}
+                  value={values[key]}
+                  onChange={set(key)}
+                  placeholder={values.defaultMarkupPct || "0"}
                   disabled={!canEdit}
-                  invalid={state.field === "defaultMarkupPct"}
+                  invalid={state.field === key}
                 />
-              </div>
-            </Row>
-            <Row label="Markup by line type" hint="Leave blank to use the default.">
-              <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:w-[22rem]">
-                {TYPES.map(([key, label]) => (
-                  <div key={key} className="space-y-1">
-                    <label htmlFor={key} className="block text-xs font-medium text-ink-3">
-                      {label}
-                    </label>
-                    <Pct
-                      id={key}
-                      value={values[key]}
-                      onChange={set(key)}
-                      placeholder={values.defaultMarkupPct || "0"}
-                      disabled={!canEdit}
-                      invalid={state.field === key}
-                    />
-                  </div>
-                ))}
-              </div>
-            </Row>
-            <Row label="Registered for GST" htmlFor="gstRegistered" hint={`Adds ${initial.gstRate}% GST to estimate totals.`}>
-              <label className="relative inline-flex cursor-pointer items-center">
-                <input
-                  id="gstRegistered"
-                  name="gstRegistered"
-                  type="checkbox"
-                  role="switch"
-                  checked={gst}
-                  onChange={(e) => setGst(e.target.checked)}
-                  disabled={!canEdit}
-                  className="peer sr-only"
-                />
-                <span
-                  aria-hidden
-                  className="h-6 w-10 rounded-full bg-border-strong transition-colors peer-checked:bg-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-focus peer-disabled:opacity-50 sm:h-5 sm:w-9"
-                />
-                <span
-                  aria-hidden
-                  className="absolute left-0.5 size-5 rounded-full bg-bg shadow-sm transition-transform peer-checked:translate-x-4 sm:size-4"
-                />
-              </label>
-            </Row>
-            <Row label="Example" hint="A line that costs you $100 in materials.">
-              <p className="text-sm sm:text-right">
-                <Money cents={exGst} className="font-medium text-ink" /> <span className="text-ink-3">ex GST</span>
-                {gst && (
-                  <>
-                    <span className="text-ink-3"> · </span>
-                    <Money cents={incGst} className="font-medium text-ink" /> <span className="text-ink-3">inc GST</span>
-                  </>
-                )}
-              </p>
-            </Row>
-          </Rows>
-          {canEdit && <Footer state={state} pending={pending} disabled={!canEdit} />}
-        </Panel>
-      </form>
-    </section>
+              ))}
+            </div>
+          </div>
+          <Switch
+            label="Registered for GST"
+            description={`Adds ${initial.gstRate}% GST to estimate totals.`}
+            htmlName="gstRegistered"
+            value={gst}
+            onChange={setGst}
+            isDisabled={!canEdit}
+          />
+          <div className="rounded-(--radius-element) bg-(--color-background-muted) px-3 py-2.5">
+            <Text as="p" display="block" type="supporting">
+              A line that costs you $100 in materials comes to
+            </Text>
+            <Text as="p" display="block" hasTabularNumbers>
+              <Text type="inherit" weight="semibold">
+                <Money cents={exGst} />
+              </Text>{" "}
+              ex GST
+              {gst && (
+                <>
+                  {" · "}
+                  <Text type="inherit" weight="semibold">
+                    <Money cents={incGst} />
+                  </Text>{" "}
+                  inc GST
+                </>
+              )}
+            </Text>
+          </div>
+        </Fields>
+        {canEdit && <FormFooter message={state.message} error={state.status === "error"} />}
+      </SettingsSection>
+    </form>
   );
 }
 
@@ -172,60 +170,69 @@ type Context = { trades: string; finishLevel: "basic" | "standard" | "premium"; 
 
 /** What the AI should assume when it prices materials it has no rate for. */
 export function BusinessContextForm({ initial, canEdit }: { initial: Context; canEdit: boolean }) {
-  const [state, action, pending] = useActionState<FormState, FormData>(saveBusinessContext, { status: "idle" });
+  const [state, action] = useActionState<FormState, FormData>(saveBusinessContext, { status: "idle" });
   const [finish, setFinish] = useState(initial.finishLevel);
   const finishHint = FINISH_LEVELS.find(([k]) => k === finish)?.[2];
+  const bad = (f: string) => (state.field === f ? ({ type: "error" } as const) : undefined);
 
   return (
-    <section aria-labelledby="context" className="mt-10">
-      <GroupTitle id="context">What the AI assumes</GroupTitle>
-      <form action={action}>
-        <Panel>
-          <Rows>
-            <Row label="Trades" htmlFor="trades" hint="What you do, separated by commas.">
-              <Input
-                id="trades"
-                name="trades"
-                defaultValue={initial.trades}
-                placeholder="carpenter, deck builder"
-                autoComplete="off"
-                disabled={!canEdit}
-                aria-invalid={state.field === "trades" || undefined}
-              />
-            </Row>
-            <Row label="Finish level" hint={finishHint}>
-              <input type="hidden" name="finishLevel" value={finish} />
-              <Segmented
-                className="sm:w-[22rem]"
+    <form action={action} noValidate>
+      <SettingsSection id="context" title="What the AI assumes">
+        <Fields>
+          <TextField
+            name="trades"
+            label="Trades"
+            description="What you do, separated by commas."
+            defaultValue={initial.trades}
+            placeholder="carpenter, deck builder"
+            autoComplete="off"
+            isDisabled={!canEdit}
+            status={bad("trades")}
+          />
+          <div>
+            <div aria-hidden className="mb-1.5">
+              <Text as="p" display="block" type="label" color="secondary" weight="medium">
+                Finish level
+              </Text>
+            </div>
+            <input type="hidden" name="finishLevel" value={finish} />
+            <div className="sm:max-w-md">
+              <SegmentedControl
+                label="Finish level"
                 value={finish}
-                onChange={(v) => canEdit && setFinish(v)}
-                options={[
-                  ["basic", "Basic", Hammer],
-                  ["standard", "Standard", Sparkles],
-                  ["premium", "Premium", Gem],
-                ]}
-              />
-            </Row>
-            <Row label="Postcode" htmlFor="postcode" hint="Where you mostly work, for local prices and travel.">
-              <div className="sm:w-32 sm:min-w-0">
-                <Input
-                  id="postcode"
-                  name="postcode"
-                  inputMode="numeric"
-                  maxLength={4}
-                  defaultValue={initial.postcode}
-                  placeholder="3056"
-                  autoComplete="postal-code"
-                  disabled={!canEdit}
-                  aria-invalid={state.field === "postcode" || undefined}
-                  className="figures"
-                />
+                onChange={(v) => canEdit && setFinish(v as Context["finishLevel"])}
+                layout="fill"
+              >
+                {FINISH_LEVELS.map(([k, l]) => (
+                  <SegmentedControlItem key={k} value={k} label={l} />
+                ))}
+              </SegmentedControl>
+            </div>
+            {finishHint && (
+              <div className="mt-1.5">
+                <Text as="p" display="block" type="supporting">
+                  {finishHint}
+                </Text>
               </div>
-            </Row>
-          </Rows>
-          {canEdit && <Footer state={state} pending={pending} disabled={!canEdit} />}
-        </Panel>
-      </form>
-    </section>
+            )}
+          </div>
+          <div className="max-w-72">
+            <TextField
+              name="postcode"
+              label="Postcode"
+              description="Where you mostly work, for local prices and travel."
+              inputMode="numeric"
+              {...{ maxLength: 4 }}
+              defaultValue={initial.postcode}
+              placeholder="3056"
+              autoComplete="postal-code"
+              isDisabled={!canEdit}
+              status={bad("postcode")}
+            />
+          </div>
+        </Fields>
+        {canEdit && <FormFooter message={state.message} error={state.status === "error"} />}
+      </SettingsSection>
+    </form>
   );
 }

@@ -1,18 +1,20 @@
-import { Mail } from "lucide-react";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { AuthFrame } from "@/components/auth-frame";
-import { SubmitButton, SubmitLink } from "@/components/submit-button";
-import { Field, Input, Notice } from "@/components/ui";
-import { sendCode, verifyCode } from "./actions";
-import { CODE_ERRORS, CODE_NOTICES, LOGIN_ERRORS, messageFor } from "@/lib/auth-messages";
 import { z } from "zod";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Text } from "@astryxdesign/core/Text";
+import { AuthFrame } from "@/components/auth-frame";
+import { TextField } from "@/components/fields";
+import { SubmitButton } from "@/components/submit-button";
+import { CODE_ERRORS, CODE_NOTICES, LOGIN_ERRORS, messageFor } from "@/lib/auth-messages";
+import { sendCode, verifyCode } from "./actions";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
-    <AuthFrame title="Sign in to OpenQuote" intro="Quote jobs from the site in minutes, priced with your own rates.">
+    <AuthFrame title="Sign in to OpenQuote AU" intro="Quote jobs from the site in minutes, priced with your own rates.">
       <Suspense>
         <LoginForm searchParams={searchParams} />
       </Suspense>
@@ -32,69 +34,60 @@ async function LoginForm({ searchParams }: Pick<PageProps<"/login">, "searchPara
   // Step 2: type the code from the email.
   if (sent) {
     return (
-      <div className="space-y-4">
-        <div className="flex items-start gap-3 rounded-lg border border-border bg-subtle p-4">
-          <Mail className="mt-0.5 size-5 shrink-0 text-ink-2" aria-hidden />
-          <p className="text-body">
-            We emailed a 6-digit code to <strong className="break-all font-medium">{sent}</strong>. It can take a minute to
-            arrive, so check your junk folder too. If the email has a Sign in link instead, open it in this browser.
-          </p>
-        </div>
-        <form action={verifyCode} className="space-y-3">
+      <div className="flex flex-col gap-5">
+        <Text as="p">
+          We emailed a 6-digit code to <strong className="font-semibold [overflow-wrap:anywhere]">{sent}</strong>. It can take a minute
+          to arrive, so check your junk folder too. If the email has a Sign in link instead, open it in this browser.
+        </Text>
+        <form action={verifyCode} className="flex flex-col gap-4">
           <input type="hidden" name="email" value={sent} />
-          <Field id="code" label="Code">
-            <Input
-              id="code"
-              name="code"
-              required
-              autoFocus
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              pattern="[0-9 ]*"
-              maxLength={12}
-              placeholder="123456"
-              aria-invalid={codeError ? true : undefined}
-              className="figures tracking-[0.2em]"
-            />
-          </Field>
-          {codeError ? <Notice tone="error">{codeError}</Notice> : notice && <Notice tone="info">{notice}</Notice>}
-          <SubmitButton className="w-full" pendingLabel="Signing in…">
-            Sign in
-          </SubmitButton>
+          <TextField
+            name="code"
+            label="Code"
+            size="lg"
+            hasAutoFocus
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            enterKeyHint="go"
+            placeholder="123456"
+            controlClassName="tabular-nums tracking-[0.2em]"
+            status={codeError ? { type: "error", message: codeError } : undefined}
+          />
+          {!codeError && notice && <Banner status="info" title={notice} />}
+          <SubmitButton label="Sign in" pendingLabel="Signing in…" size="lg" width="100%" />
         </form>
-        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <form action={sendCode}>
             <input type="hidden" name="email" value={sent} />
-            <SubmitLink pendingLabel="Sending…">Send a new code</SubmitLink>
+            <SubmitButton label="Send a new code" pendingLabel="Sending…" variant="ghost" />
           </form>
-          <a href="/login" className="font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
-            Use a different email
-          </a>
+          <Button label="Use a different email" variant="ghost" href="/login" />
         </div>
       </div>
     );
   }
 
-  // Step 1: your email.
+  // Step 1: your email. A problem with the address itself is shown on the field; anything else above the button.
+  const badEmail = params.error === "invalid_email";
   return (
-    <form action={sendCode} className="space-y-3">
-      <Field id="email" label="Email">
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          required
-          autoComplete="email"
-          inputMode="email"
-          spellCheck={false}
-          defaultValue={lastEmail}
-          placeholder="you@business.com.au"
-        />
-      </Field>
-      {error && <Notice tone="error">{error}</Notice>}
-      <SubmitButton className="w-full" pendingLabel="Sending your code…">
-        Email me a code
-      </SubmitButton>
+    <form action={sendCode} className="flex flex-col gap-4">
+      <TextField
+        name="email"
+        label="Email"
+        type="email"
+        size="lg"
+        defaultValue={lastEmail}
+        placeholder="you@business.com.au"
+        autoComplete="email"
+        inputMode="email"
+        autoCapitalize="none"
+        hasAutoCorrect={false}
+        hasSpellCheck={false}
+        enterKeyHint="send"
+        status={error && badEmail ? { type: "error", message: error } : undefined}
+      />
+      {error && !badEmail && <Banner status="error" title={error} />}
+      <SubmitButton label="Email me a code" pendingLabel="Sending your code…" size="lg" width="100%" />
     </form>
   );
 }

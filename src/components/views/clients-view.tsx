@@ -1,12 +1,12 @@
-import Link from "next/link";
+import { Button } from "@astryxdesign/core/Button";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
+import { List, ListItem } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
 import { Money } from "@/components/money";
 import { NewClientButton } from "@/components/record-editors";
-import { ListFrame, listHeader, listRow, PageHeader, SearchBox } from "@/components/records";
-import { EmptyState, LinkButton } from "@/components/ui";
+import { PageHeader, SearchBox } from "@/components/records";
 import type { ClientOption } from "@/lib/project-schema";
 import { matches, type Quoted } from "@/lib/records-overview";
-
-const cols = "md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_6rem_8rem]";
 
 export function ClientsView({ all, q }: { all: (ClientOption & Quoted & { projectCount: number })[]; q: string }) {
   const shown = all.filter((c) => matches(q, c.name, c.contactName, c.email, c.phone, c.address));
@@ -16,63 +16,64 @@ export function ClientsView({ all, q }: { all: (ClientOption & Quoted & { projec
       <PageHeader title="Clients" description="The people and businesses you quote for." action={<NewClientButton />} />
       {all.length === 0 ? (
         <div className="mt-8">
-          <EmptyState title="No clients yet" action={<NewClientButton variant="primary" />}>
-            Add a client once and their address can fill in the site for every new project.
-          </EmptyState>
+          <EmptyState
+            title="No clients yet"
+            description="Add a client once and their address can fill in the site for every new project."
+            actions={<NewClientButton variant="primary" />}
+          />
         </div>
       ) : (
         <>
-          <div className="mt-7">
-            <SearchBox q={q} placeholder="Search name, email, phone or address…" />
+          <div className="mt-6">
+            <SearchBox q={q} placeholder="Search name, email, phone or address" />
           </div>
-          <div className="mt-5">
+          <div className="mt-2">
             {shown.length ? (
-              <ListFrame
-                header={
-                  <div aria-hidden className={`${listHeader} ${cols}`}>
-                    <span>Name</span>
-                    <span>Contact</span>
-                    <span>Projects</span>
-                    <span className="text-right">Latest quote</span>
-                  </div>
-                }
-              >
+              <List hasDividers edge="flush" density="spacious">
                 {shown.map((c) => {
-                  const contact = [c.kind === "company" ? c.contactName : null, c.phone, c.email].filter(Boolean).join(" · ");
+                  const contact = [c.kind === "company" ? c.contactName : null, c.phone, c.email]
+                    .filter(Boolean)
+                    .join(" · ");
                   return (
-                    <li key={c.id}>
-                      <Link
-                        href={`/clients/${c.id}`}
-                        className={`${listRow} ${cols}`}
-                      >
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-medium text-ink">{c.name}</span>
-                          <span className="mt-0.5 block truncate text-caption text-ink-3">
-                            {c.kind === "company" ? "Business" : "Person"}
-                            <span className="md:hidden">{contact ? ` · ${contact}` : ""}</span>
-                          </span>
-                        </span>
-                        <span className="hidden truncate text-sm text-ink-2 md:block">{contact || <span className="text-ink-3">No contact details</span>}</span>
-                        <span className="figures hidden text-sm text-ink-2 md:block">{c.projectCount}</span>
-                        <span className="text-right">
+                    <ListItem
+                      key={c.id}
+                      href={`/clients/${c.id}`}
+                      label={
+                        <Text weight="medium" maxLines={2}>
+                          {c.name}
+                        </Text>
+                      }
+                      description={
+                        <Text type="supporting" maxLines={2}>
+                          {[c.kind === "company" ? "Business" : "Person", contact].filter(Boolean).join(" · ")}
+                        </Text>
+                      }
+                      endContent={
+                        <span className="flex flex-col items-end gap-0.5">
                           {c.estimateCount > 0 ? (
-                            <Money cents={c.quotedCents} className="block text-sm font-medium text-ink" />
+                            <Text weight="medium">
+                              <Money cents={c.quotedCents} />
+                            </Text>
                           ) : (
-                            <span className="text-caption text-ink-3">Nothing quoted</span>
+                            <Text type="supporting">Nothing quoted</Text>
                           )}
-                          <span className="text-caption text-ink-3 md:hidden">
+                          <Text type="supporting" hasTabularNumbers>
                             {c.projectCount} {c.projectCount === 1 ? "project" : "projects"}
-                          </span>
+                          </Text>
                         </span>
-                      </Link>
-                    </li>
+                      }
+                    />
                   );
                 })}
-              </ListFrame>
+              </List>
             ) : (
-              <EmptyState title="Nothing matches" action={<LinkButton href="/clients" variant="secondary">Show all clients</LinkButton>}>
-                No clients match &ldquo;{q}&rdquo;.
-              </EmptyState>
+              <div className="mt-6">
+                <EmptyState
+                  title="Nothing matches"
+                  description={`No clients match “${q}”.`}
+                  actions={<Button href="/clients" label="Show all clients" />}
+                />
+              </div>
             )}
           </div>
         </>

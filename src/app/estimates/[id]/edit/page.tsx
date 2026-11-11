@@ -1,3 +1,4 @@
+import { Skeleton } from "@astryxdesign/core/Skeleton";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -9,7 +10,13 @@ export const metadata: Metadata = { title: "Edit estimate" };
 
 export default function EditEstimatePage({ params }: PageProps<"/estimates/[id]/edit">) {
   return (
-    <Suspense fallback={<div className="h-64 animate-pulse rounded-[10px] bg-hover" aria-busy="true" />}>
+    <Suspense
+      fallback={
+        <div aria-busy="true" aria-label="Loading estimate">
+          <Skeleton height={256} radius={4} />
+        </div>
+      }
+    >
       <Editor params={params} />
     </Suspense>
   );

@@ -1,6 +1,6 @@
-# Contributing to OpenQuote
+# Contributing to OpenQuote AU
 
-Thanks for helping. OpenQuote is built for tradies, so the best contributions make quoting faster or prices more
+Thanks for helping. OpenQuote AU is built for tradies, so the best contributions make quoting faster or prices more
 accurate for real jobs.
 
 ## Ways to help
@@ -33,4 +33,4 @@ npm run lint
 - **Never commit secrets.** `.env.local` and your iPhone signing file stay on your machine.
 
 By contributing, you agree that your work is licensed under the [AGPL-3.0](LICENSE), like the rest of
-OpenQuote.
+OpenQuote AU.

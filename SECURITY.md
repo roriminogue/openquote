@@ -1,6 +1,6 @@
 # Security
 
-OpenQuote stores business details, client details and encrypted AI keys, so security problems matter.
+OpenQuote AU stores business details, client details and encrypted AI keys, so security problems matter.
 
 ## Reporting a problem
 

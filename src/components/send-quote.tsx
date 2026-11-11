@@ -1,20 +1,40 @@
 "use client";
 
-import { Check, Copy, ExternalLink, Layers, ListTree, Mail, MessageSquare, Receipt, Send, Share2 } from "lucide-react";
-import { useState } from "react";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { Icon } from "@astryxdesign/core/Icon";
+import { Link } from "@astryxdesign/core/Link";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { Check, Copy, Mail, MessageSquare, Send, Share2 } from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
 import { shareQuote } from "@/app/estimates/[id]/actions";
-import { Segmented } from "./record-forms";
 import { Sheet } from "./sheet";
-import { Button, Field, Notice, Textarea } from "./ui";
 import { DETAIL_LEVELS, type DetailLevel } from "@/lib/proposal-schema";
 
 export type SendTarget = {
   estimateId: string;
   title: string;
   businessName: string;
-  client: { name: string; firstName: string; phone: string | null; email: string | null } | null;
+  client: {
+    name: string;
+    firstName: string;
+    phone: string | null;
+    email: string | null;
+  } | null;
   detail: DetailLevel;
   sent: boolean;
+};
+
+const noop = () => () => {};
+
+/** Short enough that all three fit across a phone, even the selected one in bold. The line under them explains. */
+const SHORT: Record<DetailLevel, string> = {
+  total: "Total",
+  groups: "Stages",
+  full: "Every line",
 };
 
 /**
@@ -25,12 +45,19 @@ export function SendQuoteButton({ target }: { target: SendTarget }) {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<DetailLevel>(target.detail);
   const greeting = target.client ? `Hi ${target.client.firstName}` : "Hi";
-  const [message, setMessage] = useState(`${greeting}, here's your quote for ${target.title.toLowerCase()} from ${target.businessName}. You can accept it online:`);
+  const [message, setMessage] = useState(
+    `${greeting}, here's your quote for ${target.title.toLowerCase()} from ${target.businessName}. You can accept it online:`,
+  );
   const [url, setUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const canShare = typeof navigator !== "undefined" && "share" in navigator;
+  // Known only in the browser; the server renders without the Share button.
+  const canShare = useSyncExternalStore(
+    noop,
+    () => "share" in navigator,
+    () => false,
+  );
 
   async function link() {
     setError(null);
@@ -49,7 +76,11 @@ export function SendQuoteButton({ target }: { target: SendTarget }) {
     const u = await link();
     if (!u) return;
     try {
-      await navigator.share({ title: target.title, text: `${message}\n`, url: u });
+      await navigator.share({
+        title: target.title,
+        text: `${message}\n`,
+        url: u,
+      });
     } catch {
       // Cancelled from the share sheet; the link still exists.
     }
@@ -71,82 +102,124 @@ export function SendQuoteButton({ target }: { target: SendTarget }) {
     const u = await link();
     if (!u) return;
     const body = encodeURIComponent(`${message}\n${u}`);
-    if (kind === "sms") window.location.href = `sms:${target.client?.phone?.replace(/[^\d+]/g, "") ?? ""}?&body=${body}`;
-    else window.location.href = `mailto:${target.client?.email ?? ""}?subject=${encodeURIComponent(`Quote: ${target.title}`)}&body=${body}`;
+    if (kind === "sms")
+      window.location.href = `sms:${target.client?.phone?.replace(/[^\d+]/g, "") ?? ""}?&body=${body}`;
+    else
+      window.location.href = `mailto:${target.client?.email ?? ""}?subject=${encodeURIComponent(`Quote: ${target.title}`)}&body=${body}`;
   }
+
+  const contact = target.client ? [target.client.phone, target.client.email].filter(Boolean).join(" · ") : "";
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
-        <Send className="size-3.5" aria-hidden />
-        {target.sent ? "Share again" : "Send to client"}
-      </Button>
-      {open && (
-        <Sheet open title="Send to client" onClose={() => setOpen(false)}>
-          <div className="space-y-6">
-            <p className="text-sm text-ink-3">
-              {target.client ? (
-                <>
-                  For <span className="font-medium text-ink">{target.client.name}</span>
-                  {target.client.phone || target.client.email ? ` · ${[target.client.phone, target.client.email].filter(Boolean).join(" · ")}` : ""}
-                </>
-              ) : (
-                "No client on this estimate yet. You can still share the link with anyone."
-              )}
-            </p>
-
-            <fieldset>
-              <legend className="text-sm font-medium">What the client sees</legend>
-              <Segmented
-                className="mt-1.5"
-                value={detail}
-                onChange={setDetail}
-                options={DETAIL_LEVELS.map(([k, l]) => [k, l, k === "total" ? Receipt : k === "groups" ? Layers : ListTree] as const)}
-              />
-              <p className="mt-1.5 text-xs text-ink-3">{DETAIL_LEVELS.find(([k]) => k === detail)?.[2]} Your costs and markup are never shown.</p>
-            </fieldset>
-
-            <Field id="message" label="Message">
-              <Textarea id="message" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} />
-            </Field>
-
-            {error && <Notice tone="error">{error}</Notice>}
-
-            <div className="grid gap-2">
-              {canShare && (
-                <Button size="lg" onClick={share} disabled={busy} className="w-full">
-                  <Share2 className="size-4" aria-hidden />
-                  {busy ? "Making the link…" : "Share…"}
-                </Button>
-              )}
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="secondary" onClick={() => open_("sms")} disabled={busy}>
-                  <MessageSquare className="size-4" aria-hidden />
-                  Text
-                </Button>
-                <Button variant="secondary" onClick={() => open_("email")} disabled={busy}>
-                  <Mail className="size-4" aria-hidden />
-                  Email
-                </Button>
-              </div>
-              <Button variant="ghost" onClick={copy} disabled={busy}>
-                {copied ? <Check className="size-4 text-ok" aria-hidden /> : <Copy className="size-4" aria-hidden />}
-                {copied ? "Copied message and link" : "Copy message and link"}
-              </Button>
-            </div>
-
-            {url && (
-              <div className="rounded-[10px] bg-subtle px-3 py-2.5 text-xs">
-                <p className="text-ink-3">Client link</p>
-                <p className="mt-0.5 break-all font-medium text-ink">{url}</p>
-                <a href={url} target="_blank" rel="noreferrer" className="mt-1.5 inline-flex items-center gap-1 font-medium text-ink-2 underline underline-offset-2">
-                  See what the client sees <ExternalLink className="size-3" aria-hidden />
-                </a>
-              </div>
+      <Button
+        label={target.sent ? "Share again" : "Send to client"}
+        variant="primary"
+        icon={<Icon icon={Send} />}
+        onClick={() => setOpen(true)}
+        width="100%"
+      />
+      <Sheet open={open} title="Send to client" onClose={() => setOpen(false)}>
+        <div className="flex flex-col gap-6">
+          <Text as="p" type="supporting">
+            {target.client ? (
+              <>
+                For{" "}
+                <Text type="inherit" weight="medium" color="primary">
+                  {target.client.name}
+                </Text>
+                {contact ? ` · ${contact}` : ""}
+              </>
+            ) : (
+              "No client on this estimate yet. You can still share the link with anyone."
             )}
+          </Text>
+
+          <div>
+            {/* The control is named for screen readers already; this is the same name, shown. */}
+            <div aria-hidden className="mb-1.5">
+              <Text as="p" type="label" color="secondary" weight="medium">
+                What the client sees
+              </Text>
+            </div>
+            <SegmentedControl
+              label="What the client sees"
+              value={detail}
+              onChange={(next) => setDetail(next as DetailLevel)}
+              layout="fill"
+            >
+              {DETAIL_LEVELS.map(([k]) => (
+                <SegmentedControlItem key={k} value={k} label={SHORT[k]} />
+              ))}
+            </SegmentedControl>
+            <div className="mt-1.5">
+              <Text as="p" type="supporting">
+                {DETAIL_LEVELS.find(([k]) => k === detail)?.[2]} Your costs and markup are never shown.
+              </Text>
+            </div>
           </div>
-        </Sheet>
-      )}
+
+          <TextArea id="message" label="Message" rows={4} value={message} onChange={setMessage} width="100%" />
+
+          {error && <Banner status="error" title={error} />}
+
+          <div className="flex flex-col gap-2">
+            {canShare && (
+              <Button
+                label={busy ? "Making the link…" : "Share…"}
+                variant="primary"
+                size="lg"
+                icon={<Icon icon={Share2} />}
+                onClick={share}
+                isLoading={busy}
+                width="100%"
+              />
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                label="Text"
+                icon={<Icon icon={MessageSquare} />}
+                onClick={() => open_("sms")}
+                isDisabled={busy}
+                width="100%"
+              />
+              <Button
+                label="Email"
+                icon={<Icon icon={Mail} />}
+                onClick={() => open_("email")}
+                isDisabled={busy}
+                width="100%"
+              />
+            </div>
+            <Button
+              label={copied ? "Copied message and link" : "Copy message and link"}
+              variant="ghost"
+              icon={<Icon icon={copied ? Check : Copy} color={copied ? "success" : undefined} />}
+              onClick={copy}
+              isDisabled={busy}
+              width="100%"
+            />
+          </div>
+
+          {url && (
+            <Card variant="muted" padding={3}>
+              <Text as="p" type="supporting">
+                Client link
+              </Text>
+              <div className="mt-0.5 break-all">
+                <Text as="p" weight="medium">
+                  {url}
+                </Text>
+              </div>
+              <div className="mt-1.5">
+                <Link href={url} isExternalLink color="primary" hasUnderline>
+                  See what the client sees
+                </Link>
+              </div>
+            </Card>
+          )}
+        </div>
+      </Sheet>
     </>
   );
 }

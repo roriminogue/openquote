@@ -82,6 +82,15 @@ describe("buildFence", () => {
     expect(g[1].name).toBe("Existing posts");
   });
 
+  it("takes a short fence's waste to the tip in the ute instead of hiring a skip", () => {
+    const g = buildFence(fence({ lengthM: 8, removeOld: true }), rate);
+    expect(qty(g, "tip_ute_load")).toBe(1); // 8 m × 0.15 m³ = 1.2 m³, one ute load
+    expect(byRef(g, "skip_2m3")).toHaveLength(0);
+    expect(g[0].lines.some((l) => l.type === "labour" && /tip/.test(l.description))).toBe(true);
+    // Just over a ute load gets the smallest skip.
+    expect(qty(buildFence(fence({ lengthM: 12, removeOld: true }), rate), "skip_2m3")).toBe(1);
+  });
+
   it("adds gate posts, hardware and hours", () => {
     const plain = buildFence(fence(), rate);
     const gated = buildFence(fence({ gates: 1 }), rate);

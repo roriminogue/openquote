@@ -1,6 +1,8 @@
 "use client";
 
-import { Mic, Square } from "lucide-react";
+import { Icon } from "@astryxdesign/core/Icon";
+import { ToggleButton } from "@astryxdesign/core/ToggleButton";
+import { Mic } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { dictationKind, startDictation, type Dictation, type DictationKind } from "@/lib/voice/dictation";
 import { joinSpoken } from "@/lib/voice/text";
@@ -95,46 +97,46 @@ export function useDictation({
     status,
     busy: status !== "idle",
     toggle,
+    // A quiet toggle in the composer's footer, not a button shouting for attention. While listening it stays
+    // pressed, four orange bars move (the live state) and the label becomes Stop with a running time.
     button: kind ? (
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={status === "starting" || status === "tidying"}
-        aria-pressed={status === "listening"}
-        aria-label={status === "listening" ? "Stop talking" : "Talk instead of typing"}
-        title={status === "listening" ? "Stop" : "Talk instead of typing"}
-        className={`inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 text-[0.9375rem] font-medium transition-[background-color,border-color,color] duration-150 disabled:opacity-60 sm:h-8 sm:px-2.5 sm:text-xs ${
-          status === "listening"
-            ? "border-accent-hover bg-accent-soft text-accent-ink"
-            : "border-border-strong bg-bg text-ink hover:bg-hover"
-        }`}
+      <ToggleButton
+        label={status === "listening" ? `Stop talking (${elapsedFmt(elapsed)})` : "Talk instead of typing"}
+        isPressed={status === "listening"}
+        onPressedChange={() => toggle()}
+        isDisabled={status === "starting" || status === "tidying"}
+        icon={<Icon icon={Mic} />}
+        pressedIcon={
+          <span aria-hidden className="voice-bars">
+            <span />
+            <span />
+            <span />
+            <span />
+          </span>
+        }
       >
         {status === "listening" ? (
           <>
-            <span aria-hidden className="size-2 rounded-full bg-accent motion-safe:animate-pulse" />
-            <span className="figures">{elapsedFmt(elapsed)}</span>
-            <Square className="size-3 fill-current" aria-hidden />
-            <span>Stop</span>
+            Stop <span className="font-normal tabular-nums text-(--color-text-secondary)">{elapsedFmt(elapsed)}</span>
           </>
+        ) : status === "starting" ? (
+          "Starting…"
+        ) : status === "tidying" ? (
+          "Checking words…"
         ) : (
-          <>
-            <Mic className="size-4 sm:size-3.5" aria-hidden />
-            <span className={status === "idle" ? "max-sm:sr-only" : ""}>
-              {status === "starting" ? "Starting…" : status === "tidying" ? "Checking words…" : "Talk"}
-            </span>
-          </>
+          "Talk"
         )}
-      </button>
+      </ToggleButton>
     ) : null,
     statusLine:
       status === "listening" ? (
-        <p className="text-xs text-ink-3">Listening. Talk it through like you would on the phone, then tap Stop.</p>
+        <p className="sr-only">Listening. Talk it through, then press Stop.</p>
       ) : problem ? (
-        <p className="text-xs text-danger">{problem}</p>
+        <p className="text-(length:--text-supporting-size) text-(--color-text-error)">{problem}</p>
       ) : tidied && value === tidied.result ? (
-        <p className="text-xs text-ink-3">
+        <p className="text-(length:--text-supporting-size) text-(--color-text-secondary)">
           {tidied.fixed.length ? `Fixed: ${tidied.fixed.join(", ")}. ` : "Tidied up the wording. "}
-          <button type="button" onClick={undoTidy} className="font-medium text-ink underline underline-offset-2">
+          <button type="button" onClick={undoTidy} className="font-medium text-(--color-text-primary) underline underline-offset-2">
             Undo
           </button>
         </p>

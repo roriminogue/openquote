@@ -1,23 +1,28 @@
-import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@astryxdesign/core/Skeleton";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
 import { listEstimates } from "@/lib/estimate/queries";
 import { getClient, listClients, listProjects } from "@/lib/projects";
 import { ClientView } from "@/components/views/client-view";
+import { deleteClientRecord } from "@/app/actions/delete";
+import { DeleteRecord } from "@/components/delete-record";
 
 export const metadata: Metadata = { title: "Client" };
 
 export default function ClientPage({ params }: PageProps<"/clients/[id]">) {
   return (
     <>
-      <Link href="/clients" className="-ml-2 inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-ink-3 transition-colors hover:bg-hover hover:text-ink">
-        <ArrowLeft className="size-4" aria-hidden />
-        Clients
-      </Link>
-      <Suspense fallback={<div className="mt-5 h-9 w-2/3 animate-pulse rounded-lg bg-hover" aria-busy="true" />}>
+      <BackLink href="/clients" label="Clients" />
+      <Suspense
+        fallback={
+          <div className="mt-3" aria-busy="true" aria-label="Loading">
+            <Skeleton width="66%" height={36} />
+          </div>
+        }
+      >
         <Client params={params} />
       </Suspense>
     </>
@@ -35,5 +40,20 @@ async function Client({ params }: Pick<PageProps<"/clients/[id]">, "params">) {
     listEstimates(member.orgId, { clientId: id }),
     listClients(member.orgId),
   ]);
-  return <ClientView client={client} allProjects={allProjects} estimates={estimates} clients={clients} />;
+  return (
+    <>
+      <ClientView client={client} allProjects={allProjects} estimates={estimates} clients={clients} />
+      <DeleteRecord
+        label="Delete client"
+        question={`Delete ${client.name}?`}
+        consequence={
+          estimates.length
+            ? `Their ${estimates.length === 1 ? "estimate stays" : `${estimates.length} estimates stay`} in Estimates, without a client.`
+            : "They have no estimates."
+        }
+        action={deleteClientRecord.bind(null, id)}
+        then="/clients"
+      />
+    </>
+  );
 }

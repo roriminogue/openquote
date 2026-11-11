@@ -12,7 +12,7 @@ body:
   - type: textarea
     id: price
     attributes:
-      label: What OpenQuote said, and what it should be
+      label: What OpenQuote AU said, and what it should be
       description: Include your region, the supplier (or your own experience) and the date.
     validations:
       required: true

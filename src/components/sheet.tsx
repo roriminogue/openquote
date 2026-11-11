@@ -1,14 +1,28 @@
 "use client";
 
+import { BottomSheet } from "@astryxdesign/core/BottomSheet";
+import { Button } from "@astryxdesign/core/Button";
+import { Drawer } from "@astryxdesign/core/Drawer";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Icon } from "@astryxdesign/core/Icon";
+import { IconButton } from "@astryxdesign/core/IconButton";
 import { ArrowLeft, X } from "lucide-react";
-import { useEffect, useRef, type FormEvent, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { Button } from "./ui";
+import { useEffect, useState, useSyncExternalStore, type FormEvent, type ReactNode } from "react";
+
+const WIDE = "(min-width: 640px)";
+
+function watchWide(onChange: () => void) {
+  const media = window.matchMedia(WIDE);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
 
 /**
- * A task sheet on a native <dialog>: full screen on phones, a right-hand panel from 640px. The header carries the
- * way out (close, or Back inside a nested step); the primary action sits in a footer at the bottom, within thumb
- * reach on a phone. ⌘/Ctrl+Enter submits from anywhere in the sheet.
+ * A panel for a short job that shouldn't lose your place: picking a project, adding a client, editing a rate.
+ * On a phone it comes up from the bottom; on a wider screen it slides in from the right.
+ *
+ * Keep it mounted and flip `open`, so it can animate out. Its own form stops the submit from reaching any form
+ * around it. With `onBack`, Escape and the back arrow go back one step instead of closing everything.
  */
 export function Sheet({
   open,
@@ -24,84 +38,109 @@ export function Sheet({
   open: boolean;
   title: string;
   onClose: () => void;
+  /** Name for the back arrow, e.g. "Back to project". */
   back?: string;
   onBack?: () => void;
+  /** Label for the main button. Leave out for a sheet with no form to save. */
   action?: string;
   busy?: boolean;
   onSubmit?: (e: FormEvent<HTMLFormElement>) => void;
   children: ReactNode;
 }) {
-  const ref = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
-  }, [open]);
-
+  const wide = useSyncExternalStore(
+    watchWide,
+    () => window.matchMedia(WIDE).matches,
+    () => false,
+  );
   const leave = () => (onBack ? onBack() : onClose());
 
-  // Portalled to <body> so the sheet's own form never nests inside the page's form.
-  if (typeof document === "undefined") return null;
-  return createPortal(
-    <dialog
-      ref={ref}
-      aria-labelledby="sheet-title"
-      onCancel={(e) => {
-        e.preventDefault(); // Escape steps back one level instead of throwing the whole flow away
-        leave();
+  // A closed sheet keeps nothing in the page: its fields would otherwise share ids with the same form in
+  // another sheet. The contents stay just long enough to slide away with it.
+  const [filled, setFilled] = useState(open);
+  if (open && !filled) setFilled(true);
+  useEffect(() => {
+    if (open) return;
+    const timer = setTimeout(() => setFilled(false), 500);
+    return () => clearTimeout(timer);
+  }, [open]);
+
+  const body = !filled ? null : (
+    <form
+      noValidate
+      className="flex min-h-full flex-col"
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onSubmit?.(e);
       }}
-      onClick={(e) => e.target === ref.current && onClose()}
-      className="sheet m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-bg p-0 text-ink backdrop:bg-ink/20 open:flex open:flex-col sm:ml-auto sm:max-w-[28rem] sm:border-l sm:border-border sm:shadow-lg"
+      onKeyDown={(e) => {
+        if (action && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          e.currentTarget.requestSubmit();
+        }
+      }}
     >
-      <form
-        onSubmit={onSubmit}
-        onKeyDown={(e) => {
-          if (action && e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-            e.preventDefault();
-            e.currentTarget.requestSubmit();
-          }
-        }}
-        noValidate
-        className="flex min-h-0 flex-1 flex-col"
+      {/* The phone sheet has a grab handle floating over its top edge, so the header starts a little lower. */}
+      <header
+        className={`sticky top-0 z-10 flex items-center gap-1 border-b border-(--color-border) bg-(--color-background-surface) pr-2 ${
+          onBack ? "pl-2" : "pl-4 sm:pl-6"
+        } ${wide ? "py-3" : "pb-2 pt-5"}`}
       >
-        <header className="flex h-[calc(3.5rem+env(safe-area-inset-top))] shrink-0 items-center gap-1 border-b border-border px-2 pt-[env(safe-area-inset-top)] sm:h-14 sm:px-4 sm:pt-0">
-          {onBack ? (
-            <button
-              type="button"
-              onClick={leave}
-              className="inline-flex h-11 items-center gap-1.5 rounded-lg px-2.5 text-body text-ink-2 transition-colors hover:bg-hover hover:text-ink sm:-ml-2 sm:h-9 sm:text-sm"
-            >
-              <ArrowLeft className="size-4" aria-hidden />
-              {back ?? "Back"}
-            </button>
-          ) : null}
-          <h2 id="sheet-title" className={`min-w-0 flex-1 truncate font-display text-base font-medium ${onBack ? "text-center sm:text-left sm:pl-2" : "pl-2 sm:pl-0"}`}>
-            {title}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex size-11 items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-hover hover:text-ink sm:-mr-2 sm:size-9"
-          >
-            <X className="size-[1.125rem]" aria-hidden />
-            <span className="sr-only">Close</span>
-          </button>
-        </header>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8 pt-5 sm:px-6 sm:pt-6">{children}</div>
-        {action && (
-          <footer className="flex shrink-0 items-center justify-end gap-2 border-t border-border bg-bg px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 sm:pb-4 sm:pt-4">
-            <Button type="button" variant="ghost" onClick={leave} className="hidden sm:inline-flex">
-              {onBack ? "Back" : "Cancel"}
-            </Button>
-            <Button type="submit" disabled={busy} className="max-sm:h-12 max-sm:w-full max-sm:text-base">
-              {busy ? "Saving…" : action}
-            </Button>
-          </footer>
+        {onBack && (
+          <IconButton label={back ?? "Back"} variant="ghost" icon={<Icon icon={ArrowLeft} />} onClick={onBack} />
         )}
-      </form>
-    </dialog>,
-    document.body,
+        <div className="min-w-0 flex-1">
+          <Heading level={3} accessibilityLevel={2} maxLines={1}>
+            {title}
+          </Heading>
+        </div>
+        <IconButton label="Close" variant="ghost" icon={<Icon icon={X} />} onClick={onClose} />
+      </header>
+
+      <div className="flex-1 px-4 pb-8 pt-5 sm:px-6">{children}</div>
+
+      {action && (
+        <footer
+          className={`sticky z-10 flex items-center justify-end gap-2 border-t border-(--color-border) bg-(--color-background-surface) px-4 py-3 sm:px-6 ${
+            // The side panel pads its own bottom for the home indicator, so the bar sits just above that strip
+            // and paints it too. The phone sheet keeps that strip outside its scrolling area.
+            wide
+              ? "bottom-[env(safe-area-inset-bottom,0px)] after:absolute after:inset-x-0 after:top-full after:h-[env(safe-area-inset-bottom,0px)] after:bg-(--color-background-surface)"
+              : "bottom-0"
+          }`}
+        >
+          <div className="hidden sm:block">
+            <Button label={onBack ? "Back" : "Cancel"} variant="ghost" onClick={leave} />
+          </div>
+          <div className="flex-1 sm:flex-none">
+            <Button
+              type="submit"
+              variant="primary"
+              size={wide ? "md" : "lg"}
+              width="100%"
+              label={busy ? "Saving…" : action}
+              isDisabled={busy}
+            />
+          </div>
+        </footer>
+      )}
+    </form>
+  );
+
+  // A sheet with something to save only closes on purpose (the X, Cancel, Escape); one that only shows or
+  // picks things also closes on a tap outside or a swipe down.
+  const purpose = action ? "form" : "info";
+  const onOpenChange = (isOpen: boolean) => {
+    if (!isOpen) leave();
+  };
+
+  return wide ? (
+    <Drawer isOpen={open} onOpenChange={onOpenChange} label={title} purpose={purpose} padding={0} width={448}>
+      {body}
+    </Drawer>
+  ) : (
+    <BottomSheet isOpen={open} onOpenChange={onOpenChange} label={title} purpose={purpose} padding={0} height="tall">
+      {body}
+    </BottomSheet>
   );
 }

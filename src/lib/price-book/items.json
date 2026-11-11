@@ -1000,6 +1000,18 @@
    "note": "Suntuf 2.4–3.6 m"
   },
   {
+   "id": "tip_ute_load",
+   "name": "Tip fee, ute load of general waste or timber (Melbourne)",
+   "trade": "site",
+   "unit": "each",
+   "costCents": 14091,
+   "lowCents": 10545,
+   "highCents": 14091,
+   "sources": 2,
+   "confidence": "medium",
+   "note": "Cleanaway Clayton and Lysterfield from 1 Jul 2026: ute up to 300 kg $155 inc GST; City of Melton $116/m³ non-resident"
+  },
+  {
    "id": "skip_2m3",
    "name": "Skip bin 2 m³ general waste (Melbourne)",
    "trade": "site",

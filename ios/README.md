@@ -1,7 +1,7 @@
-# OpenQuote on your iPhone, as an app
+# OpenQuote AU on your iPhone, as an app
 
-The iPhone app is a thin shell around your own OpenQuote website: it opens your site full screen with the
-OpenQuote icon. Every update to your site shows up in the app straight away, with no reinstall needed.
+The iPhone app is a thin shell around your own OpenQuote AU website: it opens your site full screen with the
+OpenQuote AU icon. Every update to your site shows up in the app straight away, with no reinstall needed.
 
 You don't need a paid Apple Developer account. A free Apple ID works, but Apple makes free-account apps stop
 opening after **7 days**. When that happens, plug the phone in and run the install script again (step 4). It
@@ -14,13 +14,13 @@ the same thing.
 
 - A Mac with **Xcode** (free from the App Store) and about 4 GB of free disk space
 - Your iPhone and a USB cable
-- Your OpenQuote site already online (see the main [README](../README.md))
+- Your OpenQuote AU site already online (see the main [README](../README.md))
 
 ## Steps
 
 1. **Sign Xcode in to your Apple ID.** In Xcode → Settings → Accounts, click **+** → **Apple ID**.
 2. **Point the app at your site and your Apple ID.**
-   - Add your site's address to `.env.local` in the OpenQuote folder (create the file if it isn't there):
+   - Add your site's address to `.env.local` in the OpenQuote AU folder (create the file if it isn't there):
      `OPENQUOTE_APP_URL=https://your-site.vercel.app`
    - Create `ios/signing.local.xcconfig` with a bundle identifier that's unique to you, and your team ID
      (Xcode → Settings → Accounts → your Apple ID → the ID next to "Personal Team"):
@@ -30,7 +30,7 @@ the same thing.
      DEVELOPMENT_TEAM = ABCDE12345
      ```
 
-   Both files stay on your Mac and are never committed. Then, in Terminal from the OpenQuote folder:
+   Both files stay on your Mac and are never committed. Then, in Terminal from the OpenQuote AU folder:
 
    ```bash
    npm install
@@ -47,7 +47,7 @@ the same thing.
 
    The first build downloads a few libraries and takes a few minutes.
 5. **Trust it on the phone, once.** Settings → General → VPN & Device Management → your Apple ID → **Trust**.
-   Then open OpenQuote.
+   Then open OpenQuote AU.
 
 ## Signing in inside the app
 

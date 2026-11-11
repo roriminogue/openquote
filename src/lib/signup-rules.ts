@@ -1,4 +1,4 @@
-// Who may create a business on this install (pure, for tests). A self-hosted OpenQuote is private by default:
+// Who may create a business on this install (pure, for tests). A self-hosted OpenQuote AU is private by default:
 // the first person sets it up, and nobody else can create a business (and spend the install's AI key) unless the
 // owner allows it with ALLOWED_EMAILS or OPEN_SIGNUPS.
 
@@ -18,11 +18,11 @@ export function signupDecision(email: string, p: SignupPolicy): { ok: true } | {
   if (p.allowedEmails?.trim()) {
     return emailAllowed(email, p.allowedEmails)
       ? { ok: true }
-      : { ok: false, reason: "This OpenQuote is private. Ask its owner to add your email to ALLOWED_EMAILS." };
+      : { ok: false, reason: "This OpenQuote AU is private. Ask its owner to add your email to ALLOWED_EMAILS." };
   }
   if (p.openSignups === "true" || p.existingBusinesses === 0) return { ok: true };
   return {
     ok: false,
-    reason: "This OpenQuote already has a business set up. To let more people create one, its owner can set ALLOWED_EMAILS or OPEN_SIGNUPS=true.",
+    reason: "This OpenQuote AU already has a business set up. To let more people create one, its owner can set ALLOWED_EMAILS or OPEN_SIGNUPS=true.",
   };
 }

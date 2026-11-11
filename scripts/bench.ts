@@ -18,7 +18,7 @@ type Job = {
   description: string;
   /** Published installed price range for the whole job, inc GST, Melbourne 2026. */
   market: [number, number] | null;
-  /** Cost before markup from an earlier OpenQuote run, in dollars. */
+  /** Cost before markup from an earlier OpenQuote AU run, in dollars. */
   before: number;
 };
 

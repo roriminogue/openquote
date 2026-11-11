@@ -15,6 +15,9 @@ const eslintConfig = defineConfig([
     // Native iPhone build output.
     "ios/build/**",
     "ios/App/App/public/**",
+    // Built by `npx astryx theme build` from openquoteTheme.ts, plus the descriptor in the shape the CLI expects.
+    "src/themes/openquote/openquote.*",
+    "src/themes/openquote/*.doc.mjs",
   ]),
 ]);
 

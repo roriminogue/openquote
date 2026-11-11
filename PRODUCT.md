@@ -18,7 +18,7 @@ without prices; homeowner clients who view and accept proposals on their phone.
 
 ## Product Purpose
 
-OpenQuote (working name) turns a job description into a priced, editable, sendable quote, using the business's
+OpenQuote AU turns a job description into a priced, editable, sendable quote, using the business's
 own rates, markup and standing instructions, then tracks it through to acceptance and invoice. Success: a quote
 the tradie would put their name to, in minutes instead of an evening, with numbers they trust.
 
@@ -50,7 +50,8 @@ Stack: Next.js 16 (App Router, Cache Components), Tailwind CSS 4, Supabase (Post
 
 ## Brand Commitments
 
-- "OpenQuote" is a placeholder name; nothing visual may depend on it.
+- The name is "OpenQuote AU" (plain "OpenQuote" is taken by another product). Write it in full; the wordmark sets
+  "AU" in medium secondary text after a semibold "OpenQuote". Code identifiers, the repo and URLs stay `openquote`.
 - Original look: no competitor's name, copy, UI or trade dress (SPEC.md §10). Reference material in
   `design/references/` is reference only.
 

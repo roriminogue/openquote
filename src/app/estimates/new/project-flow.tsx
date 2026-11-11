@@ -1,16 +1,20 @@
 "use client";
 
+import { Button } from "@astryxdesign/core/Button";
+import { Field } from "@astryxdesign/core/Field";
+import { Icon } from "@astryxdesign/core/Icon";
+import { List, ListItem } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { TextInput } from "@astryxdesign/core/TextInput";
 import { Check, ChevronDown, FolderOpen, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Sheet } from "@/components/sheet";
-import { Input } from "@/components/ui";
 import { ProjectEditor } from "@/components/record-editors";
+import { Sheet } from "@/components/sheet";
 import { formatProjectNo, type ClientOption, type ProjectOption } from "@/lib/project-schema";
 
-
 /**
- * Who and where the estimate is for. Pick a recent project, search all of them, or make one (and its client)
- * without leaving the estimate.
+ * The project an estimate belongs to. It looks like any other field on the page; tapping it opens a sheet to
+ * search and pick a project, or to make a new one (and its client) without leaving the estimate.
  */
 export function ProjectField({
   projects: initialProjects,
@@ -22,52 +26,66 @@ export function ProjectField({
   projects: ProjectOption[];
   clients: ClientOption[];
   value: ProjectOption | null;
-  onChange: (p: ProjectOption | null) => void;
+  onChange: (project: ProjectOption | null) => void;
   disabled?: boolean;
 }) {
   const [projects, setProjects] = useState(initialProjects);
   const [view, setView] = useState<"closed" | "pick" | "new">("closed");
   const [query, setQuery] = useState("");
+  // A new number each time the field is opened, so the New project form starts clean. It stays the same
+  // while moving between the list and the form, so a half-filled form survives a look back at the list.
+  const [visit, setVisit] = useState(0);
   const close = () => setView("closed");
 
   return (
     <>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setView(value || projects.length ? "pick" : "new")}
-        aria-label={value ? `Project: ${value.name}, ${value.client.name}. Change` : "Add to a project"}
-        className="group inline-flex h-10 min-w-0 max-w-full items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-ink transition-colors hover:bg-hover disabled:opacity-60 sm:h-7 sm:text-xs"
-      >
-        <FolderOpen className="size-4 shrink-0 sm:size-3.5" aria-hidden />
-        {value ? (
-          <span className="min-w-0 truncate">
-            <span>{value.name}</span>
-            <span className="font-normal text-ink-3"> · {value.client.name}</span>
+      <Field label="Project" inputID="project" isOptional isDisabled={disabled} width="100%">
+        <button
+          id="project"
+          type="button"
+          disabled={disabled}
+          onClick={() => {
+            setQuery("");
+            setVisit((n) => n + 1);
+            setView(value || projects.length ? "pick" : "new");
+          }}
+          aria-haspopup="dialog"
+          aria-label={value ? `Project: ${value.name}, ${value.client.name}. Change` : "Add to a project"}
+          className="flex h-(--size-element-md) w-full items-center gap-2 rounded-(--radius-element) border border-(--color-border-emphasized) bg-(--color-background-surface) px-2 text-left text-(length:--text-body-size) transition-shadow duration-150 hover:shadow-[inset_0_0_0_2px_color-mix(in_srgb,var(--color-border-emphasized)_30%,transparent)] disabled:opacity-60"
+        >
+          <FolderOpen className="size-4 shrink-0 text-(--color-icon-secondary)" aria-hidden />
+          <span className="min-w-0 flex-1 truncate">
+            {value ? (
+              <>
+                <span className="text-(--color-text-primary)">{value.name}</span>
+                <span className="text-(--color-text-secondary)"> · {value.client.name}</span>
+              </>
+            ) : (
+              <span className="text-(--color-text-secondary)">Add to a project</span>
+            )}
           </span>
-        ) : (
-          <span>Add to a project</span>
-        )}
-        <ChevronDown className="size-3.5 shrink-0 text-ink-3" aria-hidden />
-      </button>
+          <ChevronDown className="size-4 shrink-0 text-(--color-icon-secondary)" aria-hidden />
+        </button>
+      </Field>
 
-      {view === "pick" && (
+      <Sheet open={view === "pick"} title="Project" onClose={close}>
         <PickProject
           projects={projects}
           value={value}
           query={query}
-          setQuery={setQuery}
-          onClose={close}
+          onQuery={setQuery}
+          onNew={() => setView("new")}
           onPick={(p) => {
             onChange(p);
             close();
           }}
-          onNew={() => setView("new")}
         />
-      )}
+      </Sheet>
 
-      {view === "new" && (
+      {visit > 0 && (
         <ProjectEditor
+          key={visit}
+          open={view === "new"}
           clients={clients}
           onClose={close}
           onBack={projects.length ? () => setView("pick") : undefined}
@@ -87,18 +105,16 @@ function PickProject({
   projects,
   value,
   query,
-  setQuery,
-  onClose,
-  onPick,
+  onQuery,
   onNew,
+  onPick,
 }: {
   projects: ProjectOption[];
   value: ProjectOption | null;
   query: string;
-  setQuery: (q: string) => void;
-  onClose: () => void;
-  onPick: (p: ProjectOption | null) => void;
+  onQuery: (q: string) => void;
   onNew: () => void;
+  onPick: (project: ProjectOption | null) => void;
 }) {
   const q = query.trim().toLowerCase();
   const matches = useMemo(
@@ -113,89 +129,74 @@ function PickProject({
   const recent = q ? [] : matches.slice(0, 3);
   const rest = q ? matches : matches.slice(3);
 
+  const rows = (title: string, items: ProjectOption[]) => (
+    <List
+      density="spacious"
+      hasDividers
+      header={
+        <Text type="label" color="secondary">
+          {title}
+        </Text>
+      }
+    >
+      {items.map((p) => {
+        const chosen = p.id === value?.id;
+        return (
+          <ListItem
+            key={p.id}
+            label={p.name}
+            description={p.siteAddress ? `${p.client.name} · ${p.siteAddress}` : p.client.name}
+            isSelected={chosen}
+            onClick={() => onPick(p)}
+            endContent={
+              <span className="flex items-center gap-2">
+                <Text type="supporting" color="secondary" hasTabularNumbers>
+                  {formatProjectNo(p.number)}
+                </Text>
+                {chosen && <Check className="size-4 text-(--color-icon-accent)" aria-label="Chosen" />}
+              </span>
+            }
+          />
+        );
+      })}
+    </List>
+  );
+
   return (
-    <Sheet open title="Project" onClose={onClose}>
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3" aria-hidden />
-        <Input
-          type="search"
-          aria-label="Search projects"
-          placeholder="Search by project, client or address…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="pl-9"
-          autoComplete="off"
-        />
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
+        {projects.length > 3 && (
+          <TextInput
+            id="projectSearch"
+            type="search"
+            enterKeyHint="search"
+            label="Search projects"
+            isLabelHidden
+            startIcon={Search}
+            hasClear
+            value={query}
+            onChange={onQuery}
+            placeholder="Search by project, client or address…"
+            autoComplete="off"
+            width="100%"
+          />
+        )}
+        <Button label="New project" variant="secondary" size="lg" icon={<Icon icon={Plus} />} width="100%" onClick={onNew} />
       </div>
 
-      <button
-        type="button"
-        onClick={onNew}
-        className="mt-3 flex h-11 w-full items-center gap-2.5 rounded-lg border border-dashed border-border-strong px-3 text-left text-body font-medium text-ink transition-colors hover:border-ink-3 hover:bg-subtle"
-      >
-        <Plus className="size-4" strokeWidth={2.25} aria-hidden />
-        New project
-      </button>
-
-      {recent.length > 0 && <ProjectList title="Recent" items={recent} value={value} onPick={onPick} />}
-      {rest.length > 0 && <ProjectList title={q ? "Matches" : "All projects"} items={rest} value={value} onPick={onPick} />}
+      {recent.length > 0 && rows(rest.length ? "Recent" : "Your projects", recent)}
+      {rest.length > 0 && rows(q ? "Matches" : "All projects", rest)}
       {q && matches.length === 0 && (
-        <p className="mt-6 text-body text-ink-3">No projects match &ldquo;{query.trim()}&rdquo;. Make a new one instead.</p>
+        <Text as="p" color="secondary">
+          No projects match “{query.trim()}”. Make a new one instead.
+        </Text>
       )}
 
       {value && (
-        <button type="button" onClick={() => onPick(null)} className="mt-8 text-body font-medium text-ink-2 underline underline-offset-4 hover:text-ink">
-          Don&rsquo;t link a project
-        </button>
+        <div>
+          <Button label="Don’t link a project" variant="ghost" onClick={() => onPick(null)} />
+        </div>
       )}
-    </Sheet>
+    </div>
   );
 }
-
-function ProjectList({
-  title,
-  items,
-  value,
-  onPick,
-}: {
-  title: string;
-  items: ProjectOption[];
-  value: ProjectOption | null;
-  onPick: (p: ProjectOption) => void;
-}) {
-  return (
-    <section className="mt-6">
-      <h3 className="text-caption text-ink-3">{title}</h3>
-      <ul className="mt-1.5 space-y-0.5">
-        {items.map((p) => {
-          const selected = value?.id === p.id;
-          return (
-            <li key={p.id}>
-              <button
-                type="button"
-                onClick={() => onPick(p)}
-                aria-pressed={selected}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-hover ${selected ? "bg-hover" : ""}`}
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-baseline justify-between gap-3">
-                    <span className="truncate text-body font-medium">{p.name}</span>
-                    <span className="figures shrink-0 text-caption text-ink-3">{formatProjectNo(p.number)}</span>
-                  </span>
-                  <span className="block truncate text-caption text-ink-3">
-                    {p.client.name}
-                    {p.siteAddress ? ` · ${p.siteAddress}` : ""}
-                  </span>
-                </span>
-                <span className="flex size-6 shrink-0 items-center justify-center" aria-hidden>
-                  {selected && <Check className="size-4" strokeWidth={2.5} />}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
-

@@ -1,12 +1,21 @@
 "use client";
 
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { DateInput, type DateInputProps } from "@astryxdesign/core/DateInput";
+import { Field } from "@astryxdesign/core/Field";
+import { Icon } from "@astryxdesign/core/Icon";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
+import { Selector } from "@astryxdesign/core/Selector";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { TextInput } from "@astryxdesign/core/TextInput";
 import { Building2, MapPin, Plus, User } from "lucide-react";
-import { Field, Input, Notice, Select, Textarea } from "@/components/ui";
 import type { ClientOption } from "@/lib/project-schema";
 
-// The project and client forms, shared by the new-estimate flow and the Projects and Clients pages.
+// The fields for a project and for a client. They hold no state: the editor that wraps them does, so the same
+// fields work inside the New estimate flow, on the Projects page and on the Clients page.
 
-export const STATUSES = [
+const STATUSES = [
   ["quoting", "Quoting"],
   ["active", "Active"],
   ["on_hold", "On hold"],
@@ -15,11 +24,33 @@ export const STATUSES = [
 ] as const;
 
 export const emptyProject = { name: "", clientId: "", siteAddress: "", status: "quoting", startDate: "", endDate: "", notes: "" };
-export const emptyClient = { kind: "individual" as "individual" | "company", name: "", contactName: "", email: "", phone: "", abn: "", address: "" };
-
+export const emptyClient = {
+  kind: "individual" as "individual" | "company",
+  name: "",
+  contactName: "",
+  email: "",
+  phone: "",
+  abn: "",
+  address: "",
+};
 export type ProjectDraft = typeof emptyProject;
 export type ClientDraft = typeof emptyClient;
 export type FormError = { message: string; field?: string } | null;
+
+/** A saved date for the date field, which only takes a full YYYY-MM-DD. */
+function isoDate(date: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? (date as NonNullable<DateInputProps["value"]>) : undefined;
+}
+
+/** The message goes under the field it's about. Anything else shows in a notice at the end of the form. */
+function fieldError(error: FormError, field: string) {
+  return error?.field === field ? ({ type: "error", message: error.message } as const) : undefined;
+}
+
+function FormNotice({ error, fields }: { error: FormError; fields: string[] }) {
+  if (!error || (error.field && fields.includes(error.field))) return null;
+  return <Banner status="error" title={error.message} />;
+}
 
 export function ProjectForm({
   value,
@@ -29,98 +60,143 @@ export function ProjectForm({
   onNewClient,
 }: {
   value: ProjectDraft;
-  onChange: (v: ProjectDraft) => void;
+  onChange: (next: ProjectDraft) => void;
   clients: ClientOption[];
   error: FormError;
   onNewClient?: () => void;
 }) {
-  const set = (k: keyof typeof emptyProject) => (e: { target: { value: string } }) => onChange({ ...value, [k]: e.target.value });
+  const set = (patch: Partial<ProjectDraft>) => onChange({ ...value, ...patch });
   const chosen = clients.find((c) => c.id === value.clientId);
-  const canUseClientAddress = !!chosen?.address && chosen.address !== value.siteAddress;
-  const invalid = (f: string) => (error?.field === f ? true : undefined);
+  const offerAddress = !!chosen?.address && chosen.address !== value.siteAddress;
 
   return (
-    <div className="space-y-5">
-      <Field id="name" label="Project name">
-        <Input id="name" required value={value.name} onChange={set("name")} placeholder="e.g. Back deck, Smith St…" aria-invalid={invalid("name")} autoComplete="off" />
-      </Field>
+    <div className="flex flex-col gap-5">
+      <TextInput
+        id="name"
+        label="Project name"
+        value={value.name}
+        onChange={(name) => set({ name })}
+        placeholder="e.g. Back deck, Smith St…"
+        autoComplete="off"
+        width="100%"
+        status={fieldError(error, "name")}
+      />
 
-      <div className="space-y-1.5">
-        <div className="flex items-baseline justify-between gap-3">
-          <label htmlFor="clientId" className="text-sm font-medium">
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <label htmlFor="clientId" className="text-(length:--text-label-size) font-medium text-(--color-text-secondary)">
             Client
           </label>
-          {onNewClient && (
-            <button type="button" onClick={onNewClient} className="-my-2 inline-flex h-9 items-center gap-1 rounded-md px-1.5 text-sm font-medium text-ink-2 transition-colors hover:bg-hover hover:text-ink">
-              <Plus className="size-4" aria-hidden />
-              New client
-            </button>
+          {onNewClient && clients.length > 0 && (
+            <div className="-my-2">
+              <Button label="New client" variant="ghost" icon={<Icon icon={Plus} />} onClick={onNewClient} />
+            </div>
           )}
         </div>
-        {clients.length ? (
-          <Select id="clientId" required value={value.clientId} onChange={set("clientId")} aria-invalid={invalid("clientId")}>
-            <option value="">Choose a client…</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-                {c.kind === "company" && c.contactName ? ` (${c.contactName})` : ""}
-              </option>
-            ))}
-          </Select>
-        ) : (
-          <button
-            type="button"
-            id="clientId"
-            onClick={onNewClient}
-            className="flex h-11 w-full items-center gap-2 rounded-lg border border-dashed border-border-strong px-3 text-left text-body text-ink-2 transition-colors hover:border-ink-3 hover:bg-subtle hover:text-ink"
-          >
-            <Plus className="size-4" aria-hidden />
-            Add your first client
-          </button>
+        <div className="mt-1">
+          {clients.length > 0 || !onNewClient ? (
+            <Selector
+              id="clientId"
+              label="Client"
+              isLabelHidden
+              placeholder="Choose a client…"
+              options={clients.map((c) => ({
+                value: c.id,
+                label: c.kind === "company" && c.contactName ? `${c.name} (${c.contactName})` : c.name,
+              }))}
+              value={value.clientId || undefined}
+              onChange={(clientId) => set({ clientId: clientId ?? "" })}
+              hasSearch={clients.length > 8}
+              searchPlaceholder="Search clients…"
+              presentation="adaptive"
+              width="100%"
+              status={fieldError(error, "clientId")}
+            />
+          ) : (
+            <Button
+              id="clientId"
+              label="Add your first client"
+              variant="secondary"
+              icon={<Icon icon={Plus} />}
+              width="100%"
+              onClick={onNewClient}
+            />
+          )}
+        </div>
+      </div>
+
+      <div>
+        <TextInput
+          id="siteAddress"
+          label="Site address"
+          value={value.siteAddress}
+          onChange={(siteAddress) => set({ siteAddress })}
+          placeholder="Where the work is…"
+          autoComplete="off"
+          width="100%"
+        />
+        {offerAddress && (
+          <div className="mt-1.5">
+            <Button
+              label={`Use ${chosen.name}’s address`}
+              variant="ghost"
+              size="sm"
+              icon={<Icon icon={MapPin} />}
+              onClick={() => set({ siteAddress: chosen.address ?? "" })}
+            />
+          </div>
         )}
       </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="siteAddress" className="block text-sm font-medium">
-          Site address
-        </label>
-        <Input id="siteAddress" value={value.siteAddress} onChange={set("siteAddress")} autoComplete="off" placeholder="Where the work is…" />
-        {canUseClientAddress && (
-          <button
-            type="button"
-            onClick={() => onChange({ ...value, siteAddress: chosen!.address! })}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-caption text-ink-2 transition-colors hover:bg-subtle hover:text-ink max-sm:h-9"
-          >
-            <MapPin className="size-3.5" aria-hidden />
-            Use {chosen!.name}&rsquo;s address
-          </button>
-        )}
+      <Selector
+        id="status"
+        label="Status"
+        options={STATUSES.map(([v, label]) => ({ value: v, label }))}
+        value={value.status}
+        onChange={(status) => set({ status: status ?? "quoting" })}
+        presentation="adaptive"
+        width="100%"
+      />
+
+      {/* The date field needs 180px, so the pair only sits side by side when there is room. */}
+      <div className="grid items-start gap-5 sm:grid-cols-2 sm:gap-3">
+        <DateInput
+          id="startDate"
+          label="Start"
+          isOptional
+          hasClear
+          format="date"
+          value={isoDate(value.startDate)}
+          onChange={(startDate) => set({ startDate: startDate ?? "" })}
+          width="100%"
+        />
+        <DateInput
+          id="endDate"
+          label="Finish"
+          isOptional
+          hasClear
+          format="date"
+          min={isoDate(value.startDate)}
+          value={isoDate(value.endDate)}
+          onChange={(endDate) => set({ endDate: endDate ?? "" })}
+          width="100%"
+          status={fieldError(error, "endDate")}
+        />
       </div>
 
-      <Field id="status" label="Status">
-        <Select id="status" value={value.status} onChange={set("status")}>
-          {STATUSES.map(([v, l]) => (
-            <option key={v} value={v}>
-              {l}
-            </option>
-          ))}
-        </Select>
-      </Field>
+      <TextArea
+        id="notes"
+        label="Notes"
+        isOptional
+        description="For you, not the client."
+        rows={3}
+        value={value.notes}
+        onChange={(notes) => set({ notes })}
+        placeholder="Access, parking, dogs, gate codes…"
+        width="100%"
+      />
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field id="startDate" label="Start" optional>
-          <Input id="startDate" type="date" value={value.startDate} onChange={set("startDate")} />
-        </Field>
-        <Field id="endDate" label="Finish" optional>
-          <Input id="endDate" type="date" value={value.endDate} min={value.startDate || undefined} onChange={set("endDate")} aria-invalid={invalid("endDate")} />
-        </Field>
-      </div>
-
-      <Field id="notes" label="Notes" optional hint="For you, not the client.">
-        <Textarea id="notes" rows={3} value={value.notes} onChange={set("notes")} placeholder="Access, parking, dogs, gate codes…" />
-      </Field>
-
-      {error && <Notice tone="error">{error.message}</Notice>}
+      <FormNotice error={error} fields={["name", "clientId", "endDate"]} />
     </div>
   );
 }
@@ -131,112 +207,134 @@ export function ClientForm({
   error,
 }: {
   value: ClientDraft;
-  onChange: (v: ClientDraft) => void;
+  onChange: (next: ClientDraft) => void;
   error: FormError;
 }) {
-  const set = (k: keyof typeof emptyClient) => (e: { target: { value: string } }) => onChange({ ...value, [k]: e.target.value });
+  const set = (patch: Partial<ClientDraft>) => onChange({ ...value, ...patch });
   const company = value.kind === "company";
-  const invalid = (f: string) => (error?.field === f ? true : undefined);
 
   return (
-    <div className="space-y-5">
-      <fieldset>
-        <legend className="text-sm font-medium">Client is</legend>
+    <div className="flex flex-col gap-5">
+      <Field label="Client is" inputID="clientKind" isGroupLabel width="100%">
         <Segmented
-          className="mt-1.5"
+          label="Client is"
           value={value.kind}
-          onChange={(kind) => onChange({ ...value, kind })}
+          onChange={(kind) => set({ kind })}
           options={[
             ["individual", "A person", User],
             ["company", "A business", Building2],
           ]}
         />
-      </fieldset>
+      </Field>
 
-      <div className={company ? "grid gap-5 sm:grid-cols-2 sm:gap-3" : ""}>
-        <Field id="clientName" label={company ? "Business name" : "Name"}>
-          <Input id="clientName" required value={value.name} onChange={set("name")} autoComplete="off" aria-invalid={invalid("name")} />
-        </Field>
+      <div className={company ? "grid items-start gap-5 sm:grid-cols-2 sm:gap-3" : ""}>
+        <TextInput
+          id="clientName"
+          label={company ? "Business name" : "Name"}
+          value={value.name}
+          onChange={(name) => set({ name })}
+          autoComplete="off"
+          width="100%"
+          status={fieldError(error, "name")}
+        />
         {company && (
-          <Field id="contactName" label="Contact person" optional>
-            <Input id="contactName" value={value.contactName} onChange={set("contactName")} autoComplete="off" />
-          </Field>
+          <TextInput
+            id="contactName"
+            label="Contact person"
+            isOptional
+            value={value.contactName}
+            onChange={(contactName) => set({ contactName })}
+            autoComplete="off"
+            width="100%"
+          />
         )}
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2 sm:gap-3">
-        <Field id="email" label="Email" optional>
-          <Input id="email" type="email" inputMode="email" spellCheck={false} value={value.email} onChange={set("email")} autoComplete="off" aria-invalid={invalid("email")} />
-        </Field>
-        <Field id="phone" label="Phone" optional>
-          <Input id="phone" type="tel" inputMode="tel" value={value.phone} onChange={set("phone")} autoComplete="off" placeholder="04…" />
-        </Field>
+      <div className="grid items-start gap-5 sm:grid-cols-2 sm:gap-3">
+        <TextInput
+          id="email"
+          type="email"
+          label="Email"
+          isOptional
+          value={value.email}
+          onChange={(email) => set({ email })}
+          inputMode="email"
+          autoComplete="off"
+          autoCapitalize="none"
+          hasSpellCheck={false}
+          width="100%"
+          status={fieldError(error, "email")}
+        />
+        <TextInput
+          id="phone"
+          type="tel"
+          label="Phone"
+          isOptional
+          value={value.phone}
+          onChange={(phone) => set({ phone })}
+          inputMode="tel"
+          autoComplete="off"
+          placeholder="04…"
+          width="100%"
+        />
       </div>
 
       {company && (
-        <Field id="abn" label="ABN" optional>
-          <Input id="abn" inputMode="numeric" value={value.abn} onChange={set("abn")} autoComplete="off" placeholder="11 digits…" />
-        </Field>
+        <TextInput
+          id="abn"
+          label="ABN"
+          isOptional
+          value={value.abn}
+          onChange={(abn) => set({ abn })}
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder="11 digits…"
+          width="100%"
+        />
       )}
 
-      <Field id="address" label="Address" optional hint="Used as the site address when it’s the same place.">
-        <Input id="address" value={value.address} onChange={set("address")} autoComplete="off" />
-      </Field>
+      <TextInput
+        id="address"
+        label="Address"
+        isOptional
+        description="Used as the site address when it’s the same place."
+        value={value.address}
+        onChange={(address) => set({ address })}
+        autoComplete="off"
+        width="100%"
+      />
 
-      {error && <Notice tone="error">{error.message}</Notice>}
+      <FormNotice error={error} fields={["name", "email"]} />
     </div>
   );
 }
 
-/**
- * Two or three mutually exclusive choices. Concentric radii (track 10px, thumb 7px, 3px inset), no shadow; arrow
- * keys move the choice, as a radio group should.
- */
+/** A short either/or choice, with an icon on each option. `label` names the choice for screen readers. */
 export function Segmented<T extends string>({
   value,
   onChange,
   options,
+  label = "Choose one",
   className = "",
 }: {
   value: T;
-  onChange: (v: T) => void;
+  onChange: (next: T) => void;
   options: readonly (readonly [T, string, typeof User])[];
+  label?: string;
   className?: string;
 }) {
-  const move = (e: React.KeyboardEvent<HTMLButtonElement>, i: number) => {
-    const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
-    if (!step) return;
-    e.preventDefault();
-    const next = (i + step + options.length) % options.length;
-    onChange(options[next][0]);
-    (e.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
-  };
   return (
-    <div role="radiogroup" className={`grid auto-cols-fr grid-flow-col gap-0.5 rounded-[10px] bg-hover p-[3px] ${className}`}>
-      {options.map(([k, label, Icon], i) => {
-        const on = value === k;
-        return (
-          <button
-            key={k}
-            type="button"
-            role="radio"
-            aria-checked={on}
-            tabIndex={on ? 0 : -1}
-            onClick={() => onChange(k)}
-            onKeyDown={(e) => move(e, i)}
-            className={`flex h-10 items-center justify-center gap-2 rounded-[7px] text-body transition-colors sm:h-9 sm:text-sm ${
-              on ? "bg-bg font-medium text-ink ring-1 ring-border" : "text-ink-3 hover:text-ink"
-            }`}
-          >
-            <Icon className="size-4" aria-hidden />
-            {label}
-          </button>
-        );
-      })}
+    <div className={className}>
+      <SegmentedControl label={label} value={value} onChange={(next) => onChange(next as T)} layout="fill">
+        {options.map(([key, text, OptionIcon]) => (
+          <SegmentedControlItem key={key} value={key} label={text} icon={<OptionIcon size={16} aria-hidden />} />
+        ))}
+      </SegmentedControl>
     </div>
   );
 }
 
+/** Puts the cursor in the field a save failed on. */
 export function focusField(field?: string) {
   if (!field) return;
   requestAnimationFrame(() => document.getElementById(field)?.focus());

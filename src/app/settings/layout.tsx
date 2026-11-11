@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { AppShell } from "@/components/app-shell";
-import { PageTitle } from "@/components/ui";
+import { PageTitle } from "@/components/page-title";
 import { SettingsTabs, SettingsTabsFor } from "./tabs";
 
 export default function SettingsLayout({ children }: LayoutProps<"/settings">) {

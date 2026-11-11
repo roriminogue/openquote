@@ -1,34 +1,31 @@
 "use client";
 
+import { Button, type ButtonProps } from "@astryxdesign/core/Button";
 import { useFormStatus } from "react-dom";
-import { Button } from "@/components/ui";
 
-/** A form's submit button that locks and says what's happening while the form sends, so it can't be sent twice. */
+/** A form's submit button. While the form sends it locks, spins and says what is happening, so nothing sends twice. */
 export function SubmitButton({
-  children,
+  label,
   pendingLabel,
-  className = "",
-  variant,
+  variant = "primary",
+  size,
+  width,
 }: {
-  children: React.ReactNode;
+  label: string;
   pendingLabel: string;
-  className?: string;
-  variant?: "primary" | "secondary";
+  variant?: ButtonProps["variant"];
+  size?: ButtonProps["size"];
+  width?: ButtonProps["width"];
 }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" variant={variant} disabled={pending} aria-busy={pending} className={className}>
-      {pending ? pendingLabel : children}
-    </Button>
-  );
-}
-
-/** A small text-style submit button (e.g. "Send a new code") that also locks while sending. */
-export function SubmitLink({ children, pendingLabel }: { children: React.ReactNode; pendingLabel: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <button type="submit" disabled={pending} className="font-medium text-ink-2 underline underline-offset-4 hover:text-ink disabled:opacity-60">
-      {pending ? pendingLabel : children}
-    </button>
+    <Button
+      type="submit"
+      label={pending ? pendingLabel : label}
+      variant={variant}
+      size={size}
+      width={width}
+      isLoading={pending}
+    />
   );
 }

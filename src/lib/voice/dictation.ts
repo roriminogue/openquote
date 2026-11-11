@@ -130,7 +130,7 @@ async function startNative(hints: string[], { onText, onEnd }: DictationHandlers
   const { SpeechRecognition } = await import("@capgo/capacitor-speech-recognition");
   const permission = await SpeechRecognition.requestPermissions();
   if (permission.speechRecognition !== "granted") {
-    throw new Error("Allow the microphone and speech recognition for OpenQuote in the iPhone's Settings → OpenQuote.");
+    throw new Error("Allow the microphone and speech recognition for OpenQuote AU in the iPhone's Settings → OpenQuote AU.");
   }
 
   let committed = "";
@@ -162,7 +162,7 @@ async function startNative(hints: string[], { onText, onEnd }: DictationHandlers
     SpeechRecognition.addListener("readyForNextSession", () => restart()),
     SpeechRecognition.addListener("error", (e) => {
       if (/denied|permission|not.?authori/i.test(`${e.code} ${e.message}`)) {
-        problem = "Allow the microphone and speech recognition for OpenQuote in the iPhone's Settings → OpenQuote.";
+        problem = "Allow the microphone and speech recognition for OpenQuote AU in the iPhone's Settings → OpenQuote AU.";
         active = false;
       }
     }),

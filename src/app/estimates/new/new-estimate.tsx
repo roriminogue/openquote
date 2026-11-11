@@ -1,12 +1,18 @@
 "use client";
 
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { ChatComposer } from "@astryxdesign/core/Chat";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Icon } from "@astryxdesign/core/Icon";
+import { Text } from "@astryxdesign/core/Text";
+import { TextInput } from "@astryxdesign/core/TextInput";
 import { MapPin, Square } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Breakdown } from "@/components/breakdown";
 import { Money } from "@/components/money";
-import { Button, Notice } from "@/components/ui";
 import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";
 import { useDictation } from "./dictation";
@@ -40,13 +46,6 @@ function previewGroups(draft: PartialDraft, markup: MarkupSettings) {
     });
 }
 
-const EXAMPLES = [
-  ["Deck", "Build a 4 × 3 m merbau deck, 600 mm high, two steps down to the lawn, oil finish"],
-  ["Bathroom", "Retile a 2.4 × 2 m bathroom floor to ceiling, walk-in shower, new vanity and toilet, same layout"],
-  ["Fence", "Replace 20 m of 1.8 m paling fence, reuse the posts, treated pine palings and capping"],
-  ["Pergola", "Freestanding 4 × 4 m treated pine pergola on concrete footings, Colorbond roof"],
-] as const;
-
 export function NewEstimate({
   initialDescription,
   firstTime = false,
@@ -79,9 +78,17 @@ export function NewEstimate({
   const previewRef = useRef<HTMLElement>(null);
   const busy = phase.kind === "streaming" || phase.kind === "saving";
   const dictation = useDictation({ value: description, onChange: setDescription, hints: voiceHints, canTidy: !!ai });
+  const canPrice = !!ai && !busy && !dictation.busy;
 
-  async function generate(e: React.FormEvent) {
-    e.preventDefault();
+  // Only the Price button and its shortcut call this. The sheets opened from this page (pick a project, add a
+  // client) keep their own forms, so nothing in them can start pricing.
+  async function generate() {
+    if (!canPrice) return;
+    if (description.trim().length < 10) {
+      setPhase({ kind: "error", message: "Describe the job in a bit more detail." });
+      document.getElementById("description")?.focus();
+      return;
+    }
     const controller = new AbortController();
     abortRef.current = controller;
     setPhase({ kind: "streaming", draft: {} });
@@ -137,126 +144,127 @@ export function NewEstimate({
     }
   }
 
-  const submitOnShortcut = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      e.currentTarget.form?.requestSubmit();
-    }
-  };
-
   return (
     <div className="mx-auto mt-6 max-w-[50rem]">
-      <form onSubmit={generate}>
-        {!ai && (
-          <div className="mb-4">
-            <Notice tone="info">
-              Add an AI key first. OpenQuote uses your own provider account.{" "}
-              <Link href="/settings/ai" className="font-medium text-ink underline underline-offset-2">
-                Set up AI
-              </Link>
-            </Notice>
+      {!ai && (
+        <div className="mb-5">
+          <Banner
+            status="warning"
+            title="Add an AI key first"
+            description="OpenQuote AU prices jobs with your own AI provider account."
+          />
+          <div className="mt-3 sm:w-48">
+            <Button label="Set up AI" variant="secondary" size="lg" width="100%" href="/settings/ai" />
           </div>
-        )}
-        <div className="rounded-2xl bg-subtle">
-          <div className="rounded-[14px] bg-surface shadow-raised transition-shadow duration-150 focus-within:shadow-[var(--shadow-raised),0_0_0_4px_color-mix(in_oklab,var(--ink)_5%,transparent)]">
-            <label htmlFor="description" className="sr-only">
-              Describe the job
-            </label>
+        </div>
+      )}
+
+      <ChatComposer
+        // The page holds the words and prices on its own button, so the composer's built-in submit does nothing.
+        onSubmit={() => {}}
+        status={phase.kind === "error" ? { type: "error", message: phase.message } : undefined}
+        input={
+          <>
             <textarea
               id="description"
               name="description"
               rows={4}
-              required
-              minLength={10}
               maxLength={8000}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              onKeyDown={submitOnShortcut}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                // An old "describe it in more detail" or provider error shouldn't sit there once they've fixed it.
+                if (phase.kind === "error") setPhase({ kind: "idle" });
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  e.preventDefault();
+                  generate();
+                }
+              }}
               disabled={busy}
               readOnly={dictation.busy}
-              aria-describedby="description-hint"
+              aria-label="Describe the job"
+              aria-describedby={ai ? "description-hint" : undefined}
               placeholder={
                 dictation.supported
                   ? "Describe the job, or tap Talk: size, materials, access, finish. Whatever you’d tell a mate on the phone."
                   : "Describe the job: size, materials, access, finish. Whatever you’d tell a mate on the phone."
               }
-              className="block min-h-28 w-full resize-none rounded-t-[14px] bg-transparent px-4 pb-2 pt-4 text-base leading-relaxed text-ink placeholder:text-ink-3 focus:outline-none disabled:opacity-60 sm:text-sm"
+              className="block min-h-28 w-full resize-none bg-transparent px-1 text-base leading-relaxed text-(--color-text-primary) caret-(--color-accent) outline-none placeholder:text-(--color-text-secondary) disabled:opacity-60 sm:text-(length:--text-body-size)"
             />
-            {!description.trim() && !busy && !dictation.busy && (
-              <div className="flex flex-wrap gap-1.5 px-4 pb-2" aria-label="Start from an example">
-                {EXAMPLES.map(([label, text]) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => setDescription(text)}
-                    className="h-9 rounded-full bg-subtle px-3 text-sm font-medium text-ink-2 transition-colors hover:bg-hover hover:text-ink sm:h-7 sm:px-2.5 sm:text-xs"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
             {dictation.statusLine && (
-              <div aria-live="polite" className="px-4 pb-1">
+              <div aria-live="polite" className="px-1 pt-1">
                 {dictation.statusLine}
               </div>
             )}
-            <div className="flex flex-wrap items-center gap-2 px-3 pb-3 pt-1">
-              {!busy && dictation.button}
-              <ProjectField projects={projects} clients={clients} value={project} onChange={setProject} disabled={busy} />
-              {ai && (
-                <span id="description-hint" className="hidden min-w-0 truncate text-xs text-ink-3 sm:inline">
-                  {ai.provider}
-                  {ai.model ? ` · ${ai.model}` : ""}
-                </span>
-              )}
-              <span className="ml-auto max-sm:w-full">
-                {busy ? (
-                  <Button type="button" variant="secondary" className="max-sm:w-full" onClick={() => abortRef.current?.abort()}>
-                    <Square className="size-3 fill-current" aria-hidden />
-                    Stop
-                  </Button>
-                ) : (
-                  <Button type="submit" variant="accent" className="max-sm:w-full" disabled={!ai || dictation.busy}>
-                    Price this job
-                    <kbd className="hidden rounded border border-on-accent/20 px-1 font-sans text-2xs font-medium text-on-accent/70 sm:inline">
-                      ⌘↵
-                    </kbd>
-                  </Button>
-                )}
+          </>
+        }
+        footerActions={
+          <>
+            {!busy && dictation.button}
+            {ai && (
+              <span
+                id="description-hint"
+                className="hidden min-w-0 truncate px-1 text-(length:--text-supporting-size) text-(--color-text-secondary) sm:inline"
+              >
+                {ai.provider}
               </span>
-            </div>
-          </div>
-          {project?.siteAddress ? (
-            <p className="flex items-center gap-2 px-4 py-2.5 text-xs text-ink-2">
-              <MapPin className="size-3.5 shrink-0 text-ink-3" aria-hidden />
-              <span className="truncate">Site: {project.siteAddress}</span>
-            </p>
+            )}
+          </>
+        }
+        sendButton={
+          busy ? (
+            <Button
+              label="Stop"
+              variant="secondary"
+              icon={<Icon icon={Square} fill="currentColor" />}
+              onClick={() => abortRef.current?.abort()}
+            />
           ) : (
-            <div className="flex items-center gap-2 px-4">
-              <MapPin className="size-3.5 shrink-0 text-ink-3" aria-hidden />
-              <label htmlFor="siteAddress" className="sr-only">
-                Site address
-              </label>
-              <input
-                id="siteAddress"
-                name="siteAddress"
-                autoComplete="off"
-                value={siteAddress}
-                onChange={(e) => setSiteAddress(e.target.value)}
-                disabled={busy}
-                placeholder="Add a site address for travel and local pricing (optional)"
-                className="h-11 min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-ink-3 focus:outline-none disabled:opacity-60 sm:h-10 sm:text-xs"
-              />
-            </div>
-          )}
-        </div>
-        {phase.kind === "error" && (
-          <div className="mt-4">
-            <Notice tone="error">{phase.message}</Notice>
+            <Button
+              label="Price this job"
+              variant="primary"
+              isDisabled={!ai || dictation.busy}
+              onClick={generate}
+              endContent={
+                <span aria-hidden className="hidden text-(length:--text-supporting-size) opacity-70 sm:inline">
+                  ⌘↵
+                </span>
+              }
+            />
+          )
+        }
+      />
+
+      <div className="mt-5 grid items-start gap-5 sm:grid-cols-2 sm:gap-4">
+        <ProjectField projects={projects} clients={clients} value={project} onChange={setProject} disabled={busy} />
+        {project?.siteAddress ? (
+          <div className="min-w-0">
+            <Text as="div" type="label" color="secondary" weight="medium">
+              Site address
+            </Text>
+            <p className="mt-1 flex min-h-(--size-element-md) items-center gap-2 text-(length:--text-body-size) text-(--color-text-primary)">
+              <MapPin className="size-4 shrink-0 text-(--color-icon-secondary)" aria-hidden />
+              <span className="min-w-0 truncate">{project.siteAddress}</span>
+            </p>
           </div>
+        ) : (
+          <TextInput
+            id="jobSite"
+            htmlName="siteAddress"
+            label="Site address"
+            isOptional
+            startIcon={MapPin}
+            value={siteAddress}
+            onChange={setSiteAddress}
+            isDisabled={busy}
+            placeholder="For travel and local pricing…"
+            autoComplete="off"
+            width="100%"
+          />
         )}
-      </form>
+      </div>
 
       <section ref={previewRef} aria-label="Estimate preview" aria-busy={busy} className="mt-8 min-w-0 scroll-mt-20">
         {busy ? (
@@ -278,13 +286,15 @@ function HowItWorks() {
     ["Sanity checks", "Warnings for anything that looks off, like a bathroom with no waterproofing."],
   ];
   return (
-    <div className="rounded-[14px] bg-subtle px-4 py-3">
-      <h2 className="text-sm font-medium text-ink">What you&rsquo;ll get</h2>
-      <dl className="mt-3 grid gap-x-8 gap-y-4 pb-2 sm:grid-cols-2">
+    <div>
+      <Heading level={4} accessibilityLevel={2} color="secondary">
+        What you’ll get
+      </Heading>
+      <dl className="mt-3 grid gap-x-8 gap-y-4 border-t border-(--color-border) pt-4 sm:grid-cols-2">
         {points.map(([t, d]) => (
           <div key={t}>
-            <dt className="text-sm font-medium text-ink">{t}</dt>
-            <dd className="mt-0.5 text-sm text-ink-3">{d}</dd>
+            <dt className="text-(length:--text-body-size) font-medium text-(--color-text-primary)">{t}</dt>
+            <dd className="mt-0.5 text-(length:--text-body-size) text-(--color-text-secondary)">{d}</dd>
           </div>
         ))}
       </dl>
@@ -313,41 +323,51 @@ export function LivePreview({
   const current = groups.at(-1);
 
   return (
-    <div className="rounded-[14px] bg-bg p-4 shadow-card sm:p-5">
-      <div className="flex items-start justify-between gap-6">
-        <div className="min-w-0">
-          <p className="flex items-center gap-2 text-sm text-ink-3" role="status">
-            <span aria-hidden className="relative flex size-2">
-              <span className="absolute inset-0 animate-ping rounded-full bg-accent/60 motion-reduce:hidden" />
-              <span className="relative size-2 rounded-full bg-accent" />
-            </span>
-            {saving
-              ? "Checking prices and saving…"
-              : current
-                ? `Stage ${groups.length} · ${current.name}`
-                : "Working out the stages…"}
-          </p>
-          <h2 className="mt-2 font-display text-xl font-medium leading-snug">{draft.title || "Reading the job…"}</h2>
-          {number && <p className="figures mt-0.5 text-sm text-ink-3">{formatEstimateNo(number)}</p>}
-        </div>
-        <div className="shrink-0 text-right">
-          <p className="text-caption text-ink-3">Running total</p>
-          <Money cents={total} className="mt-0.5 block text-title font-semibold tracking-[-0.01em]" />
-          <p className="figures mt-0.5 text-caption text-ink-3">{lineCount} lines</p>
-        </div>
+    <Card elevation="low">
+      <p className="flex items-center gap-2 text-(length:--text-supporting-size) text-(--color-text-secondary)" role="status">
+        <span aria-hidden className="relative flex size-2 shrink-0">
+          <span className="absolute inset-0 animate-ping rounded-full bg-(--color-accent) opacity-60 motion-reduce:hidden" />
+          <span className="relative size-2 rounded-full bg-(--color-accent)" />
+        </span>
+        <span className="min-w-0 truncate">
+          {saving ? "Checking prices and saving…" : current ? `Stage ${groups.length} · ${current.name}` : "Working out the stages…"}
+        </span>
+      </p>
+
+      <div className="mt-2">
+        <Heading level={2}>{draft.title || "Reading the job…"}</Heading>
       </div>
-      <div className="mt-5">
+      {number && (
+        <Text as="p" type="supporting" color="secondary" hasTabularNumbers>
+          {formatEstimateNo(number)}
+        </Text>
+      )}
+
+      <div className="mt-4 flex items-end justify-between gap-4">
+        <div>
+          <Text as="p" type="supporting" color="secondary">
+            Running total, inc. GST
+          </Text>
+          <Money cents={total} className="mt-0.5 block text-[1.75rem] font-semibold leading-tight tracking-[-0.01em] text-(--color-text-primary)" />
+        </div>
+        <Text as="p" type="supporting" color="secondary" hasTabularNumbers>
+          {lineCount} {lineCount === 1 ? "line" : "lines"}
+        </Text>
+      </div>
+
+      <div className="mt-4">
         <Breakdown legend={false} stages={groups.map((g) => ({ name: g.name, cents: g.priceCents }))} />
       </div>
+
       <ol className="mt-6 space-y-5">
         {groups.map((g, gi) => (
           <li key={gi} className="enter">
-            <div className="flex items-baseline justify-between gap-4 border-b border-border pb-2">
-              <h3 className="text-body font-medium">
-                <span className="figures mr-2 text-ink-4">{gi + 1}</span>
+            <div className="flex items-baseline justify-between gap-4 border-b border-(--color-border) pb-2">
+              <h3 className="min-w-0 text-(length:--text-body-size) font-medium text-(--color-text-primary)">
+                <span className="mr-2 tabular-nums text-(--color-text-secondary)">{gi + 1}</span>
                 {g.name}
               </h3>
-              <Money cents={g.priceCents} className="text-body font-medium" />
+              <Money cents={g.priceCents} className="text-(length:--text-body-size) font-medium text-(--color-text-primary)" />
             </div>
             <ul>
               {g.lines.map((l, li) => {
@@ -356,10 +376,12 @@ export function LivePreview({
                 return (
                   <li
                     key={li}
-                    className={`-mx-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 rounded-md px-2 py-2 transition-colors duration-500 ${fresh ? "bg-accent-soft" : ""}`}
+                    className={`-mx-2 grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 rounded-md px-2 py-2 transition-colors duration-500 ${
+                      fresh ? "bg-(--color-accent-muted)" : ""
+                    }`}
                   >
-                    <span className="min-w-0 text-sm leading-snug text-ink-2">{l.description}</span>
-                    <Money cents={l.priceCents} className="text-sm text-ink" />
+                    <span className="min-w-0 text-(length:--text-body-size) leading-snug text-(--color-text-secondary)">{l.description}</span>
+                    <Money cents={l.priceCents} className="text-(length:--text-body-size) text-(--color-text-primary)" />
                   </li>
                 );
               })}
@@ -367,7 +389,12 @@ export function LivePreview({
           </li>
         ))}
       </ol>
-      <p className="mt-6 text-caption text-ink-3">Draft prices. Your rate rules and final checks apply when it&rsquo;s saved.</p>
-    </div>
+
+      <div className="mt-6">
+        <Text as="p" type="supporting" color="secondary">
+          Draft prices. Your rate rules and final checks apply when it’s saved.
+        </Text>
+      </div>
+    </Card>
   );
 }

@@ -1,72 +1,49 @@
 "use client";
 
-import { EllipsisVertical, LogOut } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Avatar } from "@astryxdesign/core/Avatar";
+import { DropdownMenu } from "@astryxdesign/core/DropdownMenu";
+import { LogOut, UserRound } from "lucide-react";
+import { useRef } from "react";
 
-/** The signed-in person: an initials tile and their email, with sign out behind a small menu. */
-export function AccountMenu({ email, compact = false }: { email: string; compact?: boolean }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent | KeyboardEvent) => {
-      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", close);
-    return () => {
-      document.removeEventListener("mousedown", close);
-      document.removeEventListener("keydown", close);
-    };
-  }, [open]);
-
-  const initials = email.slice(0, 2).toUpperCase();
+/**
+ * The signed-in person: their initial in the top bar, with account settings and sign out behind it. On a phone the
+ * choices come up as a sheet from the bottom; with a mouse they drop down from the avatar.
+ */
+export function AccountMenu({ email }: { email: string }) {
+  const signOut = useRef<HTMLFormElement>(null);
 
   return (
-    <div ref={ref} className={`relative ${compact ? "" : "mt-2"}`}>
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-        className={
-          compact
-            ? "-mr-2 flex size-11 items-center justify-center rounded-lg hover:bg-hover"
-            : "flex h-9 w-full items-center gap-2 rounded-lg px-1.5 text-left transition-colors hover:bg-hover"
-        }
-      >
-        <span
-          aria-hidden
-          className="flex size-5 shrink-0 items-center justify-center rounded-md bg-hover text-[0.625rem] font-medium text-ink-2"
-        >
-          {initials}
-        </span>
-        {!compact && (
-          <>
-            <span className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{email}</span>
-            <EllipsisVertical className="size-4 shrink-0 text-ink-3" aria-hidden />
-          </>
+    <>
+      <DropdownMenu
+        aria-label="Account"
+        presentation="adaptive"
+        placement="below"
+        alignment="end"
+        menuWidth={232}
+        hasChevron={false}
+        renderTrigger={(trigger) => (
+          <button
+            {...trigger}
+            type="button"
+            aria-label={`Account: ${email}`}
+            className="grid size-11 cursor-pointer place-items-center rounded-full outline-offset-[-4px] transition-opacity hover:opacity-80 aria-expanded:opacity-80"
+          >
+            <Avatar name={email} size={32} tooltip={false} />
+          </button>
         )}
-        <span className="sr-only">Account menu for {email}</span>
-      </button>
-      {open && (
-        <div
-          role="menu"
-          className={`absolute z-30 min-w-48 rounded-[10px] bg-bg p-1 shadow-raised ${compact ? "right-0 top-12" : "bottom-11 left-0 right-0"}`}
-        >
-          <p className="truncate px-2 py-1.5 text-xs text-ink-3">{email}</p>
-          <form action="/auth/signout" method="post">
-            <button
-              role="menuitem"
-              className="flex h-9 w-full items-center gap-2 rounded-md px-2 text-sm text-ink hover:bg-hover sm:h-8"
-            >
-              <LogOut className="size-4 text-ink-3" aria-hidden />
-              Sign out
-            </button>
-          </form>
-        </div>
-      )}
-    </div>
+        items={[
+          {
+            type: "section",
+            title: email,
+            items: [
+              { label: "Account settings", icon: UserRound, href: "/settings/account" },
+              { label: "Sign out", icon: LogOut, onClick: () => signOut.current?.requestSubmit() },
+            ],
+          },
+        ]}
+      />
+      {/* Signing out is a POST, so a link someone pastes or a page that prefetches can never sign you out. */}
+      <form ref={signOut} action="/auth/signout" method="post" hidden />
+    </>
   );
 }

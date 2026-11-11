@@ -39,7 +39,12 @@ export async function shareEstimate(orgId: string, estimateId: string, detail: D
       .where(eq(schema.proposalSends.estimateId, estimateId))
       .orderBy(desc(schema.proposalSends.sentAt))
       .limit(1);
-    if (existing) return { token: existing.token, sentAt: existing.sentAt, isNew: false };
+    if (existing) {
+      // Remember which version was shared last, so the estimate page can tell when it has changed since.
+      if (existing.version !== estimate.version)
+        await tx.update(schema.proposalSends).set({ version: estimate.version }).where(eq(schema.proposalSends.id, existing.id));
+      return { token: existing.token, sentAt: existing.sentAt, isNew: false };
+    }
 
     const [client] = estimate.clientId
       ? await tx.select({ email: schema.clients.email }).from(schema.clients).where(and(eq(schema.clients.id, estimate.clientId), eq(schema.clients.orgId, orgId)))
@@ -151,6 +156,13 @@ export async function decide(
       estimateVersion: seenVersion,
       totalCents: q.totals.totalCents,
     });
+    // Won the job: a project still marked Quoting becomes Active (a status set by hand is left alone).
+    if (decision.type === "accepted" && q.estimate.projectId) {
+      await tx
+        .update(schema.projects)
+        .set({ status: "active", updatedAt: new Date() })
+        .where(and(eq(schema.projects.id, q.estimate.projectId), eq(schema.projects.status, "quoting")));
+    }
     return "ok";
   });
 }
@@ -158,7 +170,7 @@ export async function decide(
 /** For the estimate page: the link, when it was sent, how often it was viewed and the client's answer. */
 export async function proposalActivity(orgId: string, estimateId: string) {
   const sends = await db
-    .select({ id: schema.proposalSends.id, token: schema.proposalSends.token, sentAt: schema.proposalSends.sentAt })
+    .select({ id: schema.proposalSends.id, token: schema.proposalSends.token, sentAt: schema.proposalSends.sentAt, version: schema.proposalSends.version })
     .from(schema.proposalSends)
     .innerJoin(schema.estimates, eq(schema.estimates.id, schema.proposalSends.estimateId))
     .where(and(eq(schema.proposalSends.estimateId, estimateId), eq(schema.estimates.orgId, orgId)))
@@ -172,6 +184,8 @@ export async function proposalActivity(orgId: string, estimateId: string) {
   return {
     token: sends[0].token,
     sentAt: sends[0].sentAt,
+    /** The estimate version last shared with the client. */
+    sharedVersion: sends[0].version,
     views: views.length,
     lastViewedAt: views[0]?.at ?? null,
     decision: await latestDecision(sends.map((s) => s.id)),
