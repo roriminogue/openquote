@@ -12,6 +12,13 @@ they can accept it from their phone.
 - **See what happened.** Know when they opened it, and who accepted or declined it.
 - **Your own AI key.** You pay your AI provider directly (a few cents a quote). OpenQuote AU itself is free.
 
+<p>
+  <img src="docs/screenshots/new.png" width="200" alt="New estimate: describe the job or tap Talk, pick a project, and price it">
+  <img src="docs/screenshots/estimate.png" width="200" alt="An estimate: the total, your cost and margin, and where the money goes">
+  <img src="docs/screenshots/quote.png" width="200" alt="The quote your client opens, with your business details and their dates">
+  <img src="docs/screenshots/projects.png" width="200" alt="Projects, with the latest quote and status for each">
+</p>
+
 ## Run your own OpenQuote AU (free)
 
 You get your own private copy, on free accounts that you control. Nobody else can see your quotes. It takes about
