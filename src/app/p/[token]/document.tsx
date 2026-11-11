@@ -1,5 +1,4 @@
 import { Heading } from "@astryxdesign/core/Heading";
-import { Link } from "@astryxdesign/core/Link";
 import { Text } from "@astryxdesign/core/Text";
 import { CheckCircle2, XCircle } from "lucide-react";
 import type { ReactNode } from "react";
@@ -66,17 +65,17 @@ export function QuoteDocument({ q, token }: { q: PublicQuote; token: string }) {
               )}
               {org.phone && (
                 <Text as="p" display="block" type="supporting" hasTabularNumbers>
-                  <Link href={`tel:${org.phone.replace(/[^\d+]/g, "")}`} color="inherit">
+                  <a href={`tel:${org.phone.replace(/[^\d+]/g, "")}`} className="hover:underline">
                     {org.phone}
-                  </Link>
+                  </a>
                 </Text>
               )}
               {org.email && (
                 <span className="break-all">
                   <Text as="p" display="block" type="supporting">
-                    <Link href={`mailto:${org.email}`} color="inherit">
+                    <a href={`mailto:${org.email}`} className="hover:underline">
                       {org.email}
-                    </Link>
+                    </a>
                   </Text>
                 </span>
               )}
