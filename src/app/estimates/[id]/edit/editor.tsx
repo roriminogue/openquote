@@ -1,14 +1,31 @@
 "use client";
 
-import { ArrowDown, ArrowLeft, ArrowUp, Plus, Trash2 } from "lucide-react";
-import Link from "next/link";
+import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { DropdownMenu } from "@astryxdesign/core/DropdownMenu";
+import { Icon } from "@astryxdesign/core/Icon";
+import { IconButton } from "@astryxdesign/core/IconButton";
+import { InputGroup, InputGroupText } from "@astryxdesign/core/InputGroup";
+import { Selector } from "@astryxdesign/core/Selector";
+import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
+import { TextInput } from "@astryxdesign/core/TextInput";
+import { ArrowDown, ArrowUp, MoreHorizontal, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { BackLink } from "@/components/back-link";
 import { Money } from "@/components/money";
-import { Button, Notice, Panel } from "@/components/ui";
 import type { EditLine } from "@/lib/estimate/edit-schema";
 import { parseQty } from "@/lib/estimate/edit-schema";
-import { estimateTotals, formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
+import {
+  estimateTotals,
+  formatEstimateNo,
+  linePriceCents,
+  resolveMarkupPct,
+  type LineType,
+  type MarkupSettings,
+} from "@/lib/pricing";
 import { centsToDollars, dollarsToCents, RATE_UNITS } from "@/lib/rates-schema";
 import { saveEstimate, saveLineAsRate } from "./actions";
 
@@ -30,11 +47,11 @@ type DraftLine = {
 };
 type DraftGroup = { key: string; name: string; lines: DraftLine[] };
 
-const TYPE_OPTIONS: [LineType, string][] = [
-  ["material", "Materials"],
-  ["labour", "Labour"],
-  ["subbie", "Subcontractor"],
-  ["other", "Other"],
+const TYPE_OPTIONS: { value: LineType; label: string }[] = [
+  { value: "material", label: "Materials" },
+  { value: "labour", label: "Labour" },
+  { value: "subbie", label: "Subcontractor" },
+  { value: "other", label: "Other" },
 ];
 
 let seq = 0;
@@ -160,7 +177,9 @@ export function EstimateEditor({
     setDirty(true);
   };
   const setLine = (gi: number, li: number, patch: Partial<DraftLine>) =>
-    update((gs) => gs.map((g, i) => (i !== gi ? g : { ...g, lines: g.lines.map((l, j) => (j === li ? { ...l, ...patch } : l)) })));
+    update((gs) =>
+      gs.map((g, i) => (i !== gi ? g : { ...g, lines: g.lines.map((l, j) => (j === li ? { ...l, ...patch } : l)) })),
+    );
   const move = <T,>(arr: T[], from: number, to: number) => {
     if (to < 0 || to >= arr.length) return arr;
     const next = [...arr];
@@ -174,7 +193,12 @@ export function EstimateEditor({
       groups.map((g) => ({
         name: g.name,
         lines: g.lines.map((l) => {
-          const line = { type: l.type, qty: parseQty(l.qty) ?? 0, unitCostCents: dollarsToCents(l.cost) ?? 0, markupPct: num(l.markup) };
+          const line = {
+            type: l.type,
+            qty: parseQty(l.qty) ?? 0,
+            unitCostCents: dollarsToCents(l.cost) ?? 0,
+            markupPct: num(l.markup),
+          };
           const pct = resolveMarkupPct(line, markup, estimateMarkupPct);
           return { ...line, priceCents: linePriceCents(line, Number.isFinite(pct) ? pct : 0) };
         }),
@@ -189,12 +213,17 @@ export function EstimateEditor({
     const lines = groups.map((g) => g.lines.map(toLine));
     const bad = lines.flatMap((ls, gi) => ls.map((l, li) => (l ? null : [gi, li]))).find(Boolean);
     if (bad) {
-      setError(`Check the numbers in stage ${bad[0] + 1}, line ${bad[1] + 1}: quantity, cost and markup must be numbers.`);
+      setError(
+        `Check the numbers in stage ${bad[0] + 1}, line ${bad[1] + 1}: quantity, cost and markup must be numbers.`,
+      );
       document.getElementById(`${groups[bad[0]].lines[bad[1]].key}-qty`)?.focus();
       return;
     }
     setBusy(true);
-    const res = await saveEstimate(estimateId, { title, groups: groups.map((g, gi) => ({ name: g.name, lines: lines[gi] })) });
+    const res = await saveEstimate(estimateId, {
+      title,
+      groups: groups.map((g, gi) => ({ name: g.name, lines: lines[gi] })),
+    });
     setBusy(false);
     if (!res.ok) {
       setError(res.error);
@@ -203,6 +232,8 @@ export function EstimateEditor({
     setDirty(false);
     router.push(`/estimates/${estimateId}`);
   }
+
+  const totalLabel = gstRatePct ? "Total inc GST" : "Total";
 
   return (
     <form
@@ -216,57 +247,60 @@ export function EstimateEditor({
         }
       }}
     >
-      <Link
-        href={`/estimates/${estimateId}`}
-        className="-ml-2 inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-ink-3 transition-colors hover:bg-hover hover:text-ink"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        Back to estimate
-      </Link>
+      <BackLink href={`/estimates/${estimateId}`} label="Back to estimate" />
 
-      <header className="mt-4 flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
+      <header className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
         <div className="min-w-0 flex-1">
-          <p className="figures text-sm text-ink-3">Editing {formatEstimateNo(number)}</p>
-          <label htmlFor="title" className="sr-only">
-            Title
-          </label>
-          <textarea
-            id="title"
-            rows={1}
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value.replace(/\n/g, " "));
-              setDirty(true);
-            }}
-            className="mt-1 -ml-2 w-full resize-none rounded-lg border border-transparent bg-transparent px-2 py-1 font-display text-title font-medium leading-8 text-ink transition-colors [field-sizing:content] hover:border-border focus:border-ink-4 focus:outline-none"
-          />
+          <Text as="p" type="supporting" hasTabularNumbers>
+            Editing {formatEstimateNo(number)}
+          </Text>
+          <div className="mt-2">
+            <TextArea
+              id="title"
+              label="Title"
+              rows={2}
+              value={title}
+              onChange={(next) => {
+                setTitle(next.replace(/\n/g, " "));
+                setDirty(true);
+              }}
+              width="100%"
+            />
+          </div>
         </div>
-        <div className="hidden shrink-0 gap-2 sm:flex">
-          <Link href={`/estimates/${estimateId}`} className="inline-flex h-8 items-center rounded-lg px-2.5 text-xs font-medium text-ink-2 hover:bg-hover">
-            Cancel
-          </Link>
-          <Button type="submit" disabled={busy}>
-            {busy ? "Saving…" : "Save changes"}
-          </Button>
+        <div className="hidden shrink-0 gap-2 sm:flex sm:pt-7">
+          <Button href={`/estimates/${estimateId}`} label="Cancel" variant="ghost" />
+          <Button type="submit" label={busy ? "Saving…" : "Save changes"} variant="primary" isLoading={busy} />
         </div>
       </header>
 
-      <section aria-label="Totals" className="mt-6 grid grid-cols-3 gap-0">
-        {[
-          [gstRatePct ? "Total inc GST" : "Total", totals.totalCents],
-          ["Price ex GST", totals.subtotalCents],
-          ["Your cost", totals.costCents],
-        ].map(([label, cents], i) => (
-          <div key={i} className="border-l border-border px-3 first:border-l-0 first:pl-0 sm:px-6">
-            <p className="text-xs font-medium text-ink-3">{label}</p>
-            <Money cents={cents as number} className="mt-1.5 block text-lg font-semibold text-ink sm:text-title" />
+      <section aria-label="Totals" className="mt-6 grid grid-cols-3">
+        {(
+          [
+            [totalLabel, totals.totalCents],
+            ["Price ex GST", totals.subtotalCents],
+            ["Your cost", totals.costCents],
+          ] as const
+        ).map(([label, cents]) => (
+          <div
+            key={label}
+            className="min-w-0 border-l border-(--color-border) px-3 first:border-l-0 first:pl-0 sm:px-6"
+          >
+            <Text as="p" type="supporting" weight="medium">
+              {label}
+            </Text>
+            <div className="mt-1.5">
+              <Text as="p" type="large" weight="semibold" hasTabularNumbers>
+                <Money cents={cents} />
+              </Text>
+            </div>
           </div>
         ))}
       </section>
 
       {error && (
-        <div className="mt-6">
-          <Notice tone="error">{error}</Notice>
+        <div className="mt-6" role="alert">
+          <Banner status="error" title={error} />
         </div>
       )}
 
@@ -276,128 +310,156 @@ export function EstimateEditor({
         ))}
       </datalist>
 
-      <div className="mt-8 space-y-8">
+      <div className="mt-8 flex flex-col gap-8">
         {groups.map((g, gi) => (
           <section key={g.key} aria-label={`Stage ${gi + 1}`}>
             <div className="mb-3 flex items-center gap-2">
-              <span className="figures text-sm text-ink-4">{gi + 1}</span>
-              <label htmlFor={`${g.key}-name`} className="sr-only">
-                Stage {gi + 1} name
-              </label>
-              <input
-                id={`${g.key}-name`}
-                value={g.name}
-                onChange={(e) => update((gs) => gs.map((x, i) => (i === gi ? { ...x, name: e.target.value } : x)))}
-                placeholder="Stage name"
-                className="h-9 min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1.5 text-sm font-semibold text-ink hover:border-border focus:border-ink-4 focus:outline-none sm:h-8"
-              />
-              <Money cents={priced[gi].lines.reduce((s, l) => s + l.priceCents, 0)} className="hidden shrink-0 text-sm font-semibold text-ink sm:inline" />
-              <span className="flex shrink-0 items-center">
-                <IconButton label={`Move stage ${gi + 1} up`} onClick={() => update((gs) => move(gs, gi, gi - 1))} disabled={gi === 0}>
-                  <ArrowUp className="size-4" />
-                </IconButton>
-                <IconButton label={`Move stage ${gi + 1} down`} onClick={() => update((gs) => move(gs, gi, gi + 1))} disabled={gi === groups.length - 1}>
-                  <ArrowDown className="size-4" />
-                </IconButton>
-                <IconButton
-                  label={`Delete stage ${gi + 1}`}
-                  onClick={() => {
-                    if (g.lines.length === 0 || window.confirm(`Delete “${g.name || "this stage"}” and its ${g.lines.length} lines?`))
-                      update((gs) => gs.filter((_, i) => i !== gi));
-                  }}
-                  disabled={groups.length === 1}
-                >
-                  <Trash2 className="size-4" />
-                </IconButton>
+              <span aria-hidden className="w-5 shrink-0 text-center tabular-nums text-(--color-text-secondary)">
+                {gi + 1}
               </span>
+              <div className="min-w-0 flex-1">
+                <TextInput
+                  id={`${g.key}-name`}
+                  label={`Stage ${gi + 1} name`}
+                  isLabelHidden
+                  value={g.name}
+                  onChange={(name) => update((gs) => gs.map((x, i) => (i === gi ? { ...x, name } : x)))}
+                  placeholder="Stage name"
+                  width="100%"
+                />
+              </div>
+              <span className="hidden shrink-0 sm:inline">
+                <Text weight="semibold">
+                  <Money cents={priced[gi].lines.reduce((s, l) => s + l.priceCents, 0)} />
+                </Text>
+              </span>
+              <DropdownMenu
+                aria-label={`Stage ${gi + 1} actions`}
+                presentation="adaptive"
+                placement="below"
+                alignment="end"
+                hasChevron={false}
+                renderTrigger={(trigger) => (
+                  <IconButton
+                    {...trigger}
+                    label={`Stage ${gi + 1} actions`}
+                    variant="ghost"
+                    icon={<Icon icon={MoreHorizontal} />}
+                  />
+                )}
+                items={[
+                  {
+                    label: "Move up",
+                    icon: ArrowUp,
+                    isDisabled: gi === 0,
+                    onClick: () => update((gs) => move(gs, gi, gi - 1)),
+                  },
+                  {
+                    label: "Move down",
+                    icon: ArrowDown,
+                    isDisabled: gi === groups.length - 1,
+                    onClick: () => update((gs) => move(gs, gi, gi + 1)),
+                  },
+                  { type: "divider" },
+                  {
+                    label: "Delete stage",
+                    icon: Trash2,
+                    variant: "destructive",
+                    isDisabled: groups.length === 1,
+                    onClick: () => {
+                      if (
+                        g.lines.length === 0 ||
+                        window.confirm(`Delete “${g.name || "this stage"}” and its ${g.lines.length} lines?`)
+                      )
+                        update((gs) => gs.filter((_, i) => i !== gi));
+                    },
+                  },
+                ]}
+              />
             </div>
 
-            <Panel>
-              <ul className="divide-y divide-dashed divide-border">
+            <Card padding={0}>
+              <ul className="divide-y divide-dashed divide-(--color-border)">
                 {g.lines.map((l, li) => (
                   <LineRow
                     key={l.key}
                     line={l}
+                    stage={gi + 1}
                     index={li}
                     priceCents={priced[gi].lines[li].priceCents}
-                    defaultMarkup={resolveMarkupPct({ type: l.type, qty: 0, unitCostCents: 0, markupPct: null }, markup, estimateMarkupPct)}
+                    defaultMarkup={resolveMarkupPct(
+                      { type: l.type, qty: 0, unitCostCents: 0, markupPct: null },
+                      markup,
+                      estimateMarkupPct,
+                    )}
                     onChange={(patch) => setLine(gi, li, patch)}
-                    onRemove={() => update((gs) => gs.map((x, i) => (i === gi ? { ...x, lines: x.lines.filter((_, j) => j !== li) } : x)))}
-                    onMove={(dir) => update((gs) => gs.map((x, i) => (i === gi ? { ...x, lines: move(x.lines, li, li + dir) } : x)))}
+                    onRemove={() =>
+                      update((gs) =>
+                        gs.map((x, i) => (i === gi ? { ...x, lines: x.lines.filter((_, j) => j !== li) } : x)),
+                      )
+                    }
+                    onMove={(dir) =>
+                      update((gs) => gs.map((x, i) => (i === gi ? { ...x, lines: move(x.lines, li, li + dir) } : x)))
+                    }
                     first={li === 0}
                     last={li === g.lines.length - 1}
                   />
                 ))}
               </ul>
-              <div className="border-t border-dashed border-border px-2 py-2">
+              <div className="border-t border-dashed border-(--color-border) px-2 py-2">
                 <Button
-                  type="button"
+                  label="Add line"
                   variant="ghost"
                   size="sm"
+                  icon={<Icon icon={Plus} />}
                   onClick={() => {
                     const line = blankLine();
                     update((gs) => gs.map((x, i) => (i === gi ? { ...x, lines: [...x.lines, line] } : x)));
                     setFocusId(`${line.key}-description`);
                   }}
-                >
-                  <Plus className="size-3.5" aria-hidden />
-                  Add line
-                </Button>
+                />
               </div>
-            </Panel>
+            </Card>
           </section>
         ))}
       </div>
 
       <div className="mt-6">
         <Button
-          type="button"
-          variant="secondary"
+          label="Add stage"
+          icon={<Icon icon={Plus} />}
           onClick={() => {
             const g = { key: key(), name: "", lines: [blankLine()] };
             update((gs) => [...gs, g]);
             setFocusId(`${g.key}-name`);
           }}
-        >
-          <Plus className="size-4" aria-hidden />
-          Add stage
-        </Button>
+        />
       </div>
 
-      {/* Phones: the total and Save stay within thumb reach. */}
-      <div className="no-print fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 flex items-center justify-between gap-3 border-t border-border bg-bg px-4 py-3 sm:hidden">
-        <span className="text-sm">
-          <span className="block text-xs text-ink-3">{gstRatePct ? "Total inc GST" : "Total"}</span>
-          <Money cents={totals.totalCents} className="font-semibold text-ink" />
-        </span>
-        <Button type="submit" disabled={busy}>
-          {busy ? "Saving…" : "Save changes"}
-        </Button>
+      {/* Phones: the total and Save stay within thumb reach, just above the tab bar. */}
+      <div className="no-print fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 flex items-center justify-between gap-3 border-t border-(--color-border) bg-(--color-background-surface) px-4 py-2.5 sm:hidden">
+        <div className="min-w-0">
+          <Text as="p" type="supporting" display="block">
+            {totalLabel}
+          </Text>
+          <Text as="p" weight="semibold" display="block">
+            <Money cents={totals.totalCents} />
+          </Text>
+        </div>
+        <Button type="submit" label={busy ? "Saving…" : "Save changes"} variant="primary" isLoading={busy} />
       </div>
       <div className="h-20 sm:hidden" aria-hidden />
     </form>
   );
 }
 
-function IconButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled?: boolean; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      title={label}
-      className="inline-flex size-9 items-center justify-center rounded-md text-ink-3 transition-colors hover:bg-hover hover:text-ink disabled:pointer-events-none disabled:opacity-30 sm:size-7"
-    >
-      {children}
-    </button>
-  );
-}
-
-const cell = "h-11 rounded-md border border-border bg-bg px-2 text-base text-ink placeholder:text-ink-4 hover:border-border-strong focus:border-ink-4 focus:outline-none sm:h-8 sm:text-sm";
-
+/**
+ * One line, laid out the same at every width: what it is, then its numbers, then the amount with the line's own
+ * move and delete buttons, so on a phone the description gets the whole width.
+ */
 function LineRow({
   line: l,
+  stage,
   index,
   priceCents,
   defaultMarkup,
@@ -408,6 +470,7 @@ function LineRow({
   last,
 }: {
   line: DraftLine;
+  stage: number;
   index: number;
   priceCents: number;
   defaultMarkup: number;
@@ -418,93 +481,112 @@ function LineRow({
   last: boolean;
 }) {
   const id = (f: string) => `${l.key}-${f}`;
+  // Each field's spoken name says which line it is on, so a screen reader moving through the form knows where it is.
+  const where = `stage ${stage}, line ${index + 1}`;
   const qtyBad = parseQty(l.qty) === null;
   const costBad = l.cost.trim() !== "" && dollarsToCents(l.cost) === null;
+  const numeric = "[&_input]:text-right [&_input]:tabular-nums";
   return (
-    <li className="space-y-2 px-3 py-3">
-      <div className="flex items-center gap-2">
-        <label htmlFor={id("description")} className="sr-only">
-          Line {index + 1} description
-        </label>
-        <input
-          id={id("description")}
-          value={l.description}
-          onChange={(e) => onChange({ description: e.target.value })}
-          placeholder="What it is"
-          className={`${cell} min-w-0 flex-1`}
+    <li className="flex flex-col gap-3 px-3 py-4 sm:px-4">
+      <TextArea
+        id={id("description")}
+        label={`Description, ${where}`}
+        isLabelHidden
+        rows={2}
+        value={l.description}
+        onChange={(description) => onChange({ description: description.replace(/\n/g, " ") })}
+        placeholder="What it is"
+        width="100%"
+      />
+      <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-[9rem_5.5rem_6.5rem_8rem_6.5rem]">
+        <div className="col-span-2 sm:col-span-1">
+          <Selector
+            label="Type"
+            options={TYPE_OPTIONS}
+            value={l.type}
+            onChange={(type) => onChange({ type: type as LineType })}
+            presentation="adaptive"
+            width="100%"
+            aria-label={`Type, ${where}`}
+          />
+        </div>
+        <TextInput
+          id={id("qty")}
+          label="Qty"
+          aria-label={`Quantity, ${where}`}
+          inputMode="decimal"
+          value={l.qty}
+          onChange={(qty) => onChange({ qty })}
+          status={qtyBad ? { type: "error" } : undefined}
+          width="100%"
+          controlClassName={numeric}
         />
-        <Money cents={priceCents} className="hidden w-28 shrink-0 text-right text-sm font-medium text-ink sm:block" />
-        <span className="flex shrink-0 items-center">
-          <IconButton label={`Move line ${index + 1} up`} onClick={() => onMove(-1)} disabled={first}>
-            <ArrowUp className="size-4" />
-          </IconButton>
-          <IconButton label={`Move line ${index + 1} down`} onClick={() => onMove(1)} disabled={last}>
-            <ArrowDown className="size-4" />
-          </IconButton>
-          <IconButton label={`Delete line ${index + 1}`} onClick={onRemove}>
-            <Trash2 className="size-4" />
-          </IconButton>
+        <TextInput
+          id={id("unit")}
+          label="Unit"
+          aria-label={`Unit, ${where}`}
+          value={l.unit}
+          onChange={(unit) => onChange({ unit })}
+          autoCapitalize="none"
+          width="100%"
+          {...{ list: "units" }}
+        />
+        <InputGroup label="Your cost">
+          <InputGroupText>$</InputGroupText>
+          <TextInput
+            id={id("cost")}
+            label={`Your cost, ${where}`}
+            inputMode="decimal"
+            value={l.cost}
+            onChange={(cost) => onChange({ cost })}
+            placeholder="0"
+            status={costBad ? { type: "error" } : undefined}
+            controlClassName={numeric}
+          />
+        </InputGroup>
+        <InputGroup label="Markup">
+          <TextInput
+            id={id("markup")}
+            label={`Markup, ${where}`}
+            inputMode="decimal"
+            value={l.markup}
+            onChange={(markup) => onChange({ markup })}
+            placeholder={String(defaultMarkup)}
+            controlClassName={numeric}
+          />
+          <InputGroupText>%</InputGroupText>
+        </InputGroup>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <Text type="supporting">Amount </Text>
+          <Text weight="medium">
+            <Money cents={priceCents} />
+          </Text>
+        </div>
+        <span className="-mr-1.5 flex shrink-0 items-center">
+          <IconButton
+            label={`Move line ${index + 1} up`}
+            variant="ghost"
+            icon={<Icon icon={ArrowUp} />}
+            onClick={() => onMove(-1)}
+            isDisabled={first}
+          />
+          <IconButton
+            label={`Move line ${index + 1} down`}
+            variant="ghost"
+            icon={<Icon icon={ArrowDown} />}
+            onClick={() => onMove(1)}
+            isDisabled={last}
+          />
+          <IconButton
+            label={`Delete line ${index + 1}`}
+            variant="ghost"
+            icon={<Icon icon={Trash2} />}
+            onClick={onRemove}
+          />
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[9rem_5rem_6rem_7rem_5.5rem]">
-        <Labelled htmlFor={id("type")} label="Type" className="col-span-2 sm:col-span-1">
-          <select id={id("type")} value={l.type} onChange={(e) => onChange({ type: e.target.value as LineType })} className={`${cell} w-full`}>
-            {TYPE_OPTIONS.map(([v, t]) => (
-              <option key={v} value={v}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </Labelled>
-        <Labelled htmlFor={id("qty")} label="Qty">
-          <input
-            id={id("qty")}
-            inputMode="decimal"
-            value={l.qty}
-            onChange={(e) => onChange({ qty: e.target.value })}
-            aria-invalid={qtyBad || undefined}
-            className={`${cell} figures w-full text-right aria-invalid:border-danger`}
-          />
-        </Labelled>
-        <Labelled htmlFor={id("unit")} label="Unit">
-          <input id={id("unit")} list="units" value={l.unit} onChange={(e) => onChange({ unit: e.target.value })} className={`${cell} w-full`} />
-        </Labelled>
-        <Labelled htmlFor={id("cost")} label="Your cost">
-          <span className="relative block">
-            <span aria-hidden className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-sm text-ink-3">
-              $
-            </span>
-            <input
-              id={id("cost")}
-              inputMode="decimal"
-              value={l.cost}
-              onChange={(e) => onChange({ cost: e.target.value })}
-              placeholder="0"
-              aria-invalid={costBad || undefined}
-              className={`${cell} figures w-full pl-5 text-right aria-invalid:border-danger`}
-            />
-          </span>
-        </Labelled>
-        <Labelled htmlFor={id("markup")} label="Markup">
-          <span className="relative block">
-            <input
-              id={id("markup")}
-              inputMode="decimal"
-              value={l.markup}
-              onChange={(e) => onChange({ markup: e.target.value })}
-              placeholder={String(defaultMarkup)}
-              className={`${cell} figures w-full pr-5 text-right`}
-            />
-            <span aria-hidden className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-sm text-ink-3">
-              %
-            </span>
-          </span>
-        </Labelled>
-      </div>
-      <p className="flex justify-between text-sm sm:hidden">
-        <span className="text-ink-3">Amount</span>
-        <Money cents={priceCents} className="font-medium text-ink" />
-      </p>
       <SaveAsRate l={l} onSaved={onChange} />
     </li>
   );
@@ -515,12 +597,25 @@ function LineRow({
  * every future estimate uses it.
  */
 function SaveAsRate({ l, onSaved }: { l: DraftLine; onSaved: (patch: Partial<DraftLine>) => void }) {
-  const [state, setState] = useState<{ busy: boolean; error: string | null; saved: boolean }>({ busy: false, error: null, saved: false });
+  const [state, setState] = useState<{ busy: boolean; error: string | null; saved: boolean }>({
+    busy: false,
+    error: null,
+    saved: false,
+  });
   const cents = dollarsToCents(l.cost);
   const changed = cents !== null && cents !== l.originalCostCents;
   const eligible =
-    (l.type === "labour" || l.type === "material") && cents !== null && cents > 0 && l.description.trim() !== "" && (changed || l.source === "ai");
-  if (state.saved) return <p className="text-xs text-ink-3">Saved to your rates. Future estimates will use it.</p>;
+    (l.type === "labour" || l.type === "material") &&
+    cents !== null &&
+    cents > 0 &&
+    l.description.trim() !== "" &&
+    (changed || l.source === "ai");
+  if (state.saved)
+    return (
+      <Text as="p" type="supporting">
+        Saved to your rates. Future estimates will use it.
+      </Text>
+    );
   if (!eligible || l.source === "rate_rule") return null;
 
   async function save() {
@@ -532,22 +627,20 @@ function SaveAsRate({ l, onSaved }: { l: DraftLine; onSaved: (patch: Partial<Dra
   }
 
   return (
-    <p className="flex flex-wrap items-center gap-x-2 text-xs">
-      <button type="button" onClick={save} disabled={state.busy} className="font-medium text-ink underline-offset-2 hover:underline disabled:opacity-50">
-        {state.busy ? "Saving…" : `Save $${l.cost.replace(/^\$/, "")} per ${l.unit || "unit"} as my rate`}
-      </button>
-      {state.error && <span className="text-danger">{state.error}</span>}
-    </p>
-  );
-}
-
-function Labelled({ htmlFor, label, className = "", children }: { htmlFor: string; label: string; className?: string; children: React.ReactNode }) {
-  return (
-    <div className={className}>
-      <label htmlFor={htmlFor} className="mb-1 block text-xs font-medium text-ink-3">
-        {label}
-      </label>
-      {children}
+    <div className="-ml-2 flex flex-col items-start gap-2">
+      <Button
+        label={`Save $${l.cost.replace(/^\$/, "")} per ${l.unit || "unit"} as my rate`}
+        variant="ghost"
+        size="sm"
+        icon={<Icon icon={Plus} />}
+        onClick={save}
+        isLoading={state.busy}
+      />
+      {state.error && (
+        <div className="ml-2">
+          <Banner status="error" title={state.error} />
+        </div>
+      )}
     </div>
   );
 }
