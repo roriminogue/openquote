@@ -1,9 +1,13 @@
-import { ArrowRight } from "lucide-react";
+import { Card } from "@astryxdesign/core/Card";
+import { Heading } from "@astryxdesign/core/Heading";
+import { List, ListItem } from "@astryxdesign/core/List";
+import { Skeleton } from "@astryxdesign/core/Skeleton";
+import { Text } from "@astryxdesign/core/Text";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { EstimateRows } from "@/components/estimate-rows";
-import { LinkButton, PageTitle } from "@/components/ui";
+import { NewEstimateButton } from "@/components/new-estimate-button";
+import { PageTitle } from "@/components/page-title";
 import { requireMember } from "@/lib/auth";
 import { listEstimates } from "@/lib/estimate/queries";
 
@@ -27,7 +31,7 @@ async function EstimateList() {
   if (!rows.length) return <FirstEstimate />;
 
   return (
-    <div className="mt-8">
+    <div className="mt-6">
       <EstimateRows rows={rows} />
     </div>
   );
@@ -41,45 +45,48 @@ const examples = [
 
 function FirstEstimate() {
   return (
-    <div className="dots mt-8 rounded-2xl bg-subtle/60 px-4 py-12 sm:px-8 sm:py-16">
-      <div className="mx-auto max-w-lg rounded-[14px] bg-surface p-5 shadow-raised sm:p-6">
-        <h2 className="font-display text-xl font-medium">Price your first job</h2>
-        <p className="mt-1 text-sm text-ink-3">
-          Describe it the way you&rsquo;d tell a mate on the phone. OpenQuote AU breaks it into stages and prices each line
-          with your rates, usually in under a minute.
-        </p>
-        <LinkButton href="/estimates/new" variant="accent" className="mt-5">
-          Describe a job
-          <ArrowRight className="size-4" aria-hidden />
-        </LinkButton>
-        <h3 className="mt-6 text-xs font-medium text-ink-3">Or start from an example</h3>
-        <ul className="mt-1 divide-y divide-dashed divide-border">
-          {examples.map(([label, text]) => (
-            <li key={label}>
-              <Link
+    <div className="mt-8 max-w-lg">
+      <Card elevation="low">
+        <Heading level={2}>Price your first job</Heading>
+        <div className="mt-1">
+          <Text as="p" color="secondary">
+            Describe it the way you&rsquo;d tell a mate on the phone. OpenQuote AU breaks it into stages and prices each
+            line with your rates, usually in under a minute.
+          </Text>
+        </div>
+        <div className="mt-5">
+          <NewEstimateButton label="Describe a job" />
+        </div>
+        <div className="mt-6">
+          <List
+            hasDividers
+            edge="flush"
+            header={
+              <Text type="supporting" weight="medium">
+                Or start from an example
+              </Text>
+            }
+          >
+            {examples.map(([label, text]) => (
+              <ListItem
+                key={label}
                 href={`/estimates/new?describe=${encodeURIComponent(text)}`}
-                className="group flex min-h-11 items-center gap-3 py-2.5 text-sm text-ink-2 transition-colors hover:text-ink"
-              >
-                <span className="w-20 shrink-0 font-medium text-ink">{label}</span>
-                <span className="min-w-0 flex-1 truncate">{text}</span>
-                <ArrowRight className="size-4 shrink-0 text-ink-4 transition-transform group-hover:translate-x-0.5 group-hover:text-ink" aria-hidden />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+                label={label}
+                description={text}
+              />
+            ))}
+          </List>
+        </div>
+      </Card>
     </div>
   );
 }
 
 function ListSkeleton() {
   return (
-    <div className="mt-8 border-t border-border" aria-busy="true" aria-label="Loading estimates">
+    <div className="mt-6 flex flex-col gap-3" aria-busy="true" aria-label="Loading estimates">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="flex items-center justify-between gap-6 border-b border-border py-4">
-          <div className="h-4 w-1/2 animate-pulse rounded bg-hover" />
-          <div className="h-4 w-20 animate-pulse rounded bg-hover" />
-        </div>
+        <Skeleton key={i} height={56} index={i} />
       ))}
     </div>
   );
