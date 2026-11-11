@@ -16,7 +16,7 @@ const config: CapacitorConfig = {
   webDir: "mobile/www",
   // The web app hides Google sign-in when it sees this (Google blocks sign-in inside embedded web views).
   appendUserAgent: "OpenQuoteApp",
-  backgroundColor: "#fcfcfc",
+  backgroundColor: "#ffffff",
   server: {
     url: APP_URL,
     allowNavigation: [new URL(APP_URL).host],
