@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { DraftLine } from "./draft";
-import { labourRateFrom, priceDraft, toCents, validateEstimate, type RateRule } from "./price";
+import { labourRateFrom, priceDraft, scopeWithCalculators, toCents, validateEstimate, type RateRule } from "./price";
 
 const rules: RateRule[] = [
   { id: "R1", title: "Qualified carpenter", rateCents: 9500, unit: "hour", type: "labour" },
@@ -129,5 +129,23 @@ describe("priceDraft with the price book and calculators", () => {
   it("falls back to the typical labour rate without an hourly rule", () => {
     expect(labourRateFrom([])).toEqual({ cents: 7500, source: "price_book", ref: "labour:carpenter" });
     expect(labourRateFrom([{ id: "R9", title: "Site visit", rateCents: 15000, unit: "lot", type: "labour" }]).source).toBe("price_book");
+  });
+});
+
+describe("scopeWithCalculators", () => {
+  const fence = { lengthM: 8, heightM: 1.8, style: "butted" as const, newPosts: true, removeOld: true, gates: 0, capping: false, plinth: false, site: "normal" as const };
+  it("replaces the model's fence lines with ones that match the calculator, and keeps the rest", () => {
+    const scope = scopeWithCalculators({
+      scope: ["Fix three H3 treated pine 75×50 rails between the posts", "Clean up and remove site waste", "Arrange a council permit"],
+      fences: [fence],
+      decks: [],
+    });
+    expect(scope).toContain("Fix 2 rows of H3 treated pine 75×50 rails");
+    expect(scope.some((l) => /three/i.test(l))).toBe(false);
+    expect(scope.filter((l) => /clean up/i.test(l))).toHaveLength(1);
+    expect(scope.at(-1)).toBe("Arrange a council permit");
+  });
+  it("leaves the scope alone when no calculator ran", () => {
+    expect(scopeWithCalculators({ scope: ["Retile the bathroom floor"], fences: [], decks: [] })).toEqual(["Retile the bathroom floor"]);
   });
 });

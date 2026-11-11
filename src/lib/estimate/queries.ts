@@ -122,6 +122,15 @@ export async function listEstimates(orgId: string, filter: { projectId?: string;
   });
 }
 
+/** Just the number and title, for the browser tab. */
+export async function getEstimateHeading(orgId: string, estimateId: string) {
+  const [row] = await db
+    .select({ number: schema.estimates.number, title: schema.estimates.title })
+    .from(schema.estimates)
+    .where(and(eq(schema.estimates.id, estimateId), eq(schema.estimates.orgId, orgId)));
+  return row ?? null;
+}
+
 export async function getEstimate(orgId: string, estimateId: string) {
   const [estimate] = await db
     .select()

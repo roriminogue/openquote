@@ -79,8 +79,8 @@ function material(id: string, qty: number, notes: string, opts: { description?: 
   };
 }
 
-function other(id: string, qty: number, notes: string): PricedLine {
-  return { ...material(id, qty, notes), type: "other" };
+function other(id: string, qty: number, notes: string, description?: string): PricedLine {
+  return { ...material(id, qty, notes, { description }), type: "other" };
 }
 
 function labour(description: string, hours: number, rate: LabourRate, notes: string): PricedLine {
@@ -105,14 +105,16 @@ export const UTE_LOAD_M3 = 1.5;
  * large amounts several 6 m³ skips.
  */
 function disposal(volumeM3: number, why: string, rate: LabourRate): PricedLine[] {
+  // The price book names say where a price was checked ("(Melbourne)"); the client sees what the line is for.
   if (volumeM3 <= UTE_LOAD_M3)
     return [
-      other("tip_ute_load", 1, `${why}: one ute load`),
+      other("tip_ute_load", 1, `${why}: one ute load`, "Tip fees for the old timber and waste, one ute load"),
       labour("Load the ute and take the waste to the tip", 1, rate, "About an hour there and back"),
     ];
-  if (volumeM3 <= 2) return [other("skip_2m3", 1, why)];
-  if (volumeM3 <= 4) return [other("skip_4m3", 1, why)];
-  return [other("skip_6m3", ceil(volumeM3 / 6), why)];
+  if (volumeM3 <= 2) return [other("skip_2m3", 1, why, "Skip bin for the old timber and waste, 2 m³")];
+  if (volumeM3 <= 4) return [other("skip_4m3", 1, why, "Skip bin for the old timber and waste, 4 m³")];
+  const skips = ceil(volumeM3 / 6);
+  return [other("skip_6m3", skips, why, `Skip bin${skips > 1 ? "s" : ""} for the old timber and waste, 6 m³ each`)];
 }
 
 const groups = (list: { name: string; lines: PricedLine[] }[]): PricedGroup[] => list.filter((g) => g.lines.length > 0);
@@ -151,7 +153,7 @@ export function buildFence(spec: FenceSpec, rate: LabourRate): PricedGroup[] {
   const gatePosts = spec.newPosts ? spec.gates : 0; // a gate needs its own post beside the line post
   const posts = linePosts + gatePosts;
   const postLength = H <= 1.5 ? 2.1 : H <= 1.8 ? 2.4 : 2.7; // 600 mm in the ground
-  const rails = H >= 2.1 || (H >= 1.8 && spec.style !== "butted") ? 3 : 2;
+  const rails = fenceRails(spec);
 
   // Palings per metre of fence.
   const palingSets: { width: 100 | 150; perM: number; why: string }[] =
@@ -417,4 +419,84 @@ export function buildDeck(spec: DeckSpec, rate: LabourRate): PricedGroup[] {
     { name: spec.steps > 1 ? "Steps" : "Step", lines: stepLines },
     { name: "Finishing and clean-up", lines: finish },
   ]);
+}
+
+// ── Scope lines ─────────────────────────────────────────────────────────────
+// The model writes its scope in the same pass as the spec, before the calculator runs, so it can't know what the
+// calculator chose (it once wrote "three rails" over a priced two). These lines are written from the spec with the
+// same rules the calculators use, so the scope always matches the price.
+
+/** Three rails on lapped and lap-and-cap fences from 1.8 m and on any fence from 2.1 m; otherwise two. */
+export function fenceRails(spec: Pick<FenceSpec, "heightM" | "style">): 2 | 3 {
+  const H = spec.heightM;
+  return H >= 2.1 || (H >= 1.8 && spec.style !== "butted") ? 3 : 2;
+}
+
+const wasteGoes = (volumeM3: number) =>
+  volumeM3 <= UTE_LOAD_M3 ? "take the waste to the tip in the ute" : "take the waste away in a skip bin";
+
+export function fenceScope(spec: FenceSpec): string[] {
+  const L = spec.lengthM;
+  const bays = ceil(L / 2.4);
+  const rails = fenceRails(spec);
+  const lines = [`Build ${fmt(L)} m of ${fmt(spec.heightM)} m high treated pine paling fence`];
+  if (spec.removeOld) {
+    const volume = L * (spec.newPosts ? 0.15 : 0.1);
+    lines.push(
+      spec.newPosts
+        ? `Remove the old fence and its posts, and ${wasteGoes(volume)}`
+        : `Remove the old palings and rails, keep the posts, and ${wasteGoes(volume)}`,
+    );
+  }
+  lines.push(
+    spec.newPosts
+      ? `Set out and concrete in ${bays + 1 + spec.gates} H4 treated pine 125×75 posts at up to 2.4 m centres`
+      : "Check, straighten and re-fix the existing posts",
+    `Fix ${rails} rows of H3 treated pine 75×50 rails`,
+  );
+  if (spec.plinth) lines.push("Fit a 150×25 treated pine plinth board along the bottom");
+  lines.push(
+    spec.style === "lap_and_cap"
+      ? "Fix 150 mm base palings with 100 mm cover palings over the gaps (lap and cap)"
+      : spec.style === "lapped"
+        ? "Fix 100 mm H3 treated pine palings, lapped 25 mm"
+        : "Fix 100 mm H3 treated pine palings, butted side by side",
+  );
+  if (spec.capping) lines.push("Fit 90×45 timber capping along the top");
+  if (spec.gates > 0)
+    lines.push(
+      spec.gates > 1
+        ? `Build and hang ${spec.gates} timber gates with strap hinges and latches`
+        : "Build and hang a timber gate with strap hinges and a latch",
+    );
+  lines.push("Clean up and remove offcuts");
+  return lines;
+}
+
+export function deckScope(spec: DeckSpec): string[] {
+  const L = spec.lengthM;
+  const W = spec.widthM;
+  const area = L * W;
+  const board = BOARDS[spec.boards];
+  const composite = spec.boards === "composite_137";
+  const hidden = spec.hiddenFixings || composite;
+  const low = spec.heightMm < 300;
+  const lines = [`Build a ${fmt(L)} × ${fmt(W)} m deck (${fmt(area)} m²), about ${Math.round(spec.heightMm)} mm off the ground`];
+  if (spec.removeOldDeck) lines.push(`Demolish the old deck and ${wasteGoes(area * 0.3)}`);
+  lines.push(
+    spec.heightMm < 250
+      ? "Concrete pad footings with galvanised post stirrups"
+      : "H4 treated pine 100×100 posts concreted into the ground",
+    `Doubled H3 treated pine 140×45 bearers and ${low ? "90×45" : "140×45"} joists at 450 mm centres${
+      spec.attachedToHouse ? ", with a ledger bolted to the house" : ""
+    }`,
+    "Weed mat under the deck",
+    `${bookItem(board.id).name} decking, ${hidden ? "fixed with hidden clips" : "face-screwed with stainless steel screws"}`,
+    "Fascia around the exposed edges",
+  );
+  if (spec.steps > 0 && spec.stepWidthM > 0)
+    lines.push(`${spec.steps} step${spec.steps > 1 ? "s" : ""}, ${fmt(spec.stepWidthM)} m wide`);
+  if (spec.oil && !composite) lines.push("Clean and oil the deck, two coats");
+  lines.push("Clean up and remove offcuts");
+  return lines;
 }

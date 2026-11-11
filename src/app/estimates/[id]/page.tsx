@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
 import { EstimateView } from "@/components/estimate-view";
-import { getEstimate } from "@/lib/estimate/queries";
+import { getEstimate, getEstimateHeading } from "@/lib/estimate/queries";
 import { getClient } from "@/lib/projects";
 import { proposalActivity } from "@/lib/proposals";
 import { deleteEstimateRecord } from "@/app/actions/delete";
@@ -12,7 +12,17 @@ import { formatEstimateNo } from "@/lib/pricing";
 import { BackLink } from "@/components/back-link";
 import { Skeleton } from "@astryxdesign/core/Skeleton";
 
-export const metadata: Metadata = { title: "Estimate" };
+/**
+ * Each estimate's tab reads "EST-1010 Fence replacement", not just "Estimate". Set through metadata rather than a
+ * <title> in the page: a page-level <title> lost to the plain one whenever a save or share refreshed the page.
+ */
+export async function generateMetadata({ params }: PageProps<"/estimates/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { title: "Estimate" };
+  const member = await requireMember();
+  const row = await getEstimateHeading(member.orgId, id);
+  return { title: row ? `${formatEstimateNo(row.number)} ${row.title}` : "Estimate" };
+}
 
 export default function EstimatePage({ params }: PageProps<"/estimates/[id]">) {
   return (
@@ -41,8 +51,6 @@ async function EstimateDetail({ params }: Pick<PageProps<"/estimates/[id]">, "pa
   const number = formatEstimateNo(data.estimate.number);
   return (
     <>
-      {/* React puts this in <head>: each estimate's tab reads "EST-1010 Fence replacement", not just "Estimate". */}
-      <title>{`${number} ${data.estimate.title ?? "Estimate"} · OpenQuote AU`}</title>
       <EstimateView
         estimate={data.estimate}
         gstRatePct={data.org.gstRate}
