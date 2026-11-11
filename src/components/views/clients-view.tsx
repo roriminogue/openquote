@@ -13,7 +13,7 @@ export function ClientsView({ all, q }: { all: (ClientOption & Quoted & { projec
 
   return (
     <>
-      <PageHeader title="Clients" description="The people and businesses you quote for." action={<NewClientButton />} />
+      <PageHeader title="Clients" description="The people and businesses you quote for." action={all.length > 0 && <NewClientButton />} />
       {all.length === 0 ? (
         <div className="mt-8">
           <EmptyState

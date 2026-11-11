@@ -102,7 +102,12 @@ export function EstimateView({
             <Text type="supporting" hasTabularNumbers color="primary">
               {formatEstimateNo(e.number)}
             </Text>
-            <Text type="supporting">· {dateFmt.format(e.createdAt)}</Text>
+            <Text type="supporting">
+              <span aria-hidden className="mr-2">
+                ·
+              </span>
+              {dateFmt.format(e.createdAt)}
+            </Text>
           </div>
           {/* Who, which project and where, as one line of text that wraps where it needs to. */}
           {meta.length > 0 && (
@@ -457,9 +462,9 @@ function Schedule({ groups }: { groups: GroupView[] }) {
       {groups.map((g, gi) => (
         <section key={g.id} id={`g-${g.id}`} aria-labelledby={`gh-${g.id}`} className="scroll-mt-24 pt-6">
           <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-(--color-border) pb-2.5">
-            <h3 id={`gh-${g.id}`} className="font-semibold">
-              <span className="mr-2.5 tabular-nums text-(--color-text-secondary)">{gi + 1}</span>
-              {g.name}
+            <h3 id={`gh-${g.id}`} className="flex min-w-0 gap-2.5 font-semibold">
+              <span className="tabular-nums text-(--color-text-secondary)">{gi + 1}</span>
+              <span className="min-w-0">{g.name}</span>
             </h3>
             <Money cents={g.priceCents} className="font-semibold" />
           </div>

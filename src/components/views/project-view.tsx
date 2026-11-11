@@ -73,7 +73,14 @@ export function ProjectView({
             <Text type="supporting" color="primary" hasTabularNumbers>
               {formatProjectNo(project.number)}
             </Text>
-            {client && <Text type="supporting">· {client.name}</Text>}
+            {client && (
+              <Text type="supporting">
+                <span aria-hidden className="mr-2">
+                  ·
+                </span>
+                {client.name}
+              </Text>
+            )}
           </div>
         </div>
         <div className="no-print grid shrink-0 grid-cols-2 gap-2 sm:flex">

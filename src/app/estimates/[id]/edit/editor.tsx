@@ -436,8 +436,8 @@ export function EstimateEditor({
         />
       </div>
 
-      {/* Phones: the total and Save stay within thumb reach, just above the tab bar. */}
-      <div className="no-print fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 flex items-center justify-between gap-3 border-t border-(--color-border) bg-(--color-background-surface) px-4 py-2.5 sm:hidden">
+      {/* Phones: the total and Save stay within thumb reach, sitting right on the tab bar (56px + its border). */}
+      <div className="no-print fixed inset-x-0 bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] z-20 flex items-center justify-between gap-3 border-t border-(--color-border) bg-(--color-background-surface) px-4 py-2.5 sm:hidden">
         <div className="min-w-0">
           <Text as="p" type="supporting" display="block">
             {totalLabel}

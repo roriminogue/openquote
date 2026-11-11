@@ -48,7 +48,7 @@ export function Breakdown({ stages, legend = true }: { stages: Stage[]; legend?:
                   style={{ background: stageShade(i, stages.length) }}
                 />
                 <span className="min-w-0 flex-1">
-                  <Text maxLines={1} hasTruncateTooltip={false}>
+                  <Text maxLines={2} hasTruncateTooltip={false}>
                     {g.name}
                   </Text>
                 </span>
@@ -67,12 +67,12 @@ export function Breakdown({ stages, legend = true }: { stages: Stage[]; legend?:
                     href={`#g-${g.id}`}
                     onFocus={() => setActive(i)}
                     onBlur={() => setActive(null)}
-                    className="-mx-2 flex min-h-11 items-center gap-2.5 rounded-(--radius-element) px-2 transition-colors hover:bg-(--color-overlay-hover)"
+                    className="-mx-2 flex min-h-11 items-center gap-2.5 rounded-(--radius-element) px-2 py-1.5 leading-snug transition-colors hover:bg-(--color-overlay-hover)"
                   >
                     {body}
                   </a>
                 ) : (
-                  <span className="flex min-h-11 items-center gap-2.5">{body}</span>
+                  <span className="flex min-h-11 items-center gap-2.5 py-1.5 leading-snug">{body}</span>
                 )}
               </li>
             );
