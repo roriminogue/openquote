@@ -1,8 +1,6 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
-import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 
 // Appearance: follow the device, or always light / always dark. Saved on this device only (localStorage), and
 // applied before the first paint by THEME_SCRIPT in the root layout, so there's no flash of the wrong theme.
@@ -30,7 +28,8 @@ function subscribe(fn: () => void) {
   return () => listeners.delete(fn);
 }
 
-function apply(choice: ThemeChoice) {
+/** Saves the choice on this device and applies it straight away. */
+export function applyThemeChoice(choice: ThemeChoice) {
   const root = document.documentElement;
   try {
     if (choice === "system") localStorage.removeItem(KEY);
@@ -43,24 +42,7 @@ function apply(choice: ThemeChoice) {
   listeners.forEach((fn) => fn());
 }
 
-const OPTIONS = [
-  ["system", "System", Monitor],
-  ["light", "Light", Sun],
-  ["dark", "Dark", Moon],
-] as const;
-
 /** The saved choice. "system" on the server and for the first client render, so the two always match. */
 export function useThemeChoice() {
   return useSyncExternalStore(subscribe, read, () => "system" as ThemeChoice);
-}
-
-export function ThemeSwitch() {
-  const choice = useThemeChoice();
-  return (
-    <SegmentedControl label="Theme" value={choice} onChange={(value) => apply(value as ThemeChoice)} layout="fill">
-      {OPTIONS.map(([value, label, Icon]) => (
-        <SegmentedControlItem key={value} value={value} label={label} icon={<Icon size={16} aria-hidden />} />
-      ))}
-    </SegmentedControl>
-  );
 }

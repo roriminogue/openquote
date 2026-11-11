@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Text } from "@astryxdesign/core/Text";
-import { Wordmark } from "./app-shell";
+import { Wordmark } from "./wordmark";
 
 /**
  * Sign-in and onboarding. On a phone everything starts at the top, so the fields stay in view above the keyboard,

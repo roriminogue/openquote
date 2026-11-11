@@ -4,7 +4,7 @@ import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Text } from "@astryxdesign/core/Text";
-import { Wordmark } from "@/components/app-shell";
+import { Wordmark } from "@/components/wordmark";
 
 // How the setup page looks. The page itself only works out what is and isn't configured.
 
