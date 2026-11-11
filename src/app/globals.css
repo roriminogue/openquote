@@ -17,198 +17,33 @@ html[data-theme] [data-astryx-theme]:not([data-theme]) {
   color-scheme: inherit;
 }
 
-/* ---- Legacy tokens: the pre-Astryx kit. Removed once every screen is rebuilt. ---- */
-
-:root {
-  --bg: #fcfcfc;
-  --surface: #ffffff; /* raised inputs such as the composer */
-  --sidebar: #fcfcfc;
-  --subtle: #f4f4f5;
-  --hover: #f4f4f5;
-  --border: #ebebf1;
-  --border-strong: #e2e2e8;
-  --ink: #18191b;
-  --ink-2: #3f3f46;
-  --ink-3: #6b6b74;
-  --ink-4: #a1a1aa; /* decoration only, never text */
-  --label: #5a5b5e; /* small group labels */
-  --primary: #262626;
-  --primary-top: #404040; /* primary buttons are a short vertical gradient with a top highlight */
-  --primary-hover: #333333;
-  --on-primary: #ffffff;
-  --accent: #f26b1d; /* hi-vis orange */
-  --accent-hover: #e05d12;
-  --on-accent: #18181b;
-  --accent-soft: #fff2ea;
-  --accent-ink: #c2410c;
-  --danger: #c81e1e;
-  --danger-soft: #fef1f1;
-  --ok: #15803d;
-  --ok-soft: #effbf3;
-  --focus: #18191b;
-  --shadow-xs: 0 1px 2px rgb(24 24 27 / 0.04);
-  --shadow-sm: 0 1px 3px rgb(24 24 27 / 0.06), 0 1px 2px rgb(24 24 27 / 0.04);
-  --shadow-lg: 0 12px 32px -12px rgb(24 24 27 / 0.22), 0 2px 6px rgb(24 24 27 / 0.06);
-  /* Cards are outlined by a 1px ring with a barely-there layered shadow; the composer lifts a little more. */
-  --shadow-card: 0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.02), 0 3px 3px -1.5px rgb(0 0 0 / 0.015),
-    0 6px 6px -3px rgb(0 0 0 / 0.015);
-  --shadow-raised: 0 0 0 1px var(--border-strong), 0 1px 1px -0.5px rgb(0 0 0 / 0.03), 0 3px 3px -1.5px rgb(0 0 0 / 0.03),
-    0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02);
-  /* The composer while you type in it: the same lift, with its edge darkened instead of a glow around it. */
-  --shadow-raised-focus: 0 0 0 1px var(--ink-4), 0 1px 1px -0.5px rgb(0 0 0 / 0.03), 0 3px 3px -1.5px rgb(0 0 0 / 0.03),
-    0 6px 6px -3px rgb(0 0 0 / 0.02), 0 12px 12px -6px rgb(0 0 0 / 0.02);
-}
-
-/* Dark theme: follows the device unless someone picks Light or Dark in Settings → Account (data-theme on <html>,
-   set before first paint by the script in layout.tsx). */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f0f10;
-    --surface: #161618;
-    --sidebar: #0f0f10;
-    --subtle: #1a1a1d;
-    --hover: #1f1f23;
-    --border: #232328;
-    --border-strong: #2e2e34;
-    --ink: #f4f4f5;
-    --ink-2: #d4d4d8;
-    --ink-3: #a1a1aa;
-    --ink-4: #52525b;
-    --label: #a1a1aa;
-    --primary: #e4e4e7;
-    --primary-top: #fafafa;
-    --primary-hover: #ffffff;
-    --on-primary: #18181b;
-    --accent-hover: #ff7a2e;
-    --accent-soft: #2a170b;
-    --accent-ink: #ff9a5c;
-    --danger: #f87171;
-    --danger-soft: #2a1213;
-    --ok: #4ade80;
-    --ok-soft: #0f2416;
-    --focus: #f4f4f5;
-    --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5);
-    --shadow-lg: 0 16px 40px -12px rgb(0 0 0 / 0.7);
-    --shadow-card: 0 0 0 1px var(--border-strong);
-    --shadow-raised: 0 0 0 1px var(--border-strong), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-    --shadow-raised-focus: 0 0 0 1px var(--ink-4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"] {
-  --bg: #0f0f10;
-  --surface: #161618;
-  --sidebar: #0f0f10;
-  --subtle: #1a1a1d;
-  --hover: #1f1f23;
-  --border: #232328;
-  --border-strong: #2e2e34;
-  --ink: #f4f4f5;
-  --ink-2: #d4d4d8;
-  --ink-3: #a1a1aa;
-  --ink-4: #52525b;
-  --label: #a1a1aa;
-  --primary: #e4e4e7;
-  --primary-top: #fafafa;
-  --primary-hover: #ffffff;
-  --on-primary: #18181b;
-  --accent-hover: #ff7a2e;
-  --accent-soft: #2a170b;
-  --accent-ink: #ff9a5c;
-  --danger: #f87171;
-  --danger-soft: #2a1213;
-  --ok: #4ade80;
-  --ok-soft: #0f2416;
-  --focus: #f4f4f5;
-  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5);
-  --shadow-lg: 0 16px 40px -12px rgb(0 0 0 / 0.7);
-  --shadow-card: 0 0 0 1px var(--border-strong);
-  --shadow-raised: 0 0 0 1px var(--border-strong), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-  --shadow-raised-focus: 0 0 0 1px var(--ink-4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-  color-scheme: dark;
-}
-
-:root[data-theme="light"] {
-  color-scheme: light;
-}
-
-/* Type ramp: Tailwind's xs–2xl plus these steps. */
-@theme {
-  --text-2xs: 0.6875rem;
-  --text-caption: 0.75rem;
-  --text-body: 0.875rem;
-  --text-lead: 1rem;
-  --text-title: 1.5rem;
-  --text-title-lg: 1.5rem;
-  --text-figure: 2rem;
-}
-
-@theme inline {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-label: var(--label);
-  --color-primary-top: var(--primary-top);
-  --color-sidebar: var(--sidebar);
-  --color-subtle: var(--subtle);
-  --color-hover: var(--hover);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-ink: var(--ink);
-  --color-ink-2: var(--ink-2);
-  --color-ink-3: var(--ink-3);
-  --color-ink-4: var(--ink-4);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-on-primary: var(--on-primary);
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-on-accent: var(--on-accent);
-  --color-accent-soft: var(--accent-soft);
-  --color-accent-ink: var(--accent-ink);
-  --color-danger: var(--danger);
-  --color-danger-soft: var(--danger-soft);
-  --color-ok: var(--ok);
-  --color-ok-soft: var(--ok-soft);
-  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
-  --shadow-xs: var(--shadow-xs);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-card: var(--shadow-card);
-  --shadow-raised: var(--shadow-raised);
-}
-
 html {
-  color-scheme: light dark;
   scroll-padding-top: 5rem;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
-  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-color: var(--color-border-emphasized) transparent;
 }
 
 body {
   touch-action: manipulation;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-sans);
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-body);
   font-size: 1rem;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  caret-color: var(--ink);
+  caret-color: var(--color-text-primary);
 }
 
 ::selection {
-  background: var(--accent-soft);
-  color: var(--ink);
+  background: var(--color-accent-muted);
+  color: var(--color-text-primary);
 }
 
 /* Layered, so Astryx components keep their own focus ring. */
 @layer base {
   :focus-visible {
-    outline: 2px solid var(--focus);
+    outline: 2px solid var(--color-text-primary);
     outline-offset: 2px;
   }
 }
@@ -281,18 +116,6 @@ dd {
   text-wrap: pretty;
 }
 
-/* Numbers in money, quantities and totals: tabular so columns line up. */
-@utility figures {
-  font-variant-numeric: tabular-nums lining-nums;
-}
-
-/* Dotted grid for empty states and quiet panels. */
-@utility dots {
-  background-image: radial-gradient(color-mix(in oklab, var(--ink-4) 45%, transparent) 1px, transparent 1px);
-  background-size: 16px 16px;
-  background-position: -8px -8px;
-}
-
 @keyframes rise {
   from {
     opacity: 0;
@@ -302,36 +125,6 @@ dd {
 
 @utility enter {
   animation: rise 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Sheets arrive from where they live: up from the bottom on phones, in from the right from 640px. */
-dialog.sheet[open] {
-  animation: sheet-up 280ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-dialog.sheet[open]::backdrop {
-  animation: fade 200ms ease-out;
-}
-@media (min-width: 40rem) {
-  dialog.sheet[open] {
-    animation-name: sheet-in;
-  }
-}
-@keyframes sheet-up {
-  from {
-    transform: translateY(1.5rem);
-    opacity: 0;
-  }
-}
-@keyframes sheet-in {
-  from {
-    transform: translateX(2rem);
-    opacity: 0;
-  }
-}
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
 }
 
 @media print {

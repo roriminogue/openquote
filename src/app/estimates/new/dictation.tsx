@@ -117,7 +117,7 @@ export function useDictation({
       >
         {status === "listening" ? (
           <>
-            Stop <span className="figures font-normal text-(--color-text-secondary)">{elapsedFmt(elapsed)}</span>
+            Stop <span className="font-normal tabular-nums text-(--color-text-secondary)">{elapsedFmt(elapsed)}</span>
           </>
         ) : status === "starting" ? (
           "Starting…"

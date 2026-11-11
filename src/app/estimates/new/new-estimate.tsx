@@ -364,7 +364,7 @@ export function LivePreview({
           <li key={gi} className="enter">
             <div className="flex items-baseline justify-between gap-4 border-b border-(--color-border) pb-2">
               <h3 className="min-w-0 text-(length:--text-body-size) font-medium text-(--color-text-primary)">
-                <span className="figures mr-2 text-(--color-text-secondary)">{gi + 1}</span>
+                <span className="mr-2 tabular-nums text-(--color-text-secondary)">{gi + 1}</span>
                 {g.name}
               </h3>
               <Money cents={g.priceCents} className="text-(length:--text-body-size) font-medium text-(--color-text-primary)" />
