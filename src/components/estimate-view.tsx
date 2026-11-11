@@ -8,6 +8,7 @@ import { Tooltip } from "@astryxdesign/core/Tooltip";
 import { ArrowDownRight, ArrowUpRight, CheckCircle2, Eye, Send, XCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { Breakdown } from "@/components/breakdown";
+import { SectionTitle } from "@/components/section-title";
 import { EstimateActions } from "@/components/estimate-actions";
 import type { SendTarget } from "@/components/send-quote";
 import { Money } from "@/components/money";
@@ -47,17 +48,6 @@ export function EstimateStatus({ status }: { status: Estimate["status"] }) {
 }
 
 const dateFmt = dateFormat({ day: "numeric", month: "long", year: "numeric" });
-
-/** A small grey heading over a section, kept as an h2 for the page outline. */
-function SectionTitle({ id, children }: { id?: string; children: ReactNode }) {
-  return (
-    <div id={id} className="mb-3">
-      <Heading level={4} accessibilityLevel={2} color="secondary">
-        {children}
-      </Heading>
-    </div>
-  );
-}
 
 /** The estimate as the tradie checks it: the number up top, where it goes, then the schedule line by line. */
 export function EstimateView({

@@ -1,11 +1,17 @@
-import { CalendarDays, MapPin, Plus } from "lucide-react";
-import Link from "next/link";
+import { Button } from "@astryxdesign/core/Button";
+import { Card } from "@astryxdesign/core/Card";
+import { EmptyState } from "@astryxdesign/core/EmptyState";
+import { Heading } from "@astryxdesign/core/Heading";
+import { Link } from "@astryxdesign/core/Link";
+import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
+import { Text } from "@astryxdesign/core/Text";
+import { Plus } from "lucide-react";
 import type { schema } from "@/db";
 import { EstimateRows } from "@/components/estimate-rows";
 import { Money } from "@/components/money";
 import { EditProjectButton } from "@/components/record-editors";
 import { mapsUrl, StatusPill } from "@/components/records";
-import { EmptyState, GroupTitle, KeyValue, LinkButton, Panel } from "@/components/ui";
+import { SectionTitle } from "@/components/section-title";
 import type { listEstimates } from "@/lib/estimate/queries";
 import { formatProjectNo, type ClientOption } from "@/lib/project-schema";
 import { dateFormat } from "@/lib/dates";
@@ -17,22 +23,29 @@ type Estimates = Awaited<ReturnType<typeof listEstimates>>;
 
 /** Latest quote, and the spread when there is more than one estimate. Never a sum: they're alternatives. */
 export function QuoteSummary({ estimates }: { estimates: Estimates }) {
-  if (!estimates.length) return <span className="text-ink-3">Nothing quoted yet</span>;
+  if (!estimates.length) return <Text type="supporting">Nothing quoted yet</Text>;
   const totals = estimates.map((r) => r.totals.totalCents);
   const min = Math.min(...totals);
   const max = Math.max(...totals);
   return (
-    <span>
-      <Money cents={totals[0]} className="font-medium text-ink" />
-      <span className="text-ink-3"> latest</span>
+    <Text type="supporting">
+      <Text type="inherit" color="primary" weight="medium">
+        <Money cents={totals[0]} />
+      </Text>{" "}
+      latest
       {estimates.length > 1 && min !== max && (
-        <span className="text-ink-3">
+        <>
           {" "}
           · range <Money cents={min} quiet={false} /> to <Money cents={max} quiet={false} />
-        </span>
+        </>
       )}
-    </span>
+    </Text>
   );
+}
+
+/** Nothing set yet, in the secondary colour. */
+function Unset({ children }: { children: string }) {
+  return <Text color="secondary">{children}</Text>;
 }
 
 export function ProjectView({
@@ -48,24 +61,22 @@ export function ProjectView({
 }) {
   const start = fmtDate(project.startDate);
   const finish = fmtDate(project.endDate);
+  const newEstimate = `/estimates/new?project=${project.id}`;
 
   return (
-    <article className="mt-5">
-      <header className="flex flex-wrap items-start justify-between gap-x-8 gap-y-4 sm:flex-nowrap">
-        <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
-          <h1 className="font-display text-title font-medium leading-8 tracking-[-0.01em]">{project.name}</h1>
-          <p className="mt-1.5 flex flex-wrap items-center gap-2 text-sm text-ink-3">
+    <article className="mt-3">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+        <div className="min-w-0 flex-1">
+          <Heading level={1}>{project.name}</Heading>
+          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
             <StatusPill status={project.status} />
-            <span className="figures text-ink-2">{formatProjectNo(project.number)}</span>
-            {client && (
-              <span>
-                <span aria-hidden className="mr-2">·</span>
-                {client.name}
-              </span>
-            )}
-          </p>
+            <Text type="supporting" color="primary" hasTabularNumbers>
+              {formatProjectNo(project.number)}
+            </Text>
+            {client && <Text type="supporting">· {client.name}</Text>}
+          </div>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="no-print grid shrink-0 grid-cols-2 gap-2 sm:flex">
           <EditProjectButton
             projectId={project.id}
             clients={clients}
@@ -79,82 +90,78 @@ export function ProjectView({
               notes: project.notes ?? "",
             }}
           />
-          <LinkButton href={`/estimates/new?project=${project.id}`}>
-            <Plus className="size-4" aria-hidden />
-            New estimate
-          </LinkButton>
+          <Button
+            href={newEstimate}
+            label="New estimate"
+            variant="primary"
+            icon={<Plus aria-hidden className="size-4" />}
+            width="100%"
+          />
         </div>
       </header>
 
       <section aria-labelledby="details" className="mt-8">
-        <GroupTitle id="details">Details</GroupTitle>
-        <Panel>
-          <dl className="divide-y divide-dashed divide-border px-4 sm:px-5">
-            <KeyValue label="Client">
+        <SectionTitle id="details">Details</SectionTitle>
+        <Card>
+          <MetadataList label={{ width: 96 }}>
+            <MetadataListItem label="Client">
               {client ? (
-                <Link href={`/clients/${client.id}`} className="hover:underline">
-                  {client.name}
-                  {client.kind === "company" && client.contactName && <span className="font-normal text-ink-3"> · {client.contactName}</span>}
+                <Text>
+                  <Link href={`/clients/${client.id}`} color="primary">
+                    {client.name}
+                  </Link>
+                  {client.kind === "company" && client.contactName && (
+                    <Text type="inherit" color="secondary">
+                      {" "}
+                      · {client.contactName}
+                    </Text>
+                  )}
+                </Text>
+              ) : (
+                <Unset>No client</Unset>
+              )}
+            </MetadataListItem>
+            <MetadataListItem label="Site">
+              {project.siteAddress ? (
+                <Link href={mapsUrl(project.siteAddress)} isExternalLink color="primary">
+                  {project.siteAddress}
                 </Link>
               ) : (
-                <span className="font-normal text-ink-3">No client</span>
+                <Unset>No site address</Unset>
               )}
-            </KeyValue>
-            <KeyValue label="Site">
-              {project.siteAddress ? (
-                <a href={mapsUrl(project.siteAddress)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:underline">
-                  <MapPin className="size-3.5 shrink-0 text-ink-3" aria-hidden />
-                  {project.siteAddress}
-                </a>
-              ) : (
-                <span className="font-normal text-ink-3">No site address</span>
-              )}
-            </KeyValue>
-            <KeyValue label="When">
+            </MetadataListItem>
+            <MetadataListItem label="When">
               {start || finish ? (
-                <span className="figures inline-flex items-center gap-1.5">
-                  <CalendarDays className="size-3.5 shrink-0 text-ink-3" aria-hidden />
+                <Text hasTabularNumbers>
                   {start ?? "Start not set"} to {finish ?? "finish not set"}
-                </span>
+                </Text>
               ) : (
-                <span className="font-normal text-ink-3">Not scheduled</span>
+                <Unset>Not scheduled</Unset>
               )}
-            </KeyValue>
-            {project.notes && (
-              <KeyValue label="Notes">
-                <span className="whitespace-pre-line font-normal text-ink-2">{project.notes}</span>
-              </KeyValue>
-            )}
-          </dl>
-        </Panel>
+            </MetadataListItem>
+            {project.notes ? (
+              <MetadataListItem label="Notes">
+                <span className="whitespace-pre-line">
+                  <Text color="secondary">{project.notes}</Text>
+                </span>
+              </MetadataListItem>
+            ) : null}
+          </MetadataList>
+        </Card>
       </section>
 
       <section aria-labelledby="estimates" className="mt-10">
-        <GroupTitle
-          id="estimates"
-          action={
-            <p className="text-xs">
-              <QuoteSummary estimates={estimates} />
-            </p>
-          }
-        >
+        <SectionTitle id="estimates" action={<QuoteSummary estimates={estimates} />}>
           Estimates
-        </GroupTitle>
+        </SectionTitle>
         {estimates.length ? (
           <EstimateRows rows={estimates} showClient={false} />
         ) : (
-          <div className="mt-4">
-            <EmptyState
-              title="No estimates for this job yet"
-              action={
-                <LinkButton href={`/estimates/new?project=${project.id}`} variant="accent">
-                  Price this job
-                </LinkButton>
-              }
-            >
-              Describe the work and the estimate is filed here with the client and site already filled in.
-            </EmptyState>
-          </div>
+          <EmptyState
+            title="No estimates for this job yet"
+            description="Describe the work and the estimate is filed here with the client and site already filled in."
+            actions={<Button href={newEstimate} label="Price this job" variant="primary" />}
+          />
         )}
       </section>
     </article>

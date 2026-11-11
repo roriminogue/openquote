@@ -1,6 +1,6 @@
-import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@astryxdesign/core/Skeleton";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink } from "@/components/back-link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
@@ -15,11 +15,14 @@ export const metadata: Metadata = { title: "Project" };
 export default function ProjectPage({ params }: PageProps<"/projects/[id]">) {
   return (
     <>
-      <Link href="/projects" className="-ml-2 inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-ink-3 transition-colors hover:bg-hover hover:text-ink">
-        <ArrowLeft className="size-4" aria-hidden />
-        Projects
-      </Link>
-      <Suspense fallback={<div className="mt-5 h-9 w-2/3 animate-pulse rounded-lg bg-hover" aria-busy="true" />}>
+      <BackLink href="/projects" label="Projects" />
+      <Suspense
+        fallback={
+          <div className="mt-3" aria-busy="true" aria-label="Loading">
+            <Skeleton width="66%" height={36} />
+          </div>
+        }
+      >
         <Project params={params} />
       </Suspense>
     </>
