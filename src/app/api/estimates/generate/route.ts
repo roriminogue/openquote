@@ -15,7 +15,7 @@ import {
   loadGenerationInputs,
   saveGeneratedEstimate,
 } from "@/lib/estimate/persist";
-import { priceDraft, validateEstimate } from "@/lib/estimate/price";
+import { priceDraft, scopeWithCalculators, validateEstimate } from "@/lib/estimate/price";
 import { buildGenerationPrompt } from "@/lib/estimate/prompt";
 import { estimateTotals } from "@/lib/pricing";
 import { getProject } from "@/lib/projects";
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
         await saveGeneratedEstimate({
           orgId: member.orgId,
           estimateId: estimate.id,
-          draft,
+          draft: { ...draft, scope: scopeWithCalculators(draft) },
           groups,
           usage: {
             provider: config.provider,

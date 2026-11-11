@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { PRICE_BOOK } from "../price-book";
-import { buildDeck, buildFence, type DeckSpec, type FenceSpec, type LabourRate } from "./assemblies";
+import { buildDeck, buildFence,
+  fenceScope, type DeckSpec, type FenceSpec, type LabourRate } from "./assemblies";
 import type { PricedGroup } from "./price";
 
 const rate: LabourRate = { cents: 8000, source: "rate_rule", ref: "R1" };
@@ -87,8 +88,20 @@ describe("buildFence", () => {
     expect(qty(g, "tip_ute_load")).toBe(1); // 8 m × 0.15 m³ = 1.2 m³, one ute load
     expect(byRef(g, "skip_2m3")).toHaveLength(0);
     expect(g[0].lines.some((l) => l.type === "labour" && /tip/.test(l.description))).toBe(true);
+    // The client sees what the fee is for, not where the price book checked it.
+    expect(byRef(g, "tip_ute_load")[0].description).not.toMatch(/Melbourne/);
     // Just over a ute load gets the smallest skip.
     expect(qty(buildFence(fence({ lengthM: 12, removeOld: true }), rate), "skip_2m3")).toBe(1);
+  });
+
+  it("writes scope lines that match what the fence calculator priced", () => {
+    const spec = fence({ lengthM: 8, removeOld: true });
+    const scope = fenceScope(spec);
+    const rails = qty(buildFence(spec, rate), "rail_tp_75x50") > 0;
+    expect(rails).toBe(true);
+    expect(scope).toContain("Fix 2 rows of H3 treated pine 75×50 rails"); // butted, 1.8 m: two rails
+    expect(scope.some((l) => /ute/.test(l))).toBe(true); // 8 m of waste fits one ute load
+    expect(fenceScope(fence({ style: "lapped" }))).toContain("Fix 3 rows of H3 treated pine 75×50 rails");
   });
 
   it("adds gate posts, hardware and hours", () => {

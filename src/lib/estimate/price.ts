@@ -1,6 +1,6 @@
 import { DEFAULT_LABOUR_CENTS, priceBookItem } from "../price-book";
 import type { LineType } from "@/lib/pricing";
-import { buildDeck, buildFence, type LabourRate } from "./assemblies";
+import { buildDeck, buildFence, deckScope, fenceScope, type LabourRate } from "./assemblies";
 import type { EstimateDraft } from "./draft";
 
 // Stage 6 + 7 of the pipeline (SPEC.md §5): deterministic pricing and sanity checks. The model proposes, code prices.
@@ -96,4 +96,27 @@ export function validateEstimate(description: string, groups: { lines: CheckedLi
     warnings.push("This looks like wet-area work but there's no waterproofing line.");
   }
   return warnings;
+}
+
+const FENCE_WORDS = /\b(fence|fencing|posts?|rails?|palings?|capping|plinth|gates?)\b/i;
+const DECK_WORDS = /\b(deck|decking|posts?|joists?|bearers?|boards?|footings?|stirrups?|fascia|steps?|stairs?|oil|oiling|ledger|subframe|weed mat)\b/i;
+const CLEAN_UP = /\b(clean[- ]?up|offcuts|tip|skip|waste)\b/i;
+
+/**
+ * The scope to store: lines written from each fence and deck spec first (they match the calculator's price), then
+ * the model's own lines for everything else. Model lines about the parts a calculator covers are dropped, since
+ * the model wrote them before the calculator ran and they can contradict it.
+ */
+export function scopeWithCalculators(draft: Pick<EstimateDraft, "scope"> & Partial<Pick<EstimateDraft, "fences" | "decks">>): string[] {
+  const fences = draft.fences ?? [];
+  const decks = draft.decks ?? [];
+  if (!fences.length && !decks.length) return draft.scope;
+  const covered = (line: string) =>
+    CLEAN_UP.test(line) || (fences.length > 0 && FENCE_WORDS.test(line)) || (decks.length > 0 && DECK_WORDS.test(line));
+  const label = (kind: string, i: number, n: number) => (line: string) => (n > 1 ? `${kind} ${i + 1}: ${line}` : line);
+  return [
+    ...fences.flatMap((f, i) => fenceScope(f).map(label("Fence", i, fences.length))),
+    ...decks.flatMap((d, i) => deckScope(d).map(label("Deck", i, decks.length))),
+    ...draft.scope.filter((line) => !covered(line)),
+  ];
 }
