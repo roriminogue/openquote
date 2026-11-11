@@ -116,11 +116,23 @@ export function EstimateView({
         <EstimateActions
           text={text}
           editHref={activity?.decision?.type === "accepted" ? undefined : `/estimates/${e.id}/edit`}
+          duplicateId={activity?.decision?.type === "accepted" ? e.id : undefined}
           send={send}
         />
       </header>
 
       {activity && <ClientActivity activity={activity} />}
+
+      {/* Edited since it was shared: the link already shows the new version, but the client won't know to look. */}
+      {activity && !activity.decision && e.currentVersion > activity.sharedVersion && (
+        <div className="no-print mt-3">
+          <Banner
+            status="info"
+            title="You've changed this since you shared it"
+            description="Your client's link shows the new version, but they won't know to look again. Tap Share again to send it to them."
+          />
+        </div>
+      )}
 
       <section aria-label="Totals" className="mt-8 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 sm:gap-0">
         <Stat
@@ -275,6 +287,8 @@ function Stat({
 export type Activity = {
   token: string;
   sentAt: Date;
+  /** The estimate version last shared with the client. */
+  sharedVersion: number;
   views: number;
   lastViewedAt: Date | null;
   decision: {
@@ -322,7 +336,7 @@ function ClientActivity({ activity: a }: { activity: Activity }) {
               <div className="mt-0.5">
                 <Text as="p" type="supporting">
                   {d?.type === "accepted" ? (
-                    `${d.totalCents !== null ? `Accepted at ${formatAud(d.totalCents)} inc GST. ` : ""}Accepted quotes are locked. Price any changes as a new estimate.`
+                    `${d.totalCents !== null ? `Accepted at ${formatAud(d.totalCents)} inc GST. ` : ""}Accepted quotes are locked. To price any changes, duplicate it as a new estimate.`
                   ) : d?.type === "declined" ? (
                     d.reason ? (
                       `“${d.reason}”`
