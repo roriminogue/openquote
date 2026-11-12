@@ -37,7 +37,7 @@ async function shrinkImage(file: File, maxWidth: number): Promise<string> {
 }
 
 /** The logo is shrunk to at most 600 px wide and kept in the database as an image, so it goes into backups too. */
-function LogoPicker({ orgId, initial, canEdit }: { orgId: string; initial: string | null; canEdit: boolean }) {
+function LogoPicker({ initial, canEdit }: { initial: string | null; canEdit: boolean }) {
   const [url, setUrl] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,11 +116,9 @@ function LogoPicker({ orgId, initial, canEdit }: { orgId: string; initial: strin
 }
 
 export function BusinessForm({
-  orgId,
   initial,
   canEdit,
 }: {
-  orgId: string;
   initial: BusinessDetails;
   canEdit: boolean;
 }) {
@@ -132,7 +130,7 @@ export function BusinessForm({
   return (
     <>
       <SettingsSection id="brand" title="On your quotes">
-        <LogoPicker orgId={orgId} initial={initial.logoUrl} canEdit={canEdit} />
+        <LogoPicker initial={initial.logoUrl} canEdit={canEdit} />
       </SettingsSection>
       <form action={action} noValidate>
         <SettingsSection id="details" title="Business details">

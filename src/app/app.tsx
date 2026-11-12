@@ -2,6 +2,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router";
 import { PointerFocus } from "@/components/pointer-focus";
+import { PublikGate } from "@/components/publik-gate";
 import { Wordmark } from "@/components/wordmark";
 import { flush, openDatabase } from "@/db";
 import { isNative } from "@/db/storage";
@@ -37,9 +38,11 @@ export function App() {
     <Providers>
       <PointerFocus />
       {state === "open" ? (
-        <DataProvider>
-          <RouterProvider router={router} />
-        </DataProvider>
+        <PublikGate>
+          <DataProvider>
+            <RouterProvider router={router} />
+          </DataProvider>
+        </PublikGate>
       ) : (
         <div className="grid min-h-dvh flex-1 place-items-center px-6 text-center" aria-busy={state === "opening"}>
           {state === "opening" ? (

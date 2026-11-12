@@ -71,7 +71,7 @@ function EstimateDetail() {
         question={`Delete ${number}?`}
         consequence={
           activity
-            ? "Its lines, history and the client's link go with it, so the link stops working."
+            ? "Its lines, history and the record of sending it go with it."
             : "Its lines and history go with it."
         }
         action={deleteEstimateRecord.bind(null, id)}

@@ -7,6 +7,7 @@ import ClientPage from "@/app/clients/[id]/page";
 import ClientsPage from "@/app/clients/page";
 import EstimatePage from "@/app/estimates/[id]/page";
 import EditEstimatePage from "@/app/estimates/[id]/edit/page";
+import QuotePage from "@/app/estimates/[id]/quote/page";
 import NewEstimatePage from "@/app/estimates/new/page";
 import EstimatesPage from "@/app/estimates/page";
 import OnboardingPage from "@/app/onboarding/page";
@@ -90,6 +91,8 @@ export const router = createBrowserRouter([
     children: [
       { path: "/", element: <Navigate to="/estimates" replace /> },
       { path: "/onboarding", element: <OnboardingPage /> },
+      // The quote document, full screen without the app's frame, so it prints and shares as a clean page.
+      { path: "/estimates/:id/quote", element: <QuotePage />, errorElement: <RouteError /> },
       {
         element: <SignedIn />,
         children: [

@@ -6,10 +6,10 @@ import { Money } from "@/components/money";
 import { DEFAULT_TERMS, formatAbn } from "@/lib/business-schema";
 import { dateFormat } from "@/lib/dates";
 import { formatEstimateNo } from "@/lib/pricing";
-import type { getPublicProposal } from "@/lib/proposals";
+import type { getQuoteDocument } from "@/lib/proposals";
 import { formatQty, keepUnits, unitLabel } from "@/lib/units";
 
-export type PublicQuote = NonNullable<Awaited<ReturnType<typeof getPublicProposal>>>;
+export type PublicQuote = NonNullable<Awaited<ReturnType<typeof getQuoteDocument>>>;
 
 const dateFmt = dateFormat({ day: "numeric", month: "long", year: "numeric" });
 
@@ -235,7 +235,7 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
           {decision?.type === "accepted" ? (
             <Answered
               icon={<CheckCircle2 className="size-5 shrink-0 text-(--color-icon-success)" aria-hidden />}
-              title={`Accepted by ${decision.name} on ${dateFmt.format(decision.at)}`}
+              title={`Accepted${decision.name ? ` by ${decision.name}` : ""} on ${dateFmt.format(decision.at)}`}
             >
               Thanks. {org.name} can see you’ve accepted and will be in touch to book the work.
             </Answered>
@@ -269,7 +269,7 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
         </section>
         {decision?.type === "accepted" && (
           <p className="hidden pt-6 text-sm print:block">
-            Accepted by {decision.name} on {dateFmt.format(decision.at)}.
+            Accepted{decision.name ? ` by ${decision.name}` : ""} on {dateFmt.format(decision.at)}.
           </p>
         )}
       </article>

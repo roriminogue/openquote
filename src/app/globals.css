@@ -11,6 +11,9 @@
 @import "./fonts.css";
 @import "@astryxdesign/core/tailwind-theme.css";
 @import "tailwindcss/utilities.css" layer(utilities);
+/* Class names come from src only, never the iOS build output. */
+@source not "../../ios";
+@source not "../../dist";
 
 /* The saved Light/Dark choice is put on <html> before first paint (see THEME_SCRIPT in components/theme.tsx). Until
    React wakes up, the themed wrapper has no choice of its own, so it follows the page's. */

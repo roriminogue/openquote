@@ -1,12 +1,14 @@
 import { Badge, type BadgeProps } from "@astryxdesign/core/Badge";
 import { Banner } from "@astryxdesign/core/Banner";
+import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
-import { Link } from "@astryxdesign/core/Link";
+import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
 import { Tooltip } from "@astryxdesign/core/Tooltip";
-import { ArrowDownRight, ArrowUpRight, CheckCircle2, Eye, Send, XCircle } from "lucide-react";
-import type { ReactNode } from "react";
+import { ArrowDownRight, ArrowUpRight, CheckCircle2, Send, XCircle } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { markQuote, unmarkQuote } from "@/app/estimates/[id]/actions";
 import { Breakdown } from "@/components/breakdown";
 import { SectionTitle } from "@/components/section-title";
 import { EstimateActions } from "@/components/estimate-actions";
@@ -126,15 +128,15 @@ export function EstimateView({
         />
       </header>
 
-      {activity && <ClientActivity activity={activity} />}
+      {activity && <ClientActivity estimateId={e.id} activity={activity} />}
 
       {/* Edited since it was shared: the link already shows the new version, but the client won't know to look. */}
       {activity && !activity.decision && e.currentVersion > activity.sharedVersion && (
         <div className="no-print mt-3">
           <Banner
             status="info"
-            title="You've changed this since you shared it"
-            description="Your client's link shows the new version, but they won't know to look again. Tap Share again to send it to them."
+            title="You've changed this since you sent it"
+            description="Your client has the old version. Tap Share again to send them a new PDF."
           />
         </div>
       )}
@@ -305,63 +307,79 @@ export type Activity = {
   } | null;
 };
 
-/** What the client has done with the quote: sent, opened, accepted or declined. */
-function ClientActivity({ activity: a }: { activity: Activity }) {
+/** What has happened with the quote since it was sent, and buttons to record the client's answer. */
+function ClientActivity({ estimateId, activity: a }: { estimateId: string; activity: Activity }) {
   const d = a.decision;
-  // Lucide icons drawn here rather than through Astryx's Icon: this part renders on the server, and a component
-  // can't be handed to a client component from there.
-  const Glyph = d?.type === "accepted" ? CheckCircle2 : d?.type === "declined" ? XCircle : a.views ? Eye : Send;
+  const [busy, setBusy] = useState(false);
+  const Glyph = d?.type === "accepted" ? CheckCircle2 : d?.type === "declined" ? XCircle : Send;
+  const act = (fn: () => Promise<unknown>) => async () => {
+    setBusy(true);
+    await fn().finally(() => setBusy(false));
+  };
   return (
     <section aria-label="Client activity" className="no-print mt-6">
       <Card variant={d?.type === "accepted" ? "green" : "muted"} padding={3}>
-        <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
-          <div className="flex min-w-0 flex-1 basis-64 items-start gap-2.5">
-            <Glyph
-              aria-hidden
-              className={`mt-0.5 size-5 shrink-0 ${d?.type === "accepted" ? "text-(--color-icon-success)" : "text-(--color-icon-secondary)"}`}
-            />
-            <div className="min-w-0">
-              <Text as="p" weight="medium">
-                {d?.type === "accepted" ? (
-                  <>
-                    Accepted by {d.name} · <LocalTime date={d.at} />
-                  </>
-                ) : d?.type === "declined" ? (
-                  <>
-                    Declined · <LocalTime date={d.at} />
-                  </>
-                ) : a.views ? (
-                  <>
-                    Opened {a.views === 1 ? "once" : `${a.views} times`}, last <LocalTime date={a.lastViewedAt!} />
-                  </>
-                ) : (
-                  "Sent, not opened yet"
-                )}
+        <div className="flex min-w-0 items-start gap-2.5">
+          <Glyph
+            aria-hidden
+            className={`mt-0.5 size-5 shrink-0 ${d?.type === "accepted" ? "text-(--color-icon-success)" : "text-(--color-icon-secondary)"}`}
+          />
+          <div className="min-w-0 flex-1">
+            <Text as="p" weight="medium">
+              {d?.type === "accepted" ? (
+                <>
+                  Accepted · <LocalTime date={d.at} />
+                </>
+              ) : d?.type === "declined" ? (
+                <>
+                  Declined · <LocalTime date={d.at} />
+                </>
+              ) : (
+                <>
+                  Sent <LocalTime date={a.sentAt} />
+                </>
+              )}
+            </Text>
+            <div className="mt-0.5">
+              <Text as="p" type="supporting">
+                {d?.type === "accepted"
+                  ? "Accepted quotes are locked. To price any changes, duplicate it as a new estimate."
+                  : d?.type === "declined"
+                    ? d.reason
+                      ? `“${d.reason}”`
+                      : "Marked as declined."
+                    : "When the client answers, mark it here."}
               </Text>
-              <div className="mt-0.5">
-                <Text as="p" type="supporting">
-                  {d?.type === "accepted" ? (
-                    `${d.totalCents !== null ? `Accepted at ${formatAud(d.totalCents)} inc GST. ` : ""}Accepted quotes are locked. To price any changes, duplicate it as a new estimate.`
-                  ) : d?.type === "declined" ? (
-                    d.reason ? (
-                      `“${d.reason}”`
-                    ) : (
-                      "No reason given."
-                    )
-                  ) : (
-                    <>
-                      Shared <LocalTime date={a.sentAt} />. You&apos;ll see here when they open, accept or decline it.
-                    </>
-                  )}
-                </Text>
-              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {d ? (
+                <Button
+                  label={d.type === "accepted" ? "Not accepted after all" : "Not declined after all"}
+                  variant="ghost"
+                  size="sm"
+                  isDisabled={busy}
+                  onClick={act(() => unmarkQuote(estimateId))}
+                />
+              ) : (
+                <>
+                  <Button
+                    label="Mark accepted"
+                    variant="secondary"
+                    icon={<Icon icon={CheckCircle2} />}
+                    isDisabled={busy}
+                    onClick={act(() => markQuote(estimateId, "accepted"))}
+                  />
+                  <Button
+                    label="Mark declined"
+                    variant="ghost"
+                    icon={<Icon icon={XCircle} />}
+                    isDisabled={busy}
+                    onClick={act(() => markQuote(estimateId, "declined"))}
+                  />
+                </>
+              )}
             </div>
           </div>
-          <span className="pl-7 sm:pl-0">
-            <Link href={`/p/${a.token}`} isExternalLink color="primary" hasUnderline>
-              Client view
-            </Link>
-          </span>
         </div>
       </Card>
     </section>

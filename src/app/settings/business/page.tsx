@@ -31,7 +31,6 @@ function Business() {
     <>
       <Intro>These appear on every quote you send.{!canEdit && " Only owners and admins can change them."}</Intro>
       <BusinessForm
-        orgId={org.id}
         canEdit={canEdit}
         initial={{
           name: org.name,

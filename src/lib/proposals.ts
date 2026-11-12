@@ -1,10 +1,10 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { getEstimate } from "@/lib/estimate/queries";
-import { DEFAULT_DISPLAY, displayOptionsFor, isProposalToken, newProposalToken, validUntil, type DetailLevel } from "./proposal-schema";
+import { DEFAULT_DISPLAY, displayOptionsFor, newProposalToken, validUntil, type DetailLevel } from "./proposal-schema";
 
-// Sending quotes to clients. Drizzle bypasses RLS: member-facing functions filter by orgId, and the public
-// functions only ever find a quote by its unguessable token.
+// Sending quotes to clients: each PDF shared from the phone is recorded, and so is the client's answer once the
+// tradie marks it. Every function filters by orgId.
 
 export type Decision = {
   type: "accepted" | "declined";
@@ -57,12 +57,6 @@ export async function shareEstimate(orgId: string, estimateId: string, detail: D
   });
 }
 
-async function sendByToken(token: string) {
-  if (!isProposalToken(token)) return null;
-  const [send] = await db.select().from(schema.proposalSends).where(eq(schema.proposalSends.token, token));
-  return send ?? null;
-}
-
 async function latestDecision(sendIds: string[]): Promise<Decision | null> {
   if (!sendIds.length) return null;
   const [e] = await db
@@ -76,94 +70,87 @@ async function latestDecision(sendIds: string[]): Promise<Decision | null> {
     : null;
 }
 
-/** Everything the client-facing quote page shows, or null for an unknown link. */
-export async function getPublicProposal(token: string) {
-  const send = await sendByToken(token);
-  if (!send) return null;
-  const [owner] = await db.select({ orgId: schema.estimates.orgId }).from(schema.estimates).where(eq(schema.estimates.id, send.estimateId));
-  if (!owner) return null;
-  const data = await getEstimate(owner.orgId, send.estimateId);
+/** Everything the quote document (the PDF) shows, or null when the estimate isn't this business's. */
+export async function getQuoteDocument(orgId: string, estimateId: string, detail?: DetailLevel) {
+  const data = await getEstimate(orgId, estimateId);
   if (!data) return null;
   const [client] = data.estimate.clientId
     ? await db.select().from(schema.clients).where(eq(schema.clients.id, data.estimate.clientId))
     : [];
-  const decision = await latestDecision([send.id]);
-  const until = validUntil(send.sentAt, data.org.quoteValidDays);
+  const sends = await db
+    .select()
+    .from(schema.proposalSends)
+    .where(eq(schema.proposalSends.estimateId, estimateId))
+    .orderBy(desc(schema.proposalSends.sentAt));
+  const decision = await latestDecision(sends.map((x) => x.id));
+  // Valid from today when it's being sent now, or from when it was last sent.
+  const sentAt = sends[0]?.sentAt ?? new Date();
+  const until = validUntil(detail ? new Date() : sentAt, data.org.quoteValidDays);
   return {
-    send,
+    send: { sentAt: detail ? new Date() : sentAt },
     ...data,
     client: client ?? null,
-    display: data.estimate.displayOptions ?? DEFAULT_DISPLAY,
+    display: detail ? displayOptionsFor(detail) : (data.estimate.displayOptions ?? DEFAULT_DISPLAY),
     decision,
     validUntil: until,
-    // A day's grace so "valid until today" still works all day in any timezone.
-    expired: !decision && until.getTime() + 24 * 3600 * 1000 < Date.now(),
+    expired: false,
   };
 }
 
-/** Counts a client opening the link, at most once every 30 minutes. */
-export async function recordView(sendId: string) {
-  const [last] = await db
-    .select({ at: schema.proposalEvents.at })
-    .from(schema.proposalEvents)
-    .where(and(eq(schema.proposalEvents.sendId, sendId), eq(schema.proposalEvents.type, "viewed")))
-    .orderBy(desc(schema.proposalEvents.at))
-    .limit(1);
-  if (last && Date.now() - last.at.getTime() < 30 * 60 * 1000) return;
-  await db.insert(schema.proposalEvents).values({ sendId, type: "viewed" });
-}
-
-export type DecideResult = "ok" | "missing" | "answered" | "expired" | "changed";
-
 /**
- * Records the client's answer, once. `seenVersion` is the estimate version on the client's screen: if the business
- * has edited the quote since, nothing is recorded and the client is asked to reload, so nobody accepts a price they
- * didn't see. Expired quotes can't be answered.
+ * Records the client's answer, as told to the tradie (by text, email or phone). Accepting locks the quote, and a
+ * project still marked Quoting becomes Active. Returns false when the estimate isn't this business's.
  */
-export async function decide(
-  token: string,
-  seenVersion: number,
-  decision: { type: "accepted"; name: string; email: string | null } | { type: "declined"; reason: string | null },
-): Promise<DecideResult> {
-  const q = await getPublicProposal(token);
-  if (!q) return "missing";
-  if (q.decision) return "answered";
-  if (q.expired) return "expired";
-  if (q.estimate.currentVersion !== seenVersion) return "changed";
-
+export async function markDecision(orgId: string, estimateId: string, type: "accepted" | "declined", reason: string | null = null) {
   return db.transaction(async (tx) => {
-    // Lock this link, then check again inside the lock: two answers at the same moment must not both count, and
-    // an edit saved in the meantime must not slip in.
-    await tx.select({ id: schema.proposalSends.id }).from(schema.proposalSends).where(eq(schema.proposalSends.id, q.send.id));
-    const [answered] = await tx
-      .select({ id: schema.proposalEvents.id })
-      .from(schema.proposalEvents)
-      .where(and(eq(schema.proposalEvents.sendId, q.send.id), inArray(schema.proposalEvents.type, ["accepted", "declined"])))
-      .limit(1);
-    if (answered) return "answered";
     const [estimate] = await tx
-      .update(schema.estimates)
-      .set({ status: decision.type, updatedAt: new Date() })
-      .where(and(eq(schema.estimates.id, q.send.estimateId), eq(schema.estimates.currentVersion, seenVersion)))
-      .returning({ id: schema.estimates.id });
-    if (!estimate) return "changed";
-    await tx.insert(schema.proposalEvents).values({
-      sendId: q.send.id,
-      type: decision.type,
-      actorName: decision.type === "accepted" ? decision.name : null,
-      actorEmail: decision.type === "accepted" ? decision.email : null,
-      reason: decision.type === "declined" ? decision.reason : null,
-      estimateVersion: seenVersion,
-      totalCents: q.totals.totalCents,
-    });
-    // Won the job: a project still marked Quoting becomes Active (a status set by hand is left alone).
-    if (decision.type === "accepted" && q.estimate.projectId) {
+      .select({ id: schema.estimates.id, version: schema.estimates.currentVersion, projectId: schema.estimates.projectId })
+      .from(schema.estimates)
+      .where(and(eq(schema.estimates.id, estimateId), eq(schema.estimates.orgId, orgId)));
+    if (!estimate) return false;
+    let [send] = await tx
+      .select({ id: schema.proposalSends.id })
+      .from(schema.proposalSends)
+      .where(eq(schema.proposalSends.estimateId, estimateId))
+      .orderBy(desc(schema.proposalSends.sentAt))
+      .limit(1);
+    // Answered without being sent from the app (say, quoted on site): record it against a share made now.
+    send ??= (
+      await tx
+        .insert(schema.proposalSends)
+        .values({ estimateId, version: estimate.version, token: newProposalToken() })
+        .returning({ id: schema.proposalSends.id })
+    )[0];
+    await tx.update(schema.estimates).set({ status: type, updatedAt: new Date() }).where(eq(schema.estimates.id, estimateId));
+    await tx.insert(schema.proposalEvents).values({ sendId: send.id, type, reason, estimateVersion: estimate.version });
+    if (type === "accepted" && estimate.projectId) {
       await tx
         .update(schema.projects)
         .set({ status: "active", updatedAt: new Date() })
-        .where(and(eq(schema.projects.id, q.estimate.projectId), eq(schema.projects.status, "quoting")));
+        .where(and(eq(schema.projects.id, estimate.projectId), eq(schema.projects.status, "quoting")));
     }
-    return "ok";
+    return true;
+  });
+}
+
+/** Takes back an answer marked by mistake: the quote goes back to Sent and can be edited again. */
+export async function clearDecision(orgId: string, estimateId: string) {
+  return db.transaction(async (tx) => {
+    const [estimate] = await tx
+      .select({ id: schema.estimates.id })
+      .from(schema.estimates)
+      .where(and(eq(schema.estimates.id, estimateId), eq(schema.estimates.orgId, orgId)));
+    if (!estimate) return false;
+    const sends = await tx
+      .select({ id: schema.proposalSends.id })
+      .from(schema.proposalSends)
+      .where(eq(schema.proposalSends.estimateId, estimateId));
+    if (sends.length)
+      await tx
+        .delete(schema.proposalEvents)
+        .where(and(inArray(schema.proposalEvents.sendId, sends.map((x) => x.id)), inArray(schema.proposalEvents.type, ["accepted", "declined"])));
+    await tx.update(schema.estimates).set({ status: "sent", updatedAt: new Date() }).where(eq(schema.estimates.id, estimateId));
+    return true;
   });
 }
 
