@@ -132,8 +132,18 @@ dd {
 }
 
 @media print {
+  /* The page margins come from the iPhone's PDF code (OpenQuoteNative.swift sharePdf); margins set here as well
+     would shrink the page WebKit lays out without changing the page count it reports, cutting off the end. */
   @page {
-    margin: 16mm 14mm;
+    margin: 0;
+  }
+  /* Flex columns never split across pages in WebKit, so the page itself is plain blocks when printed. */
+  html,
+  body,
+  #root {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
   .no-print,
   .astryx-app-shell-header,

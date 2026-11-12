@@ -5,6 +5,7 @@ import { Check, Copy, CopyPlus, Pencil, Printer } from "lucide-react";
 import { useRouter } from "@/lib/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { duplicateQuote } from "@/app/estimates/[id]/actions";
+import { sharePdf } from "@/lib/share";
 import { SendQuoteButton, type SendTarget } from "./send-quote";
 
 /**
@@ -111,7 +112,7 @@ export function EstimateActions({
           </Button>
         </div>
         <div className="sm:shrink-0">
-          <Button label="Print or PDF" onClick={() => window.print()} icon={<Icon icon={Printer} />} width="100%">
+          <Button label="Print or PDF" onClick={() => void sharePdf(`${send?.title ?? "Estimate"} (your copy)`)} icon={<Icon icon={Printer} />} width="100%">
             <span className="sm:hidden">Print</span>
             <span className="hidden sm:inline">Print or PDF</span>
           </Button>

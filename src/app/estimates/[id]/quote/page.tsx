@@ -16,14 +16,14 @@ import { sharePdf } from "@/lib/share";
 import { openquoteTheme } from "@/themes/openquote/openquote.js";
 
 /**
- * The quote as the client will get it: the document, always light (it's paper), with Share PDF on top. Sharing
- * records the send, marks a draft as sent, and opens the Share sheet with the PDF and the message from the Send
+ * The quote as the client will get it: the document, always light (it's paper), with Share PDF on top. Once shared
+ * it records the send, marks a draft as sent, and opens the Share sheet with the PDF and the message from the Send
  * sheet. Reached from Send to client (?detail=…); without one it shows the quote as last sent.
  */
 export default function QuotePage() {
   return (
     <Theme theme={openquoteTheme} mode="light">
-      <div className="min-h-dvh bg-(--color-background-surface)">
+      <div className="min-h-dvh bg-(--color-background-surface) print:min-h-0">
         <Suspense>
           <Quote />
         </Suspense>
@@ -48,9 +48,9 @@ function Quote() {
     setError(null);
     setBusy(true);
     try {
-      const member = await requireMember();
-      if (detail) await shareEstimate(member.orgId, id, detail);
-      await sharePdf(`${formatEstimateNo(q!.estimate.number)} ${q!.estimate.title}`, message);
+      const shared = await sharePdf(`${formatEstimateNo(q!.estimate.number)} ${q!.estimate.title}`, message);
+      // Counts as sent once it actually went somewhere (not when the Share sheet was closed).
+      if (detail && shared.completed) await shareEstimate((await requireMember()).orgId, id, detail);
     } catch (e) {
       setError((e as Error)?.message || "Couldn't make the PDF. Try again.");
     } finally {

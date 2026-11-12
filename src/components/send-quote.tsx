@@ -40,7 +40,7 @@ export function SendQuoteButton({ target }: { target: SendTarget }) {
   const [detail, setDetail] = useState<DetailLevel>(target.detail);
   const greeting = target.client ? `Hi ${target.client.firstName}` : "Hi";
   const [message, setMessage] = useState(
-    `${greeting}, here's your quote for ${target.title.toLowerCase()} from ${target.businessName}. Let me know if you're happy to go ahead.`,
+    `${greeting}, here's your quote for ${target.title.charAt(0).toLowerCase() + target.title.slice(1)} from ${target.businessName}. Let me know if you're happy to go ahead.`,
   );
   const contact = target.client ? [target.client.phone, target.client.email].filter(Boolean).join(" · ") : "";
 

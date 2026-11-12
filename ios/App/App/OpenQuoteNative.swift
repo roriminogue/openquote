@@ -141,8 +141,9 @@ public class OpenQuoteNativePlugin: CAPPlugin, CAPBridgedPlugin {
 
             let data = NSMutableData()
             UIGraphicsBeginPDFContextToData(data, a4, [kCGPDFContextTitle as String: name, kCGPDFContextCreator as String: "OpenQuote AU"])
-            renderer.prepare(forDrawingPages: NSRange(location: 0, length: renderer.numberOfPages))
-            for page in 0..<renderer.numberOfPages {
+            let pages = renderer.numberOfPages
+            renderer.prepare(forDrawingPages: NSRange(location: 0, length: pages))
+            for page in 0..<pages {
                 UIGraphicsBeginPDFPage()
                 renderer.drawPage(at: page, in: UIGraphicsGetPDFContextBounds())
             }
@@ -160,7 +161,7 @@ public class OpenQuoteNativePlugin: CAPPlugin, CAPBridgedPlugin {
             sheet.popoverPresentationController?.sourceView = presenter.view
             sheet.popoverPresentationController?.sourceRect = CGRect(x: presenter.view.bounds.midX, y: presenter.view.bounds.maxY - 80, width: 1, height: 1)
             sheet.completionWithItemsHandler = { activity, completed, _, _ in
-                call.resolve(["completed": completed, "activity": activity?.rawValue ?? NSNull(), "pages": renderer.numberOfPages])
+                call.resolve(["completed": completed, "activity": activity?.rawValue ?? NSNull(), "pages": pages])
             }
             presenter.present(sheet, animated: true)
         }

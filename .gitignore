@@ -57,3 +57,6 @@ next-env.d.ts
 ios/build-sim/
 ios/*.log
 dist/
+
+# Data exported from the web version (real business data: never commit)
+/exports/

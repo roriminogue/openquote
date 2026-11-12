@@ -35,7 +35,7 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
   const savings = (e.alternatives ?? []).filter((a) => a.kind === "saving");
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-12 print:max-w-none print:p-0">
+    <main className="mx-auto w-full max-w-3xl px-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:py-12 print:max-w-none print:p-0">
       <article className="rounded-(--radius-container) border border-(--color-border) bg-(--color-background-card) px-4 py-6 shadow-sm sm:px-10 sm:py-10 print:rounded-none print:border-0 print:px-0 print:py-0 print:shadow-none">
         {/* Business header */}
         <header className="flex flex-wrap items-start justify-between gap-6 border-b border-(--color-border) pb-6">
@@ -104,7 +104,8 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
           )}
         </section>
 
-        {/* The work */}
+        {/* The work. In print (the PDF) stages may run onto the next page; a grid or flex column never would, and
+            WebKit cuts off whatever doesn't fit, so lists here are plain blocks. */}
         <section aria-labelledby="work" className="border-t border-(--color-border) py-6">
           <PartTitle id="work">The work</PartTitle>
           {display.detail === "full" && (
@@ -112,9 +113,9 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
               Prices exclude GST; GST is added to the total.
             </Text>
           )}
-          <ol className="mt-4 flex flex-col gap-5">
+          <ol className="mt-4 space-y-5">
             {groups.map((g, gi) => (
-              <li key={g.id} className="break-inside-avoid">
+              <li key={g.id}>
                 <div className="flex items-baseline justify-between gap-4 border-b border-dashed border-(--color-border) pb-2">
                   <h3 className="flex min-w-0 gap-2">
                     <Text weight="semibold">
@@ -129,7 +130,7 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
                   )}
                 </div>
                 {display.detail !== "total" && (
-                  <ul className="mt-2 flex flex-col gap-1.5">
+                  <ul className="mt-2 space-y-1.5">
                     {g.lines.map((l) => (
                       <li key={l.id} className="flex items-baseline justify-between gap-4">
                         <span className="flex gap-2.5">
@@ -185,7 +186,7 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
 
         {/* Scope */}
         {(e.scope?.length || e.assumptions?.length || e.exclusions?.length) && (
-          <section aria-label="Scope" className="grid gap-6 border-t border-(--color-border) py-6 sm:grid-cols-3">
+          <section aria-label="Scope" className="grid gap-6 border-t border-(--color-border) py-6 sm:grid-cols-3 print:block print:space-y-6">
             <Points title="Included" items={e.scope} />
             <Points title="Assumptions" items={e.assumptions} />
             <Points title="Not included" items={e.exclusions} />
@@ -195,11 +196,11 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
         {(upgrades.length > 0 || savings.length > 0) && (
           <section aria-labelledby="options" className="border-t border-(--color-border) py-6">
             <PartTitle id="options">Options you can ask about</PartTitle>
-            <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+            <ul className="mt-3 grid gap-3 sm:grid-cols-2 print:block print:space-y-3">
               {[...upgrades, ...savings].map((a) => (
                 <li
                   key={a.title}
-                  className="break-inside-avoid rounded-(--radius-element) bg-(--color-background-muted) px-4 py-3"
+                  className="rounded-(--radius-element) bg-(--color-background-muted) px-4 py-3"
                 >
                   <Text as="p" display="block" weight="medium">
                     {a.title}
@@ -230,7 +231,8 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
         {/* The answer */}
         <section
           aria-labelledby="answer"
-          className="no-print rounded-(--radius-container) bg-(--color-background-muted) px-4 py-5 sm:px-6 sm:py-6"
+          // In the PDF the client sees how to say yes; once answered, it's only shown on screen.
+          className={`${decision ? "no-print " : ""}rounded-(--radius-container) bg-(--color-background-muted) px-4 py-5 sm:px-6 sm:py-6 print:mt-2 print:border print:border-(--color-border)`}
         >
           {decision?.type === "accepted" ? (
             <Answered
@@ -313,9 +315,9 @@ function TotalRow({ label, cents }: { label: string; cents: number }) {
 function Points({ title, items }: { title: string; items: string[] | null }) {
   if (!items?.length) return null;
   return (
-    <div className="break-inside-avoid">
+    <div>
       <PartTitle>{title}</PartTitle>
-      <ul className="mt-2 flex flex-col gap-1.5">
+      <ul className="mt-2 space-y-1.5">
         {items.map((it) => (
           <li key={it} className="flex gap-2.5">
             <span aria-hidden className="mt-[0.6em] size-1 shrink-0 rounded-full bg-(--color-text-secondary)" />
