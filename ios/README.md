@@ -1,40 +1,33 @@
-# OpenQuote AU on your iPhone, as an app
+# OpenQuote AU on your iPhone
 
-The iPhone app is a thin shell around your own OpenQuote AU website: it opens your site full screen with the
-OpenQuote AU icon. Every update to your site shows up in the app straight away, with no reinstall needed.
+The whole app is installed on the phone: screens, data and all. Nothing runs on a server, so it works with no
+signal (pricing a job with AI needs one).
 
 You don't need a paid Apple Developer account. A free Apple ID works, but Apple makes free-account apps stop
-opening after **7 days**. When that happens, plug the phone in and run the install script again (step 4). It
-takes about a minute.
-
-If you'd rather skip all this, open your site in Safari and tap **Share → Add to Home Screen**. You get nearly
-the same thing.
+opening after **7 days**. When that happens, plug the phone in and run the install script again (step 4). Your
+quotes stay on the phone.
 
 ## You'll need
 
 - A Mac with **Xcode** (free from the App Store) and about 4 GB of free disk space
+- Node 22 or later
 - Your iPhone and a USB cable
-- Your OpenQuote AU site already online (see the main [README](../README.md))
 
 ## Steps
 
 1. **Sign Xcode in to your Apple ID.** In Xcode → Settings → Accounts, click **+** → **Apple ID**.
-2. **Point the app at your site and your Apple ID.**
-   - Add your site's address to `.env.local` in the OpenQuote AU folder (create the file if it isn't there):
-     `OPENQUOTE_APP_URL=https://your-site.vercel.app`
-   - Create `ios/signing.local.xcconfig` with a bundle identifier that's unique to you, and your team ID
-     (Xcode → Settings → Accounts → your Apple ID → the ID next to "Personal Team"):
+2. **Tell the build who you are.** Create `ios/signing.local.xcconfig` with a bundle identifier that's unique to
+   you, and your team ID (Xcode → Settings → Accounts → your Apple ID → the ID next to "Personal Team"):
 
-     ```
-     PRODUCT_BUNDLE_IDENTIFIER = com.yourname.openquote
-     DEVELOPMENT_TEAM = ABCDE12345
-     ```
+   ```
+   PRODUCT_BUNDLE_IDENTIFIER = com.yourname.openquote
+   DEVELOPMENT_TEAM = ABCDE12345
+   ```
 
-   Both files stay on your Mac and are never committed. Then, in Terminal from the OpenQuote AU folder:
+   It stays on your Mac and is never committed. Then, in Terminal from the OpenQuote AU folder:
 
    ```bash
    npm install
-   npx cap sync ios
    ```
 
 3. **Get the iPhone ready.** Plug it in, unlock it and tap **Trust** if asked. Turn on **Developer Mode** in
@@ -45,19 +38,21 @@ the same thing.
    ./ios/install-on-iphone.sh
    ```
 
-   The first build downloads a few libraries and takes a few minutes.
+   The first build downloads a few libraries and takes a few minutes. To start with a backup on the phone (for
+   example one made from the old web version), add `--data path/to/backup.oqbackup` on the first install only: it
+   replaces what's on the phone.
 5. **Trust it on the phone, once.** Settings → General → VPN & Device Management → your Apple ID → **Trust**.
    Then open OpenQuote AU.
 
-## Signing in inside the app
+## AI
 
-Enter your email, and type in the 6-digit code that arrives by email. iPhone usually offers the code above the
-keyboard, so it's one tap.
+Add your AI key in **Settings → AI** (Anthropic, OpenAI, Google, OpenRouter, or Ollama on a computer on your
+Wi-Fi). The key is kept in the iPhone's Keychain. Builds published on publik open with **Sign in with publik**
+instead, and can use a publik plan with no key.
 
 ## If something goes wrong
 
-- **"No paired iPhone found":** unlock the phone, replug it, and tap **Trust**.
-- **The build hangs at "Resolve Package Graph":** the Mac's download service sometimes stalls. Quit Xcode, run
-  the script again, and if it still hangs, restart the Mac.
-- **"Unable to launch … not been explicitly trusted":** do step 5.
-- **It stopped opening after a week:** run step 4 again.
+- **"No iPhone found":** unlock the phone, replug it, and tap **Trust**.
+- **The build hangs at "Resolve Package Graph":** the Mac's download service sometimes stalls. Quit Xcode and run
+  the script again.
+- **"Untrusted Developer" when opening the app:** do step 5.

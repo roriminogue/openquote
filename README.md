@@ -1,150 +1,81 @@
 # OpenQuote AU
 
-Free, open-source AI quoting for tradies. Describe a job the way you'd tell a mate on the phone, and OpenQuote AU
-breaks it into stages and prices every line with your own rates. Edit it, send it to your client as a link, and
-they can accept it from their phone.
+Free, open-source AI quoting for tradies, as an iPhone app. Describe a job the way you'd tell a mate on the phone,
+and OpenQuote AU breaks it into stages and prices every line with your own rates. Edit it, then send it to your
+client as a PDF from your phone.
 
 - **Price a job in under a minute.** Stages, quantities, labour and materials, with your rates used first.
 - **Real prices, not guesses.** A built-in price book of checked material prices, and calculators that work out
   fences and decks post by post and board by board. Anything the AI had to estimate is marked "Check price".
 - **Edit anything.** Change quantities, prices and descriptions, and add or remove lines and stages.
-- **Send it.** A branded quote page for your client with your logo and terms, plus Accept and Decline buttons.
-- **See what happened.** Know when they opened it, and who accepted or declined it.
-- **Your own AI key.** You pay your AI provider directly (a few cents a quote). OpenQuote AU itself is free.
+- **Send it.** A clean PDF quote with your logo and terms, shared by text, WhatsApp or email from your phone. Mark
+  it accepted or declined when the client answers.
+- **Everything stays on your phone.** No account to make, no website, no server. Your quotes are saved on the
+  iPhone and included in its iCloud backup, and you can back up to a file any time.
+- **Costs nothing to run.** Pay only for the AI you use: with your own AI key (a few cents a quote), or a publik
+  plan.
 
 <p>
   <img src="docs/screenshots/new.png" width="200" alt="New estimate: describe the job or tap Talk, pick a project, and price it">
   <img src="docs/screenshots/estimate.png" width="200" alt="An estimate: the total, your cost and margin, and where the money goes">
-  <img src="docs/screenshots/quote.png" width="200" alt="The quote your client opens, with your business details and their dates">
+  <img src="docs/screenshots/quote.png" width="200" alt="The quote your client gets, with your business details and their dates">
   <img src="docs/screenshots/projects.png" width="200" alt="Projects, with the latest quote and status for each">
 </p>
 
-## Run your own OpenQuote AU
+## Get it on your iPhone
 
-You get your own private copy, on accounts that you control. Nobody else can see your quotes. It takes about
-20 minutes, and you don't need to write any code. You can set it up and try it on free accounts; for real business
-use, see [What it costs](#what-it-costs).
+You need a Mac with Xcode (free), your iPhone and a USB cable. No paid Apple account: a free Apple ID works, but
+Apple makes apps installed this way stop opening after 7 days, so you plug in and run the install again each week
+(your data stays). Step-by-step instructions: [ios/README.md](ios/README.md).
 
-**You'll need:** a free [Supabase](https://supabase.com) account (the database), a free
-[Vercel](https://vercel.com) account (hosting), and an [Anthropic](https://console.anthropic.com) account with
-some API credit for the AI. US$5 goes a long way.
-
-### Step 1: Make the database
-
-1. Sign in to Supabase and click **New project**. Pick the region closest to you (Sydney for Australia), and
-   write down the database password you choose.
-2. When it's ready, click **Connect** at the top of the project and keep that page open. You'll copy three
-   things from it in step 2:
-   - the **Project URL** (`https://xxxx.supabase.co`)
-   - the **Publishable key** (starts with `sb_publishable_`)
-   - the **Transaction pooler** connection string (ends in `:6543/postgres`). Replace `[YOUR-PASSWORD]` in it
-     with your database password.
-
-### Step 2: Put it online
-
-1. Make an encryption key. It protects the AI keys you save. Copy the result of one of these:
-   - **Mac or Linux:** open Terminal and run `openssl rand -base64 32`
-   - **Windows:** open PowerShell and run
-     `[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))`
-2. Click this button and sign in to Vercel:
-
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Froriminogue%2Fopenquote&project-name=openquote&repository-name=openquote&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,DATABASE_URL,ENCRYPTION_KEY&envDescription=Your%20Supabase%20project%20details%20and%20an%20encryption%20key&envLink=https%3A%2F%2Fgithub.com%2Froriminogue%2Fopenquote%23step-2-put-it-online)
-
-   The server runs in Sydney (`vercel.json`), next to an Australian database. If you picked a different Supabase
-   region, change `syd1` in `vercel.json` to the [Vercel region](https://vercel.com/docs/regions) closest to it,
-   or every page will be slow.
-3. Paste in the four values: the Supabase Project URL, the publishable key, the pooler string (as
-   `DATABASE_URL`) and your encryption key. Click **Deploy**. The first deploy also sets up your database tables.
-
-### Step 3: Finish setting up
-
-1. Open your new site and go to **`/setup`** (for example `https://openquote-abc.vercel.app/setup`). It checks
-   everything and tells you exactly what to fix if anything is missing.
-2. Make sign-in emails show a code. OpenQuote AU signs you in with a 6-digit code on every device. Supabase only
-   lets you change its emails once they go through your own email service, so:
-   - In Supabase → **Authentication → Emails → SMTP Settings**, connect a free email service. A Gmail account
-     with an [app password](https://myaccount.google.com/apppasswords) works (host `smtp.gmail.com`, port `465`),
-     or [Brevo](https://www.brevo.com), which lets you send from your own email address without owning a domain.
-   - Then open the **Magic link** and **Confirm sign up** templates and paste in
-     [docs/email-code-template.html](docs/email-code-template.html), with the subject
-     `Your OpenQuote AU code: {{ .Token }}`.
-
-   Until you do, Supabase's own emails contain a sign-in link instead of a code. That still works, as long as you
-   open the link in the same browser you signed in from.
-
-3. Sign in with your email and the code, create your business, then go to **Settings**:
-   - **Business:** your name, logo, ABN and quote terms
-   - **Rates and pricing:** your hourly rate, the materials you use often, and your markup
-   - **AI:** your Anthropic key
-
-Your copy is private: only the first business can be created. To let more people in (staff, or another
-business), add `ALLOWED_EMAILS` in Vercel → Settings → Environment Variables, for example
-`you@gmail.com, @yourbusiness.com.au`, then redeploy.
-
-If you share your own AI key with other businesses (by setting `ANTHROPIC_API_KEY` in Vercel), each business can
-make up to 100 estimates a day with it. Change that with `AI_DAILY_LIMIT` (`0` means no limit). Businesses that add
-their own key in Settings → AI aren't limited.
-
-### Put it on your phone
-
-- **Quickest:** open your site in Safari (iPhone) or Chrome (Android), then tap **Share → Add to Home Screen**.
-  It opens full screen with its own icon.
-- **As an iPhone app** (needs a Mac with Xcode and a free Apple ID): see [ios/README.md](ios/README.md).
-
-### Updates
-
-Your copy is a repository on your GitHub. When OpenQuote AU gets new features, open it on GitHub and click
-**Sync fork** (or copy the changes across). Vercel redeploys automatically and updates your database on the way.
+Once it's installed, set up your business, then add your AI key in **Settings → AI** (or sign in with publik).
 
 ## What it costs
 
 | | |
 |---|---|
 | OpenQuote AU | Free (AGPL-3.0) |
-| Trying it out | Free: Supabase and Vercel's free plans are enough to set up and test |
-| Using it for your business | Vercel Pro, US$20 a month: Vercel's free Hobby plan is for [non-commercial use only](https://vercel.com/docs/limits/fair-use-guidelines), and quoting paid work is commercial. Supabase Pro, US$25 a month, is optional but stops the database going to sleep |
-| AI | Pay-as-you-go with your own key, typically a few cents per estimate |
-
-**Free Supabase projects go to sleep after a week without use.** If your site suddenly can't load anything,
-open your project in Supabase and click **Restore project**. Using OpenQuote AU at least once a week keeps it awake,
-and Supabase Pro projects never sleep.
+| Running it | Nothing: there's no server or database to pay for |
+| AI | Your own key, pay-as-you-go (typically a few cents per estimate), or a publik plan |
 
 **Prices are a starting point for Melbourne, Victoria (checked October 2026).** The built-in price book covers
 fencing, decking and carpentry materials. Labour times haven't been checked by a tradie yet. Your own rates in
 **Settings → Rates and pricing** always come first, so set those up, especially outside Victoria.
 
-Quotes are shared as links from your own phone (text, WhatsApp, email), so there's no email service to pay for.
-Sign-in sends a code by email through your own free email service (step 3). You stay signed in on each device,
-so codes are rare.
+## Your data
+
+Everything is in one SQLite database inside the app (Library/OpenQuote on the phone), which the iPhone includes in
+its iCloud and computer backups. **Settings → Account → Back up to a file** saves a copy you can keep in Files,
+Drive or email, and **Restore from a file** brings one back, on the same phone or a new one. AI keys are kept in
+the iPhone's Keychain and never go into backups.
+
+**Moving from the old web version?** `npx tsx scripts/export-from-web.ts` reads your business from its database
+(`DATABASE_URL` in `.env.local`) and writes a backup to `exports/`. Install with
+`./ios/install-on-iphone.sh --data "exports/<name> from web.oqbackup"` to start with it on the phone.
 
 ## For developers
 
-Prerequisites: Node 22+ and a Supabase project (see step 1).
+Prerequisites: Node 22+. For the iPhone app, a Mac with Xcode.
 
 ```bash
-cp .env.example .env.local     # paste the values from step 1, plus ENCRYPTION_KEY
 npm install
-npm run db:migrate             # tables, RLS policies, storage buckets
-npm run dev                    # http://localhost:3000
+npm run dev                    # http://localhost:5173, the whole app in a browser (data in IndexedDB)
+npm run ios                    # build the app's screens and copy them into the Xcode project
 ```
-
-Sign in at `/login`, then create your business at `/onboarding`. For demo data, run
-`SEED_EMAIL=you@example.com npm run db:seed`. `npm run dev:lan` serves on your network so you can try it on a
-phone.
 
 | Script | What it does |
 |---|---|
 | `npm test` | Unit tests (Vitest) |
-| `npm run typecheck` | Route types and `tsc --noEmit` |
+| `npm run typecheck` | `tsc --noEmit` |
 | `npm run lint` | ESLint |
-| `npm run db:generate` | New migration from `src/db/schema.ts` changes |
-| `npm run db:migrate` | Apply migrations (production builds on Vercel do this automatically) |
-| `npm run ai:try -- "job description"` | Run the AI estimate pipeline once with `ANTHROPIC_API_KEY` (no database) |
+| `npm run db:generate` | New migration in `src/db/migrations` from `src/db/schema.ts` changes (the app applies it on launch) |
+| `npm run ai:try -- "job description"` | Run the AI estimate pipeline once with `ANTHROPIC_API_KEY` |
 | `npm run bench` | Run the reference jobs and compare them with earlier results and market prices (spends AI credit) |
 
-**Stack:** Next.js (App Router, TypeScript, Tailwind) · Supabase (Postgres, Auth, Storage) with Drizzle ORM ·
-Vercel AI SDK with bring-your-own-key · Capacitor for the iPhone shell · Vitest. Product spec and data model:
-[SPEC.md](SPEC.md). Design system: [DESIGN.md](DESIGN.md).
+**Stack:** React, TypeScript, Vite and React Router · the Astryx design system and Tailwind · SQLite in the app
+(sql.js) with Drizzle ORM · Vercel AI SDK, calling the AI provider straight from the phone · Capacitor for the
+iPhone app, with a small native plugin (`ios/App/App/OpenQuoteNative.swift`) for the Keychain, PDFs and Sign in
+with publik · Vitest. Product spec and data model: [SPEC.md](SPEC.md). Design system: [DESIGN.md](DESIGN.md).
 
 **Principles:**
 
