@@ -1,5 +1,3 @@
-"use client";
-
 import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
@@ -9,12 +7,13 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { MapPin, Square } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import { useRef, useState } from "react";
 import { Breakdown } from "@/components/breakdown";
 import { Money } from "@/components/money";
 import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";
+import { generateEstimate } from "@/lib/estimate/run";
 import { useDictation } from "./dictation";
 import { ProjectField } from "./project-flow";
 
@@ -97,50 +96,31 @@ export function NewEstimate({
     let number: number | undefined;
     let draft: PartialDraft = {};
     try {
-      const res = await fetch("/api/estimates/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ description, projectId: project?.id ?? null, siteAddress: project?.siteAddress ? null : siteAddress || null }),
-        signal: controller.signal,
-      });
-      if (!res.ok || !res.body) {
-        const body = await res.json().catch(() => null);
-        setPhase({ kind: "error", message: body?.error ?? "Couldn’t start. Try again." });
-        return;
-      }
-
-      const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
-      let buffer = "";
-      for (;;) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += value;
-        let cut: number;
-        while ((cut = buffer.indexOf("\n\n")) >= 0) {
-          const block = buffer.slice(0, cut);
-          buffer = buffer.slice(cut + 2);
-          const event = /^event: (.+)$/m.exec(block)?.[1];
-          const data = JSON.parse(/^data: (.*)$/m.exec(block)?.[1] ?? "null");
-          if (event === "estimate") {
-            number = data.number;
+      const result = await generateEstimate(
+        { description, projectId: project?.id ?? null, siteAddress: project?.siteAddress ? null : siteAddress || null },
+        {
+          estimate: (e) => {
+            number = e.number;
             setPhase({ kind: "streaming", number, draft });
-          } else if (event === "partial") {
-            draft = data.draft ?? draft;
+          },
+          partial: (d) => {
+            draft = d ?? draft;
             setPhase({ kind: "streaming", number, draft });
-          } else if (event === "done") {
-            setPhase({ kind: "saving", number, draft });
-            router.push(`/estimates/${data.estimateId}`);
-            return;
-          } else if (event === "error") {
-            setPhase({ kind: "error", message: data.message });
-            return;
-          }
-        }
+          },
+        },
+        controller.signal,
+      );
+      if (result.ok) {
+        setPhase({ kind: "saving", number, draft });
+        router.push(`/estimates/${result.estimateId}`);
+      } else if (result.aborted) {
+        setPhase({ kind: "idle" });
+      } else {
+        setPhase({ kind: "error", message: result.error });
       }
-      setPhase({ kind: "error", message: "The connection closed before the estimate finished. Try again." });
     } catch (err) {
-      if ((err as Error).name === "AbortError") setPhase({ kind: "idle" });
-      else setPhase({ kind: "error", message: "Lost the connection. Check your signal and try again." });
+      console.error(err);
+      setPhase({ kind: "error", message: "Generating the estimate failed. Try again." });
     }
   }
 
@@ -150,8 +130,8 @@ export function NewEstimate({
         <div className="mb-5">
           <Banner
             status="warning"
-            title="Add an AI key first"
-            description="OpenQuote AU prices jobs with your own AI provider account."
+            title="Set up AI first"
+            description="OpenQuote AU prices jobs with AI: use your publik plan, or your own provider key."
           />
           <div className="mt-3 sm:w-48">
             <Button label="Set up AI" variant="secondary" size="lg" width="100%" href="/settings/ai" />

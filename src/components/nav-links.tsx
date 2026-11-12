@@ -1,11 +1,9 @@
-"use client";
-
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import { SideNav, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
 import { FileText, FolderOpen, Plus, Settings, Users, type LucideIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "@/lib/link";
+import { usePathname } from "@/lib/navigation";
 
 type NavLink = { href: string; label: string; icon: LucideIcon; section?: string };
 

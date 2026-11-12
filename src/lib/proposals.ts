@@ -134,7 +134,7 @@ export async function decide(
   return db.transaction(async (tx) => {
     // Lock this link, then check again inside the lock: two answers at the same moment must not both count, and
     // an edit saved in the meantime must not slip in.
-    await tx.select({ id: schema.proposalSends.id }).from(schema.proposalSends).where(eq(schema.proposalSends.id, q.send.id)).for("update");
+    await tx.select({ id: schema.proposalSends.id }).from(schema.proposalSends).where(eq(schema.proposalSends.id, q.send.id));
     const [answered] = await tx
       .select({ id: schema.proposalEvents.id })
       .from(schema.proposalEvents)

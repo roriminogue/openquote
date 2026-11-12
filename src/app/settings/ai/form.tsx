@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
@@ -13,6 +11,7 @@ import { saveAiSettings, type SaveState } from "./actions";
 
 type Initial = {
   provider: Provider;
+  baseUrl: string;
   hasSavedKey: boolean;
   smartModel: string;
   fastModel: string;
@@ -40,9 +39,11 @@ export function AiSettingsForm({ initial }: { initial: Initial }) {
           <Selector
             label="Provider"
             description={
-              info.advanced
-                ? "Quality depends on the model. Pick one with good tool-use support."
-                : "Who runs the AI. You pay them directly."
+              provider === "publik"
+                ? "No key needed: you pay publik per quote from your publik plan."
+                : info.advanced
+                  ? "Quality depends on the model. Pick one with good tool-use support."
+                  : "Who runs the AI. You pay them directly."
             }
             htmlName="provider"
             options={PROVIDER_OPTIONS}
@@ -69,14 +70,15 @@ export function AiSettingsForm({ initial }: { initial: Initial }) {
           )}
 
           {provider === "ollama" && (
-            <div>
-              <Text as="p" display="block" type="label" color="secondary" weight="medium">
-                Ollama address
-              </Text>
-              <Text as="p" display="block" type="supporting">
-                {info.defaultBaseUrl} unless whoever runs this OpenQuote AU has changed it with OLLAMA_BASE_URL.
-              </Text>
-            </div>
+            <TextField
+              name="baseUrl"
+              label="Ollama address"
+              description="A computer on the same Wi-Fi running Ollama, for example http://192.168.1.20:11434"
+              defaultValue={initial.baseUrl}
+              placeholder={info.defaultBaseUrl}
+              inputMode="url"
+              autoCapitalize="off"
+            />
           )}
 
           {/* Remount when the provider changes, so each provider starts from its own saved model. */}

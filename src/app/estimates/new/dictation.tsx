@@ -1,5 +1,3 @@
-"use client";
-
 import { Icon } from "@astryxdesign/core/Icon";
 import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { Mic } from "lucide-react";

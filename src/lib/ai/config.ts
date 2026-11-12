@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { decryptSecret } from "@/lib/crypto";
+import { publikKey } from "@/lib/publik";
+import { getApiKey } from "./keys";
 import { PROVIDER_INFO, providerBaseUrl, type Provider } from "./providers";
 
 export type AiConfig = {
@@ -9,28 +10,22 @@ export type AiConfig = {
   baseUrl: string | null;
   smartModel: string | null;
   fastModel: string | null;
-  /** Where the key came from: the business's own settings, the instance env, or nowhere (AI disabled). */
-  source: "business" | "instance" | "none";
+  /** "business": ready to use. "none": AI is off until a key is added (or the person signs in with publik). */
+  source: "business" | "none";
 };
 
-/** Server-only. Resolves which provider, key and models an organisation's AI calls use (SPEC.md §7a). */
+/** Which provider, key and models the business's AI calls use (SPEC.md §7a). Publik unless changed in Settings → AI. */
 export async function resolveAiConfig(orgId: string): Promise<AiConfig> {
   const [row] = await db.select().from(schema.aiSettings).where(eq(schema.aiSettings.orgId, orgId));
-  const provider = row?.provider ?? "anthropic";
+  const provider = row?.provider ?? "publik";
   const info = PROVIDER_INFO[provider];
   const models = {
     smartModel: row?.smartModel ?? info.defaultSmartModel,
     fastModel: row?.fastModel ?? info.defaultFastModel,
   };
-  // Never a saved address: a shared key must only ever go to the provider itself.
-  const baseUrl = providerBaseUrl(provider);
+  const baseUrl = providerBaseUrl(provider, row?.baseUrl);
 
-  if (row?.apiKeyCiphertext) {
-    return { provider, apiKey: decryptSecret(row.apiKeyCiphertext), baseUrl, ...models, source: "business" };
-  }
-  if (!info.needsKey && row) return { provider, apiKey: null, baseUrl, ...models, source: "business" };
-
-  const envKey = info.envKey ? process.env[info.envKey] : undefined;
-  if (envKey) return { provider, apiKey: envKey, baseUrl, ...models, source: "instance" };
-  return { provider, apiKey: null, baseUrl, ...models, source: "none" };
+  const apiKey = provider === "publik" ? await publikKey() : info.needsKey ? await getApiKey(provider) : null;
+  const ready = provider === "publik" || info.needsKey ? !!apiKey : !!row;
+  return { provider, apiKey, baseUrl, ...models, source: ready ? "business" : "none" };
 }

@@ -1,10 +1,11 @@
-import { Suspense, type ReactNode } from "react";
-import Link from "next/link";
+import type { ReactNode } from "react";
 import { AppShell as Shell } from "@astryxdesign/core/AppShell";
 import { TopNav } from "@astryxdesign/core/TopNav";
-import { getAuthUser } from "@/lib/auth";
+import { getMember } from "@/lib/auth";
+import { useQuery } from "@/lib/data";
+import Link from "@/lib/link";
 import { AccountMenu } from "./account-menu";
-import { ActiveSideNav, ActiveTabBar, SideNavLinks, TabBar } from "./nav-links";
+import { ActiveSideNav, ActiveTabBar } from "./nav-links";
 import { Wordmark } from "./wordmark";
 
 export { Mark, Wordmark } from "./wordmark";
@@ -19,7 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Shell
         height="auto"
         variant="section"
-        // Phones first: the server renders the phone layout, and there is no drawer to open, so no menu button.
+        // Phones first: there is no drawer to open, so no menu button.
         mobileNav={{ hasToggle: false, defaultIsMobile: true }}
         topNav={
           <TopNav
@@ -29,33 +30,23 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Wordmark />
               </Link>
             }
-            endContent={
-              <Suspense>
-                <Account />
-              </Suspense>
-            }
+            endContent={<Account />}
           />
         }
-        sideNav={
-          <Suspense fallback={<SideNavLinks pathname="" />}>
-            <ActiveSideNav />
-          </Suspense>
-        }
+        sideNav={<ActiveSideNav />}
       >
         {/* Bottom room on phones keeps the last row clear of the tab bar. */}
         <div className="mx-auto w-full max-w-[60rem] px-4 pb-[6.5rem] pt-5 sm:px-6 md:px-10 md:pb-10 md:pt-8">
           {children}
         </div>
       </Shell>
-      <Suspense fallback={<TabBar pathname="" />}>
-        <ActiveTabBar />
-      </Suspense>
+      <ActiveTabBar />
     </>
   );
 }
 
-async function Account() {
-  const user = await getAuthUser();
-  if (!user?.email) return null;
-  return <AccountMenu email={user.email} />;
+function Account() {
+  const member = useQuery("member", getMember);
+  if (!member) return null;
+  return <AccountMenu name={member.name || "You"} />;
 }

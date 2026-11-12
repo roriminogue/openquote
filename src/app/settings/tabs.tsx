@@ -1,6 +1,4 @@
-"use client";
-
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/lib/navigation";
 import { FilterTabs } from "@/components/records";
 
 const TABS = [

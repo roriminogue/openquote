@@ -1,14 +1,13 @@
 import { Skeleton } from "@astryxdesign/core/Skeleton";
-import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { notFound, redirect } from "@/lib/navigation";
 import { Suspense } from "react";
+import { useParams } from "react-router";
 import { requireMember } from "@/lib/auth";
+import { useQuery } from "@/lib/data";
 import { getEstimate, markupSettings } from "@/lib/estimate/queries";
 import { EstimateEditor, type EditorGroup } from "./editor";
 
-export const metadata: Metadata = { title: "Edit estimate" };
-
-export default function EditEstimatePage({ params }: PageProps<"/estimates/[id]/edit">) {
+export default function EditEstimatePage() {
   return (
     <Suspense
       fallback={
@@ -17,16 +16,14 @@ export default function EditEstimatePage({ params }: PageProps<"/estimates/[id]/
         </div>
       }
     >
-      <Editor params={params} />
+      <Editor />
     </Suspense>
   );
 }
 
-async function Editor({ params }: Pick<PageProps<"/estimates/[id]/edit">, "params">) {
-  const { id } = await params;
-  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const member = await requireMember();
-  const data = await getEstimate(member.orgId, id);
+function Editor() {
+  const id = useParams().id ?? "";
+  const data = useQuery(`estimate-edit:${id}`, async () => getEstimate((await requireMember()).orgId, id));
   if (!data) notFound();
   const { estimate, org, groups } = data;
   // Accepted quotes are locked.

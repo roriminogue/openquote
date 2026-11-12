@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound } from "@/lib/navigation";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
 import { EstimateView } from "@/components/estimate-view";
-import { getEstimate, getEstimateHeading } from "@/lib/estimate/queries";
+import { getEstimate } from "@/lib/estimate/queries";
+import { useQuery } from "@/lib/data";
+import { useParams } from "react-router";
 import { getClient } from "@/lib/projects";
 import { proposalActivity } from "@/lib/proposals";
 import { deleteEstimateRecord } from "@/app/actions/delete";
@@ -12,40 +13,31 @@ import { formatEstimateNo } from "@/lib/pricing";
 import { BackLink } from "@/components/back-link";
 import { Skeleton } from "@astryxdesign/core/Skeleton";
 
-/**
- * Each estimate's tab reads "EST-1010 Fence replacement", not just "Estimate". Set through metadata rather than a
- * <title> in the page: a page-level <title> lost to the plain one whenever a save or share refreshed the page.
- */
-export async function generateMetadata({ params }: PageProps<"/estimates/[id]">): Promise<Metadata> {
-  const { id } = await params;
-  if (!/^[0-9a-f-]{36}$/i.test(id)) return { title: "Estimate" };
-  const member = await requireMember();
-  const row = await getEstimateHeading(member.orgId, id);
-  return { title: row ? `${formatEstimateNo(row.number)} ${row.title}` : "Estimate" };
-}
-
-export default function EstimatePage({ params }: PageProps<"/estimates/[id]">) {
+export default function EstimatePage() {
   return (
     <>
       <BackLink href="/estimates" label="Estimates" />
       <Suspense fallback={<DetailSkeleton />}>
-        <EstimateDetail params={params} />
+        <EstimateDetail />
       </Suspense>
     </>
   );
 }
 
-async function EstimateDetail({ params }: Pick<PageProps<"/estimates/[id]">, "params">) {
-  const { id } = await params;
-  const member = await requireMember();
-  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const data = await getEstimate(member.orgId, id);
-  if (!data) notFound();
-
-  const [activity, client] = await Promise.all([
-    proposalActivity(member.orgId, id),
-    data.estimate.clientId ? getClient(member.orgId, data.estimate.clientId) : null,
-  ]);
+function EstimateDetail() {
+  const id = useParams().id ?? "";
+  const loaded = useQuery(`estimate:${id}`, async () => {
+    const member = await requireMember();
+    const data = await getEstimate(member.orgId, id);
+    if (!data) return null;
+    const [activity, client] = await Promise.all([
+      proposalActivity(member.orgId, id),
+      data.estimate.clientId ? getClient(member.orgId, data.estimate.clientId) : null,
+    ]);
+    return { data, activity, client };
+  });
+  if (!loaded) notFound();
+  const { data, activity, client } = loaded;
   const name = client?.kind === "company" ? (client.contactName ?? client.name) : client?.name;
 
   const number = formatEstimateNo(data.estimate.number);

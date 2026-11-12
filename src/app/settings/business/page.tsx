@@ -1,13 +1,11 @@
 import { Skeleton } from "@astryxdesign/core/Skeleton";
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
+import { useQuery } from "@/lib/data";
 import { formatAbn } from "@/lib/business-schema";
 import { getOrg } from "@/lib/estimate/queries";
 import { Intro } from "../parts";
 import { BusinessForm } from "./form";
-
-export const metadata: Metadata = { title: "Business" };
 
 export default function BusinessPage() {
   return (
@@ -23,9 +21,11 @@ export default function BusinessPage() {
   );
 }
 
-async function Business() {
-  const member = await requireMember();
-  const org = await getOrg(member.orgId);
+function Business() {
+  const { member, org } = useQuery("org", async () => {
+    const member = await requireMember();
+    return { member, org: await getOrg(member.orgId) };
+  });
   const canEdit = member.role !== "member";
   return (
     <>

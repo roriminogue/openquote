@@ -1,6 +1,4 @@
-"use server";
-
-import { refresh } from "next/cache";
+import { refresh } from "@/lib/data";
 import { requireMember } from "@/lib/auth";
 import { saveEstimateEdits } from "@/lib/estimate/edit";
 import { EstimateEditInput } from "@/lib/estimate/edit-schema";

@@ -1,8 +1,10 @@
-import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import type { DisplayOptions } from "@/db/schema";
 
 // Pure rules for sending quotes to clients (no DB imports, so they can be unit tested).
+
+const base64url = (bytes: Uint8Array) =>
+  btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
 /** What the client sees, as three simple presets over DisplayOptions. */
 export const DETAIL_LEVELS = [
@@ -28,7 +30,7 @@ export const DEFAULT_DISPLAY: DisplayOptions = displayOptionsFor("groups");
 
 /** An unguessable token for the public quote link (/p/<token>): 24 random bytes, URL-safe. */
 export function newProposalToken() {
-  return randomBytes(24).toString("base64url");
+  return base64url(crypto.getRandomValues(new Uint8Array(24)));
 }
 
 export function isProposalToken(token: string) {

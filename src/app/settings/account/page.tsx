@@ -1,13 +1,11 @@
 import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList";
 import { Skeleton } from "@astryxdesign/core/Skeleton";
 import { Text } from "@astryxdesign/core/Text";
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { requireMember } from "@/lib/auth";
+import { useQuery } from "@/lib/data";
 import { SettingsSection } from "../parts";
-
-export const metadata: Metadata = { title: "Account" };
 
 export default function AccountPage() {
   return (
@@ -23,8 +21,8 @@ export default function AccountPage() {
   );
 }
 
-async function Account() {
-  const member = await requireMember();
+function Account() {
+  const member = useQuery("member-required", requireMember);
   return (
     <>
       <SettingsSection id="you" title="You">

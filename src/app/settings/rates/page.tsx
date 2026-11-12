@@ -1,14 +1,12 @@
 import { Skeleton } from "@astryxdesign/core/Skeleton";
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { requireMember } from "@/lib/auth";
+import { useQuery } from "@/lib/data";
 import { getOrg } from "@/lib/estimate/queries";
 import { listRates } from "@/lib/rates";
 import { BusinessContextForm, MarkupForm } from "./forms";
 import { Intro } from "../parts";
 import { RatesList } from "./rates-list";
-
-export const metadata: Metadata = { title: "Rates and pricing" };
 
 export default function RatesPage() {
   return (
@@ -24,9 +22,12 @@ export default function RatesPage() {
   );
 }
 
-async function Rates() {
-  const member = await requireMember();
-  const [org, rates] = await Promise.all([getOrg(member.orgId), listRates(member.orgId)]);
+function Rates() {
+  const { member, org, rates } = useQuery("rates", async () => {
+    const member = await requireMember();
+    const [org, rates] = await Promise.all([getOrg(member.orgId), listRates(member.orgId)]);
+    return { member, org, rates };
+  });
   const canEdit = member.role !== "member";
 
   return (

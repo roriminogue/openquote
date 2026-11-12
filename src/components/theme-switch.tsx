@@ -1,5 +1,3 @@
-"use client";
-
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { applyThemeChoice, useThemeChoice, type ThemeChoice } from "./theme";

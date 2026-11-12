@@ -1,5 +1,3 @@
-"use client";
-
 import { useSyncExternalStore } from "react";
 
 // Appearance: follow the device, or always light / always dark. Saved on this device only (localStorage), and

@@ -70,11 +70,11 @@ describe("checkModel", () => {
 
 describe("providerBaseUrl", () => {
   it("is fixed per provider, so a shared key only goes to the provider", () => {
-    expect(providerBaseUrl("openrouter", {})).toBe("https://openrouter.ai/api/v1");
-    expect(providerBaseUrl("anthropic", {})).toBeNull();
+    expect(providerBaseUrl("openrouter")).toBe("https://openrouter.ai/api/v1");
+    expect(providerBaseUrl("anthropic")).toBeNull();
   });
   it("lets whoever runs the install move Ollama, and nobody else", () => {
-    expect(providerBaseUrl("ollama", {})).toBe("http://localhost:11434");
-    expect(providerBaseUrl("ollama", { OLLAMA_BASE_URL: "http://gpu-box:11434/" })).toBe("http://gpu-box:11434");
+    expect(providerBaseUrl("ollama")).toBe("http://localhost:11434");
+    expect(providerBaseUrl("ollama", "http://gpu-box:11434/")).toBe("http://gpu-box:11434");
   });
 });

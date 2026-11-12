@@ -1,5 +1,3 @@
-"use client";
-
 import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -11,7 +9,6 @@ import { ImageUp, Trash2 } from "lucide-react";
 import { useActionState, useRef, useState } from "react";
 import { TextField } from "@/components/fields";
 import { DEFAULT_TERMS } from "@/lib/business-schema";
-import { createClient } from "@/lib/supabase/client";
 import { FormFooter } from "../form-footer";
 import { Fields, SettingsSection } from "../parts";
 import { saveBusiness, setLogo, type BusinessState } from "./actions";
@@ -27,7 +24,19 @@ export type BusinessDetails = {
   logoUrl: string | null;
 };
 
-/** Upload goes straight from the browser to Supabase Storage (logos/<orgId>/…); the server only records the URL. */
+/** Draws the image at most `maxWidth` wide and returns it as a PNG data URL (keeps transparency). */
+async function shrinkImage(file: File, maxWidth: number): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxWidth / bitmap.width);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  return canvas.toDataURL("image/png");
+}
+
+/** The logo is shrunk to at most 600 px wide and kept in the database as an image, so it goes into backups too. */
 function LogoPicker({ orgId, initial, canEdit }: { orgId: string; initial: string | null; canEdit: boolean }) {
   const [url, setUrl] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -38,22 +47,17 @@ function LogoPicker({ orgId, initial, canEdit }: { orgId: string; initial: strin
     setError(null);
     if (!["image/png", "image/jpeg", "image/webp"].includes(file.type))
       return setError("Use a PNG, JPG or WebP image.");
-    if (file.size > 2 * 1024 * 1024) return setError("Use an image under 2 MB.");
+    if (file.size > 10 * 1024 * 1024) return setError("Use an image under 10 MB.");
     setBusy(true);
-    const supabase = createClient();
-    const path = `${orgId}/logo-${Date.now()}.${file.type.split("/")[1]}`;
-    const { error: upErr } = await supabase.storage
-      .from("logos")
-      .upload(path, file, { cacheControl: "31536000", upsert: false });
-    if (upErr) {
+    const dataUrl = await shrinkImage(file, 600).catch(() => null);
+    if (!dataUrl) {
       setBusy(false);
-      return setError("The upload didn't work. Check your connection and try again.");
+      return setError("That image couldn't be read. Try another.");
     }
-    const publicUrl = supabase.storage.from("logos").getPublicUrl(path).data.publicUrl;
-    const res = await setLogo(publicUrl);
+    const res = await setLogo(dataUrl);
     setBusy(false);
     if (!res.ok) return setError(res.error ?? "Couldn't save the logo.");
-    setUrl(publicUrl);
+    setUrl(dataUrl);
   }
 
   return (
@@ -69,7 +73,6 @@ function LogoPicker({ orgId, initial, canEdit }: { orgId: string; initial: strin
       <div className="flex flex-wrap items-center gap-3">
         <span className="flex h-16 w-32 items-center justify-center overflow-hidden rounded-(--radius-element) border border-dashed border-(--color-border-emphasized) bg-(--color-background-muted)">
           {url ? (
-            // eslint-disable-next-line @next/next/no-img-element -- user-uploaded logo from Supabase Storage
             <img src={url} alt="Your logo" className="max-h-14 max-w-28 object-contain" />
           ) : (
             <Text type="supporting">No logo</Text>

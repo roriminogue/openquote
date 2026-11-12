@@ -1,5 +1,3 @@
-"use client";
-
 import { TextInput, type TextInputProps } from "@astryxdesign/core/TextInput";
 import { useState } from "react";
 

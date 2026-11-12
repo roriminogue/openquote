@@ -1,10 +1,8 @@
-"use client";
-
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Check, Copy, CopyPlus, Pencil, Printer } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { duplicateQuote } from "@/app/estimates/[id]/actions";
 import { SendQuoteButton, type SendTarget } from "./send-quote";

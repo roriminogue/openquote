@@ -1,5 +1,3 @@
-"use client";
-
 import { Button, type ButtonProps } from "@astryxdesign/core/Button";
 import { useFormStatus } from "react-dom";
 

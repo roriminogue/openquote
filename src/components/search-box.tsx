@@ -1,5 +1,3 @@
-"use client";
-
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Search } from "lucide-react";
 import { useState, type ReactNode } from "react";

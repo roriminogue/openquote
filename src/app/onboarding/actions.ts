@@ -1,46 +1,22 @@
-"use server";
-
-import { sql } from "drizzle-orm";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db, schema } from "@/db";
-import { getAuthUser } from "@/lib/auth";
-import { canCreateBusiness } from "@/lib/signups";
+import { getMember } from "@/lib/auth";
+import { navigateTo } from "@/lib/navigation";
 
 const Onboarding = z.object({
-  name: z.string().trim().min(1),
-  business: z.string().trim().min(1),
+  name: z.string().trim().min(1, "Enter your name."),
+  business: z.string().trim().min(1, "Enter your business name."),
 });
 
-// Creates the organisation and attaches the signed-in user as its owner.
-export async function createOrganisation(formData: FormData) {
-  const user = await getAuthUser();
-  if (!user?.email) redirect("/login");
+export type OnboardingState = { error: string | null };
 
-  // Checked here too, not just on the page: the action can be called directly.
-  const allowed = await canCreateBusiness(user.email);
-  // The page explains why when sign-ups are closed, so no reason travels in the URL.
-  if (!allowed.ok) redirect("/onboarding");
-
+/** Creates the business on this phone, then opens Estimates. */
+export async function createOrganisation(_prev: OnboardingState, formData: FormData): Promise<OnboardingState> {
   const input = Onboarding.safeParse(Object.fromEntries(formData));
-  if (!input.success) redirect("/onboarding?error=missing_fields");
-
-  const created = await db.transaction(async (tx) => {
-    // One business at a time, then check again under the lock: on a fresh install, two people signing up at the
-    // same moment must not both become "the first business".
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtext('openquote:create-business'))`);
-    const stillAllowed = await canCreateBusiness(user.email!, tx);
-    if (!stillAllowed.ok) return stillAllowed;
-
-    const [org] = await tx
-      .insert(schema.organisations)
-      .values({ name: input.data.business, email: user.email })
-      .returning({ id: schema.organisations.id });
-    await tx
-      .insert(schema.users)
-      .values({ id: user.id, orgId: org.id, name: input.data.name, email: user.email!, role: "owner" });
-    return { ok: true as const };
-  });
-  if (!created.ok) redirect("/onboarding");
-  redirect("/estimates");
+  if (!input.success) return { error: input.error.issues[0].message };
+  if (!(await getMember())) {
+    await db.insert(schema.organisations).values({ name: input.data.business, ownerName: input.data.name });
+  }
+  navigateTo("/estimates", { replace: true });
+  return { error: null };
 }

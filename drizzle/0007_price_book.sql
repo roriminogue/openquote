@@ -1,1 +1,0 @@
-ALTER TYPE "public"."line_source" ADD VALUE 'price_book';

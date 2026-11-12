@@ -33,8 +33,8 @@ export const openquoteTheme = defineTheme({
     "--color-text-accent": ["#b93c0a", "#ff9a5c"],
     "--color-icon-accent": ["#c2410c", "#ff9a5c"],
 
-    // Figtree is loaded by next/font in the root layout, which serves it under a generated family name and exposes
-    // that name as --font-figtree. Naming "Figtree" directly would miss the self-hosted file.
+    // Figtree ships inside the app (@fontsource-variable/figtree, imported in main.tsx) as "Figtree Variable", and
+    // src/app/fonts.css names it --font-figtree.
     "--font-family-body": FIGTREE,
     "--font-family-heading": FIGTREE,
   },

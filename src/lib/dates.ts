@@ -3,7 +3,7 @@
 // app is for Australian businesses; set NEXT_PUBLIC_TIME_ZONE to change it). Clock times are shown in each
 // viewer's own zone by <LocalTime>, which matters in Perth or Brisbane.
 
-export const TIME_ZONE = process.env.NEXT_PUBLIC_TIME_ZONE || "Australia/Sydney";
+export const TIME_ZONE = "Australia/Sydney";
 
 export function dateFormat(options: Intl.DateTimeFormatOptions, timeZone: string = TIME_ZONE) {
   return new Intl.DateTimeFormat("en-AU", { timeZone, ...options });
