@@ -39,3 +39,14 @@ RULES:
   docs authoring     build an integration package, and every field it holds
   upgrade --from <old version> --apply   run after a dependency bump
 <!-- ASTRYX:END -->
+
+## publik API
+- Base URL: https://publikhq.com/api/v1 (OpenAI Chat Completions, Responses, Anthropic Messages)
+- Models: publik-fast, publik-balanced, publik-smart only; never a vendor model name
+- Sign in with publik: the publik module's gate runs at start-up, before the first screen; it also sends usage telemetry
+- Key: per-install `pk_` from POST /installs, stored at the publik credential path; env PUBLIK_API_KEY / PUBLIK_API_BASE_URL override
+- App token: publik-app-token.txt (public by design, committed) or PUBLIK_APP_TOKEN
+- 402: show error.message plus error.top_up_url only
+- Never print or log a key
+- Docs: https://publikhq.com/llms.txt, https://publikhq.com/developers, https://publikhq.com/skills/api.md
+- In this app: iPhone ios/App/App/Publik.swift; web src/lib/publik-web.ts through the relay functions/publik (publik's API doesn't take browser calls)
