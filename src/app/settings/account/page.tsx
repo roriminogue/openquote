@@ -127,6 +127,8 @@ function Backup() {
         <input
           ref={picker}
           type="file"
+          // Straight to Files (no Photo Library or camera): a backup is a .oqbackup file.
+          accept=".oqbackup,application/octet-stream"
           hidden
           onChange={(e) => {
             const f = e.target.files?.[0];

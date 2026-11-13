@@ -10,6 +10,27 @@ type Native = {
 };
 const native = registerPlugin<Native>("OpenQuoteNative");
 
+/**
+ * Web version: opens the Share sheet with a PDF made beforehand (lib/pdf-web.ts), and the message. Call it straight
+ * from the tap, with the PDF already made: the Share sheet only opens from a fresh tap. True once it was sent.
+ */
+export async function shareMadePdf(fileName: string, pdf: Uint8Array, text?: string): Promise<{ completed: boolean }> {
+  const file = new File([pdf as BlobPart], `${fileName.replace(/[\\/:*?"<>|]/g, "-")}.pdf`, { type: "application/pdf" });
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], text });
+      return { completed: true };
+    } catch (e) {
+      if ((e as Error)?.name === "AbortError") return { completed: false };
+    }
+  }
+  // No Share sheet (a computer's browser): open the PDF in a new tab to save or print from there.
+  const url = URL.createObjectURL(file);
+  window.open(url, "_blank");
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  return { completed: true };
+}
+
 /** Turns the screen showing now (with its print styles) into an A4 PDF and opens the Share sheet. */
 export async function sharePdf(fileName: string, text?: string): Promise<{ completed: boolean }> {
   if (Capacitor.isNativePlatform()) return native.sharePdf({ fileName, text });

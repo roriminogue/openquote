@@ -164,7 +164,7 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
           </ol>
 
           {/* Totals */}
-          <dl className="ml-auto mt-8 max-w-xs">
+          <dl data-pdf-keep className="ml-auto mt-8 max-w-xs">
             {gst && (
               <>
                 <TotalRow label="Subtotal (ex GST)" cents={totals.subtotalCents} />
@@ -230,6 +230,7 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
 
         {/* The answer */}
         <section
+          data-pdf-keep
           aria-labelledby="answer"
           // In the PDF the client sees how to say yes; once answered, it's only shown on screen.
           className={`${decision ? "no-print " : ""}rounded-(--radius-container) bg-(--color-background-muted) px-4 py-5 sm:px-6 sm:py-6 print:mt-2 print:border print:border-(--color-border)`}
