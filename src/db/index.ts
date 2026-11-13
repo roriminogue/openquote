@@ -68,6 +68,11 @@ export async function exportDatabase(): Promise<Uint8Array> {
   return snapshot();
 }
 
+/** The database file as it is in memory right now, without waiting for the save (for sharing from a tap). */
+export function snapshotDatabase(): Uint8Array {
+  return snapshot();
+}
+
 function snapshot() {
   const bytes = conn().export();
   // sql.js turns foreign keys off when it exports; turn them back on.

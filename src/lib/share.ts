@@ -3,7 +3,7 @@ import { Share } from "@capacitor/share";
 import { writeShareFile } from "@/db/storage";
 
 // Getting things off the phone: a quote as a PDF, a backup file. On the iPhone both open the Share sheet (Messages,
-// Mail, WhatsApp, AirDrop, Save to Files). In a browser (development) the PDF is the print dialog and files download.
+// Mail, WhatsApp, AirDrop, Save to Files). In the web version the PDF is the print screen (Share is at its top).
 
 type Native = {
   sharePdf(o: { fileName: string; text?: string }): Promise<{ completed: boolean; activity: string | null; pages: number }>;
@@ -17,17 +17,33 @@ export async function sharePdf(fileName: string, text?: string): Promise<{ compl
   return { completed: true };
 }
 
-/** Shares a file (a backup), or downloads it in a browser. */
-export async function shareFile(name: string, data: Uint8Array, mime: string) {
+/**
+ * Shares a file (a backup) through the Share sheet: Save to Files, AirDrop, Mail. Where there's no Share sheet
+ * (a computer's browser) it downloads instead. True once it went somewhere; false if the Share sheet was closed.
+ */
+export async function shareFile(name: string, data: Uint8Array, mime: string): Promise<boolean> {
   if (Capacitor.isNativePlatform()) {
     const uri = await writeShareFile(name, data);
-    await Share.share({ title: name, files: [uri] }).catch(() => {
-      // Closed the Share sheet without picking anything.
-    });
-    return;
+    try {
+      await Share.share({ title: name, files: [uri] });
+      return true;
+    } catch {
+      return false; // closed the Share sheet without picking anything
+    }
   }
-  const url = URL.createObjectURL(new Blob([data as BlobPart], { type: mime }));
+  const file = new File([data as BlobPart], name, { type: mime });
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: name });
+      return true;
+    } catch (e) {
+      if ((e as Error)?.name === "AbortError") return false;
+      // Not allowed to share right now: fall through to a download.
+    }
+  }
+  const url = URL.createObjectURL(file);
   const a = Object.assign(document.createElement("a"), { href: url, download: name });
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  return true;
 }

@@ -7,11 +7,12 @@ import { Text } from "@astryxdesign/core/Text";
 import { HardDriveDownload, HardDriveUpload } from "lucide-react";
 import { Suspense, useRef, useState } from "react";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { exportDatabase, replaceDatabase } from "@/db";
+import { replaceDatabase } from "@/db";
+import { isNative } from "@/db/storage";
 import { getOrg } from "@/lib/estimate/queries";
 import { requireMember } from "@/lib/auth";
 import { useQuery } from "@/lib/data";
-import { shareFile } from "@/lib/share";
+import { ago, backUpNow, useLastBackup } from "@/lib/backup";
 import { SettingsSection } from "../parts";
 
 export default function AccountPage() {
@@ -58,19 +59,18 @@ function Account() {
   );
 }
 
-const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Australia/Sydney" });
-
 /** Everything lives on this phone, so: a backup file to keep somewhere else, and a way to bring one back. */
 function Backup() {
   const picker = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<{ kind: "success" | "error" | "info"; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const last = useLastBackup();
 
   async function backUp() {
     setStatus(null);
     setBusy(true);
     try {
-      await shareFile(`OpenQuote AU backup ${today()}.oqbackup`, await exportDatabase(), "application/octet-stream");
+      if (await backUpNow()) setStatus({ kind: "success", text: "Backed up. Keep that file somewhere other than this phone." });
     } catch {
       setStatus({ kind: "error", text: "Couldn't make the backup. Try again." });
     } finally {
@@ -97,8 +97,14 @@ function Backup() {
     <SettingsSection id="backup" title="Your data">
       <div className="flex flex-col gap-4 sm:max-w-md">
         <Text as="p" display="block" type="supporting">
-          Your quotes, clients and settings are saved on this iPhone and included in its iCloud backup. To move to a
-          new phone, or to keep a copy somewhere else, back up to a file and save it to Files, Drive or email.
+          {isNative()
+            ? "Your quotes, clients and settings are saved on this iPhone, not on a server, and included in its iCloud backup."
+            : "Your quotes, clients and settings are saved in this app on your phone, not on a server."}{" "}
+          If the phone is lost or the app is deleted, a backup file is how you get them back. Save it to iCloud Drive
+          or Files, or email it to yourself. It&rsquo;s also how you move to a new phone.
+        </Text>
+        <Text as="p" display="block" weight="medium">
+          {last ? `Last backup: ${new Date(last).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })} (${ago(last)})` : "Not backed up yet"}
         </Text>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button
