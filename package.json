@@ -32,6 +32,8 @@
     "@stylexjs/stylex": "0.19.1",
     "ai": "^7.0.146",
     "drizzle-orm": "^0.45.4",
+    "html2canvas-pro": "^1.6.7",
+    "jspdf": "^3.0.4",
     "lucide-react": "^1.60.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

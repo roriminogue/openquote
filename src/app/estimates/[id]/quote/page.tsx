@@ -3,7 +3,7 @@ import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Theme } from "@astryxdesign/core/theme";
 import { ArrowLeft, Share2 } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useLocation, useParams, useSearchParams } from "react-router";
 import { QuoteDocument } from "@/components/quote-document";
 import { requireMember } from "@/lib/auth";
@@ -12,7 +12,9 @@ import { notFound, useRouter } from "@/lib/navigation";
 import { formatEstimateNo } from "@/lib/pricing";
 import { DETAIL_LEVELS, type DetailLevel } from "@/lib/proposal-schema";
 import { getQuoteDocument, shareEstimate } from "@/lib/proposals";
-import { sharePdf } from "@/lib/share";
+import { isNative } from "@/db/storage";
+import { quotePdf } from "@/lib/pdf-web";
+import { shareMadePdf, sharePdf } from "@/lib/share";
 import { openquoteTheme } from "@/themes/openquote/openquote.js";
 
 /**
@@ -44,11 +46,32 @@ function Quote() {
   const [error, setError] = useState<string | null>(null);
   if (!q) notFound();
 
+  // Web version: make the PDF as soon as the quote is on screen, so Share PDF can open the Share sheet straight
+  // from the tap (it won't open after a wait). The iPhone app makes its PDF natively when tapped.
+  const docRef = useRef<HTMLDivElement>(null);
+  const [pdf, setPdf] = useState<{ of: unknown; bytes: Uint8Array } | null>(null);
+  const made = pdf?.of === q ? pdf.bytes : null; // a PDF of an older version of the quote doesn't count
+  const web = !isNative();
+  useEffect(() => {
+    const article = docRef.current?.querySelector("article");
+    if (!web || !q || !article) return;
+    let live = true;
+    quotePdf(article).then(
+      (bytes) => live && setPdf({ of: q, bytes }),
+      (e) => live && setError(`Couldn't make the PDF: ${(e as Error)?.message ?? e}`),
+    );
+    return () => {
+      live = false;
+    };
+  }, [web, q]);
+  const making = web && !made && !error;
+
   async function share() {
     setError(null);
     setBusy(true);
     try {
-      const shared = await sharePdf(`${formatEstimateNo(q!.estimate.number)} ${q!.estimate.title}`, message);
+      const name = `${formatEstimateNo(q!.estimate.number)} ${q!.estimate.title}`;
+      const shared = web ? await shareMadePdf(name, made!, message) : await sharePdf(name, message);
       // Counts as sent once it actually went somewhere (not when the Share sheet was closed).
       if (detail && shared.completed) await shareEstimate((await requireMember()).orgId, id, detail);
     } catch (e) {
@@ -64,11 +87,12 @@ function Quote() {
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <Button label="Back" variant="ghost" icon={<Icon icon={ArrowLeft} />} onClick={() => router.back()} />
           <Button
-            label={busy ? "Making the PDF…" : "Share PDF"}
+            label={busy || making ? "Making the PDF…" : "Share PDF"}
             variant="primary"
             icon={<Icon icon={Share2} />}
             onClick={share}
-            isLoading={busy}
+            isLoading={busy || making}
+            isDisabled={making}
           />
         </div>
         {error && (
@@ -77,7 +101,9 @@ function Quote() {
           </div>
         )}
       </div>
-      <QuoteDocument q={q} />
+      <div ref={docRef}>
+        <QuoteDocument q={q} />
+      </div>
     </>
   );
 }
