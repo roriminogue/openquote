@@ -12,7 +12,7 @@
 import type { PublikScreen } from "./publik";
 
 export const APP_SLUG = "openquote-au";
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.0.1";
 const RELAY = "/publik";
 // publik API paths. The relay on this site (functions/publik) maps /publik/<x> to publikhq.com/api/v1/<x>.
 const INSTALLS = "/api/v1/installs";
