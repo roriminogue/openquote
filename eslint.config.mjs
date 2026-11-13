@@ -14,6 +14,9 @@ export default defineConfig([
     "dist/**",
     // Native iPhone build output.
     "ios/build/**",
+    "ios/build-sim/**",
+    // Left over from the Next.js version.
+    ".next/**",
     "ios/App/App/public/**",
     // Built by `npx astryx theme build` from openquoteTheme.ts, plus the descriptor in the shape the CLI expects.
     "src/themes/openquote/openquote.*",
