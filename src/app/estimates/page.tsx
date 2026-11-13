@@ -4,6 +4,7 @@ import { List, ListItem } from "@astryxdesign/core/List";
 import { Skeleton } from "@astryxdesign/core/Skeleton";
 import { Text } from "@astryxdesign/core/Text";
 import { Suspense } from "react";
+import { BackupReminder } from "@/components/backup-reminder";
 import { EstimateRows } from "@/components/estimate-rows";
 import { NewEstimateButton } from "@/components/new-estimate-button";
 import { PageTitle } from "@/components/page-title";
@@ -23,14 +24,20 @@ export default function EstimatesPage() {
 }
 
 function EstimateList() {
-  const rows = useQuery("estimates", async () => listEstimates((await requireMember()).orgId));
+  const { orgId, rows } = useQuery("estimates", async () => {
+    const { orgId } = await requireMember();
+    return { orgId, rows: await listEstimates(orgId) };
+  });
 
   if (!rows.length) return <FirstEstimate />;
 
   return (
-    <div className="mt-6">
-      <EstimateRows rows={rows} />
-    </div>
+    <>
+      <BackupReminder orgId={orgId} />
+      <div className="mt-6">
+        <EstimateRows rows={rows} />
+      </div>
+    </>
   );
 }
 
