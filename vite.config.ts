@@ -32,5 +32,10 @@ export default defineConfig({
   build: { outDir: "dist", target: "es2022", chunkSizeWarningLimit: 2000 },
   // `npm run dev`, then open the address it prints. --host lets a phone on the same Wi-Fi open it too.
   // The iOS build folders hold thousands of generated files; watching them makes the dev server run out of memory.
-  server: { port: 5173, watch: { ignored: ["**/ios/**", "**/dist/**"] } },
+  // /publik is the relay to publik API (functions/publik): on the live site a Cloudflare function, here a proxy.
+  server: {
+    port: 5173,
+    watch: { ignored: ["**/ios/**", "**/dist/**"] },
+    proxy: { "/publik": { target: "https://publikhq.com", changeOrigin: true, rewrite: (p) => p.replace(/^\/publik/, "/api/v1") } },
+  },
 });

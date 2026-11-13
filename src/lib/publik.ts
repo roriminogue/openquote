@@ -1,10 +1,11 @@
 import { Capacitor, registerPlugin, type PluginListenerHandle } from "@capacitor/core";
+import { webConfigured, webEnsureSignedIn, webPress, webPublikKey, webSetChoice } from "./publik-web";
 
 // Sign in with publik (https://publikhq.com). The native module (ios/App/App/Publik.swift) provisions this install's
 // publik key, runs the sign-in gate and keeps the key; its screens are drawn by <PublikGate> (components/publik-gate.tsx)
-// in the app's own design. The gate only runs once the build carries a publik app token, which publik issues when
-// the app is listed; until then the app runs on the person's own AI key (Settings → AI).
-// In a browser (development) a key can be set by hand in localStorage ("oq.publik-key") to try publik API.
+// in the app's own design. The web version runs the same gate in lib/publik-web.ts. The gate only runs once the build
+// carries a publik app token, which publik issues when the app is listed; until then the app runs on the person's own
+// AI key (Settings → AI).
 
 export type PublikScreen = {
   id: "sign_in" | "unreachable" | "choose" | "done";
@@ -28,7 +29,7 @@ const onPhone = () => Capacitor.isNativePlatform();
 
 /** Whether this build can sign in with publik (it has publik's app token). */
 export async function publikConfigured(): Promise<boolean> {
-  if (!onPhone()) return false;
+  if (!onPhone()) return webConfigured();
   try {
     return (await native.publikStatus()).configured;
   } catch {
@@ -45,15 +46,12 @@ export async function publikKey(): Promise<string | null> {
       return null;
     }
   }
-  try {
-    return localStorage.getItem("oq.publik-key");
-  } catch {
-    return null;
-  }
+  return webPublikKey();
 }
 
 /** Runs the gate; `onScreen` gets each screen to draw. Resolves once signed in (or straight away if not configured). */
 export async function runPublikGate(onScreen: (s: PublikScreen) => void) {
+  if (!onPhone()) return webEnsureSignedIn(onScreen);
   const handle = await native.addListener("publikScreen", onScreen);
   try {
     return await native.publikStart();
@@ -62,8 +60,8 @@ export async function runPublikGate(onScreen: (s: PublikScreen) => void) {
   }
 }
 
-export const pressPublik = (action: string | null) => native.publikPress({ action });
+export const pressPublik = (action: string | null) => (onPhone() ? native.publikPress({ action }) : Promise.resolve(webPress(action)));
 
 /** Settings → AI: pay with the publik plan, use my own key, or ask again on the next start. */
 export const setPublikChoice = (choice: "publik" | "own_key" | null) =>
-  onPhone() ? native.publikSetChoice({ choice }) : Promise.resolve();
+  onPhone() ? native.publikSetChoice({ choice }) : Promise.resolve(webSetChoice(choice));
