@@ -155,14 +155,20 @@ async function readWallet(key: string): Promise<{ status: number; wallet: Wallet
 function gateScreen(id: "sign_in" | "unreachable" | "choose", w?: Wallet | null, note?: string | null, message?: string | null): PublikScreen {
   if (id === "unreachable")
     return { id, title: "Sign in with publik", body: message ?? "publik is not reachable. Check your connection.", note, buttons: [{ action: "retry", label: "Retry" }] };
-  if (id === "sign_in")
+  if (id === "sign_in") {
+    // After the first try the person is usually signed in already, and publik's page then shows "Link this
+    // computer" straight away (publik's Google and GitHub sign-in land on the wallet instead).
+    const again = !!note;
     return {
       id,
       title: "Sign in with publik",
-      body: "This app uses your publik account. Tap Sign in with publik and sign in, then tap Done at the top to come back. The app carries on by itself.",
+      body: again
+        ? "Signed in, but publik showed your wallet? Tap Link this phone, then Link this computer on the publik page, then Done."
+        : "This app uses your publik account. Tap Sign in with publik and sign in, then tap Done at the top to come back. The app carries on by itself.",
       note,
-      buttons: [{ action: "sign_in", label: "Sign in with publik" }],
+      buttons: [{ action: "sign_in", label: again ? "Link this phone" : "Sign in with publik" }],
     };
+  }
   const who = w?.handle ? `You are signed in as @${w.handle}.` : "You are signed in to publik.";
   if (!w || (w.planKind === "none" && w.balanceMicros <= 0))
     return {
