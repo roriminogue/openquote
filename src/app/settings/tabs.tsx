@@ -5,7 +5,7 @@ const TABS = [
   ["/settings/business", "Business"],
   ["/settings/rates", "Rates and pricing"],
   ["/settings/ai", "AI"],
-  ["/settings/account", "Account"],
+  ["/settings/account", "Your data"],
 ] as const;
 
 /** The tabs for a known path; also the Suspense fallback. */

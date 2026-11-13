@@ -1,8 +1,10 @@
 # OpenQuote AU
 
-Free, open-source AI quoting for tradies, as an iPhone app. Describe a job the way you'd tell a mate on the phone,
+Free, open-source AI quoting for tradies, on your iPhone. Describe a job the way you'd tell a mate on the phone,
 and OpenQuote AU breaks it into stages and prices every line with your own rates. Edit it, then send it to your
 client as a PDF from your phone.
+
+**Try it:** open **https://openquote-au.pages.dev** in Safari on your iPhone and add it to your Home Screen.
 
 - **Price a job in under a minute.** Stages, quantities, labour and materials, with your rates used first.
 - **Real prices, not guesses.** A built-in price book of checked material prices, and calculators that work out
@@ -10,16 +12,16 @@ client as a PDF from your phone.
 - **Edit anything.** Change quantities, prices and descriptions, and add or remove lines and stages.
 - **Send it.** A clean PDF quote with your logo and terms, shared by text, WhatsApp or email from your phone. Mark
   it accepted or declined when the client answers.
-- **Everything stays on your phone.** No account to make, no website, no server. Your quotes are saved on the
-  iPhone and included in its iCloud backup, and you can back up to a file any time.
+- **Everything stays on your phone.** No account to make and no server holding your quotes. They're saved on the
+  phone, and the app reminds you to back them up to a file.
 - **Costs nothing to run.** Pay only for the AI you use: with your own AI key (a few cents a quote), or a publik
   plan.
 
 <p>
-  <img src="docs/screenshots/new.png" width="200" alt="New estimate: describe the job or tap Talk, pick a project, and price it">
-  <img src="docs/screenshots/estimate.png" width="200" alt="An estimate: the total, your cost and margin, and where the money goes">
-  <img src="docs/screenshots/quote.png" width="200" alt="The quote your client gets, with your business details and their dates">
-  <img src="docs/screenshots/projects.png" width="200" alt="Projects, with the latest quote and status for each">
+  <img src="docs/screenshots/2-new-estimate.jpg" width="200" alt="New estimate: describe the job or tap Talk, then Price this job">
+  <img src="docs/screenshots/3-estimate.jpg" width="200" alt="An estimate: the total, your cost and margin, and where the money goes">
+  <img src="docs/screenshots/4-quote.jpg" width="200" alt="The quote your client gets, with your business details, ready to share as a PDF">
+  <img src="docs/screenshots/1-estimates.jpg" width="200" alt="Every job you've priced, with its total and status">
 </p>
 
 ## Get it on your iPhone
@@ -34,7 +36,7 @@ Apple makes apps installed this way stop opening after 7 days, so you plug in an
 (your data stays). Step-by-step instructions: [ios/README.md](ios/README.md).
 
 Either way, set up your business, then add your AI key in **Settings → AI** (or sign in with publik). To move your
-quotes from one to the other: **Settings → Account → Back up to a file**, then **Restore from a file** in the other.
+quotes from one to the other: **Settings → Your data → Back up to a file**, then **Restore from a file** in the other.
 
 ## What it costs
 
@@ -48,12 +50,29 @@ quotes from one to the other: **Settings → Account → Back up to a file**, th
 fencing, decking and carpentry materials. Labour times haven't been checked by a tradie yet. Your own rates in
 **Settings → Rates and pricing** always come first, so set those up, especially outside Victoria.
 
-## Your data
+## Your data and privacy
 
-Everything is in one SQLite database inside the app (Library/OpenQuote on the phone), which the iPhone includes in
-its iCloud and computer backups. **Settings → Account → Back up to a file** saves a copy you can keep in Files,
-Drive or email, and **Restore from a file** brings one back, on the same phone or a new one. AI keys are kept in
-the iPhone's Keychain and never go into backups.
+**Your quotes stay on your phone.** OpenQuote AU has no account and no server holding anyone's data. Everything you
+enter (business details, rates, clients, quotes) is saved inside the app on your phone: in the iPhone app, a SQLite
+database in its Library folder, included in the phone's iCloud backups; in the Home Screen version, the same
+database in that app's own storage on the phone.
+
+**What leaves your phone, and only when you do it:**
+
+- **Pricing a job:** your job description, site address and rates go to the AI service you chose (Anthropic,
+  OpenAI, Google, OpenRouter, your own Ollama, or publik) to be priced. Nothing else is sent.
+- **Sharing:** the quote PDFs and backup files you choose to send.
+- **Sign in with publik** (only in the publik version): publik learns that you use the app and counts app opens.
+  It never sees your quotes.
+
+**Who else is involved:** the Home Screen version's files are served by Cloudflare Pages, which sees that the app
+was loaded, like any website, and passes publik requests on without keeping them. Nobody else gets anything: no
+analytics, no ads, no tracking.
+
+**Backups:** **Settings → Your data → Back up to a file** saves everything to one file you can keep in iCloud
+Drive, Files or email; **Restore from a file** brings it back on the same phone or a new one. The app reminds you
+when it's been a while. AI keys are never put in backups: in the iPhone app they're in the Keychain, in the Home
+Screen version in that app's storage.
 
 **Moving from the old web version?** `npx tsx scripts/export-from-web.ts` reads your business from its database
 (`DATABASE_URL` in `.env.local`) and writes a backup to `exports/`. Install with
