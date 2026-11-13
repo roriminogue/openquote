@@ -19,6 +19,8 @@ export function App() {
   const [state, setState] = useState<"opening" | "open" | Error>("opening");
 
   useEffect(() => {
+    // In the web version the quotes live in the browser's storage: ask the phone to keep it for good.
+    if (!isNative()) void navigator.storage?.persist?.().catch(() => {});
     openDatabase().then(
       () => setState("open"),
       (e: Error) => setState(e),

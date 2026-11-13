@@ -11,7 +11,7 @@ import { isNative } from "@/db/storage";
  * show it.
  */
 export function setUpKeyboard() {
-  if (!isNative()) return () => {};
+  if (!isNative()) return setUpWebKeyboard();
   const root = document.documentElement;
   let up = false;
 
@@ -60,4 +60,21 @@ function scroller(el: HTMLElement): HTMLElement | null {
     if ((overflowY === "auto" || overflowY === "scroll") && p.scrollHeight > p.clientHeight) return p;
   }
   return null;
+}
+
+/**
+ * The Home Screen web version has no keyboard plugin. Safari shrinks the visible area when the keyboard is up, so
+ * that's how we tell: the tab bar hides as it does in the app. (Safari itself still decides whether to nudge the
+ * page to show the field.)
+ */
+function setUpWebKeyboard() {
+  const viewport = window.visualViewport;
+  if (!viewport) return () => {};
+  const root = document.documentElement;
+  const onResize = () => {
+    const up = window.innerHeight - viewport.height > 120;
+    root.toggleAttribute("data-keyboard", up);
+  };
+  viewport.addEventListener("resize", onResize);
+  return () => viewport.removeEventListener("resize", onResize);
 }
