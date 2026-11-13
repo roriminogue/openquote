@@ -4,7 +4,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { useActionState, useState } from "react";
 import { TextField } from "@/components/fields";
-import { PROVIDER_INFO, PROVIDERS, type Provider } from "@/lib/ai/providers";
+import { PROVIDER_INFO, AVAILABLE_PROVIDERS, type Provider } from "@/lib/ai/providers";
 import { FormFooter } from "../form-footer";
 import { Fields, SettingsSection } from "../parts";
 import { saveAiSettings, type SaveState } from "./actions";
@@ -18,7 +18,7 @@ type Initial = {
   transcription: "off" | "openai" | "local";
 };
 
-const PROVIDER_OPTIONS = PROVIDERS.map((p) => ({
+const PROVIDER_OPTIONS = AVAILABLE_PROVIDERS.map((p) => ({
   value: p,
   label: `${PROVIDER_INFO[p].label}${PROVIDER_INFO[p].advanced ? " (advanced)" : ""}`,
 }));

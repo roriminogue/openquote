@@ -22,8 +22,7 @@ const ORIGIN = "https://publikhq.com";
 const CREDENTIAL = "oq-publik-credential";
 const TELEMETRY_ID = "oq-publik-telemetry-id";
 
-const tokenFiles = import.meta.glob<string>("/publik-app-token.txt", { query: "?raw", import: "default", eager: true });
-const APP_TOKEN = (Object.values(tokenFiles)[0] ?? import.meta.env.VITE_PUBLIK_APP_TOKEN ?? "").trim();
+import { PUBLIK_APP_TOKEN as APP_TOKEN } from "./publik-token";
 
 /** True when this build carries publik's app token, so the gate runs. */
 export const webConfigured = () => APP_TOKEN.startsWith("pat_");

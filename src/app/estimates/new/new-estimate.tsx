@@ -13,6 +13,7 @@ import { Money } from "@/components/money";
 import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";
 import { generateEstimate } from "@/lib/estimate/run";
+import { PUBLIK_ENABLED } from "@/lib/publik-token";
 import { useDictation } from "./dictation";
 import { ProjectField } from "./project-flow";
 
@@ -131,7 +132,11 @@ export function NewEstimate({
           <Banner
             status="warning"
             title="Set up AI first"
-            description="OpenQuote AU prices jobs with AI: use your publik plan, or your own provider key."
+            description={
+              PUBLIK_ENABLED
+                ? "OpenQuote AU prices jobs with AI: use your publik plan, or your own provider key."
+                : "OpenQuote AU prices jobs with AI. Add your AI key (Anthropic, OpenAI, Google or OpenRouter) in Settings → AI."
+            }
           />
           <div className="mt-3 sm:w-48">
             <Button label="Set up AI" variant="secondary" size="lg" width="100%" href="/settings/ai" />

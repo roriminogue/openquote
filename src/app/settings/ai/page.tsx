@@ -7,7 +7,9 @@ import { Suspense } from "react";
 import { db, schema } from "@/db";
 import { requireMember } from "@/lib/auth";
 import { publikKey } from "@/lib/publik";
-import { PROVIDER_INFO } from "@/lib/ai/providers";
+import { effectiveProvider, PROVIDER_INFO } from "@/lib/ai/providers";
+import { isNative } from "@/db/storage";
+import { PUBLIK_ENABLED } from "@/lib/publik-token";
 import { startOfMonth } from "@/lib/dates";
 import { removeAiKey } from "./actions";
 import { Money } from "@/components/money";
@@ -18,8 +20,9 @@ export default function AiSettingsPage() {
   return (
     <>
       <Intro>
-        OpenQuote AU prices jobs with AI. Use your publik plan (no key needed), or your own provider account: your key
-        stays in this iPhone&rsquo;s Keychain and you pay the provider directly.
+        OpenQuote AU prices jobs with AI.{PUBLIK_ENABLED ? " Use your publik plan (no key needed), or" : " Use"} your own
+        provider account: your key stays {isNative() ? "in this iPhone’s Keychain" : "in this app on your phone"} and you
+        pay the provider directly, usually a few cents a quote.
       </Intro>
       <Suspense
         fallback={
@@ -49,7 +52,7 @@ function AiSettings() {
       .where(and(eq(schema.aiUsage.orgId, member.orgId), gte(schema.aiUsage.createdAt, startOfMonth())));
     return { member, settings, usage, publikReady: !!(await publikKey()) };
   });
-  const provider = settings?.provider ?? "publik";
+  const provider = effectiveProvider(settings?.provider);
   const info = PROVIDER_INFO[provider];
   const canEdit = member.role !== "member";
 
