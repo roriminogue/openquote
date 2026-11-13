@@ -5,6 +5,8 @@ import { Skeleton } from "@astryxdesign/core/Skeleton";
 import { Text } from "@astryxdesign/core/Text";
 import { Suspense } from "react";
 import { BackupReminder } from "@/components/backup-reminder";
+import { DemoBanner } from "@/components/demo-banner";
+import { isDemo } from "@/lib/demo";
 import { EstimateRows } from "@/components/estimate-rows";
 import { NewEstimateButton } from "@/components/new-estimate-button";
 import { PageTitle } from "@/components/page-title";
@@ -33,7 +35,7 @@ function EstimateList() {
 
   return (
     <>
-      <BackupReminder orgId={orgId} />
+      {isDemo() ? <DemoBanner /> : <BackupReminder orgId={orgId} />}
       <div className="mt-6">
         <EstimateRows rows={rows} />
       </div>

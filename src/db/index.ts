@@ -62,6 +62,16 @@ export async function replaceDatabase(bytes: Uint8Array) {
   await flush();
 }
 
+/** Empties the database: a fresh start with no business (leaving the demo, see lib/demo.ts). */
+export async function resetDatabase() {
+  const SQL = await loadSqlJs();
+  await flush();
+  sqlite?.close();
+  sqlite = prepare(new SQL.Database());
+  markDirty();
+  await flush();
+}
+
 /** The database file as it is right now (for Settings → Account → Back up). */
 export async function exportDatabase(): Promise<Uint8Array> {
   await flush();
