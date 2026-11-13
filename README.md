@@ -35,8 +35,17 @@ not on a server.
 Apple makes apps installed this way stop opening after 7 days, so you plug in and run the install again each week
 (your data stays). Step-by-step instructions: [ios/README.md](ios/README.md).
 
-Either way, set up your business, then add your AI key in **Settings → AI** (or sign in with publik). To move your
-quotes from one to the other: **Settings → Your data → Back up to a file**, then **Restore from a file** in the other.
+**The first time you open it:**
+
+1. **Sign in with publik.** Tap the button, sign in to [publik](https://publikhq.com) in the browser that opens
+   (free), and come back: the app carries on by itself.
+2. **Choose how to pay for AI:** **Connect your plan** (pay per quote from your publik credit, no key needed) or
+   **Use my own key** (add an Anthropic, OpenAI, Google or OpenRouter key in **Settings → AI**).
+3. **Set up your business:** name, ABN, logo and contact details in **Settings → Business**, and your labour rate and
+   materials in **Settings → Rates and pricing**. They go on every quote.
+
+To move your quotes between phones or versions: **Settings → Your data → Back up to a file**, then **Restore from a
+file** on the other.
 
 ## What it costs
 
@@ -74,16 +83,12 @@ Drive, Files or email; **Restore from a file** brings it back on the same phone 
 when it's been a while. AI keys are never put in backups: in the iPhone app they're in the Keychain, in the Home
 Screen version in that app's storage.
 
-**Moving from the old web version?** `npx tsx scripts/export-from-web.ts` reads your business from its database
-(`DATABASE_URL` in `.env.local`) and writes a backup to `exports/`. Install with
-`./ios/install-on-iphone.sh --data "exports/<name> from web.oqbackup"` to start with it on the phone.
-
 ## Sign in with publik
 
-When OpenQuote AU is listed on [publik](https://publikhq.com), it opens behind **Sign in with publik**, and people
-can pay for AI with their publik plan instead of their own key. It switches on once publik's app token is in
-`publik-app-token.txt` at the top of the repo (publik issues it when the app is listed; committing it is intended).
-Without that file the app opens straight away and uses each person's own AI key.
+OpenQuote AU is listed on publik at **https://publikhq.com/openquote-au**. It opens behind **Sign in with publik**,
+and people can pay for AI with their publik plan instead of their own key. That's switched on by publik's app token in
+`publik-app-token.txt` at the top of the repo (public by design: it identifies the app and only mints capped keys for
+it). Without that file (in a fork, say) the app opens straight away and uses each person's own AI key.
 
 - **iPhone app:** `ios/App/App/Publik.swift` (publik's Swift module).
 - **Web version:** `src/lib/publik-web.ts`, the same steps in the browser. Publik's API doesn't take calls from web
@@ -108,6 +113,11 @@ npm run ios                    # build the app's screens and copy them into the 
 | `npm run db:generate` | New migration in `src/db/migrations` from `src/db/schema.ts` changes (the app applies it on launch) |
 | `npm run ai:try -- "job description"` | Run the AI estimate pipeline once with `ANTHROPIC_API_KEY` |
 | `npm run bench` | Run the reference jobs and compare them with earlier results and market prices (spends AI credit) |
+| `./scripts/deploy-web.sh` | Build and publish the web version to Cloudflare Pages |
+| `./ios/install-on-iphone.sh` | Build and install the native app on a plugged-in iPhone |
+
+**Moving from the old hosted version:** `npx tsx scripts/export-from-web.ts` reads a business from its Postgres
+database (`DATABASE_URL` in `.env.local`) and writes a backup file to `exports/`; restore it in the app.
 
 **Stack:** React, TypeScript, Vite and React Router · the Astryx design system and Tailwind · SQLite in the app
 (sql.js) with Drizzle ORM · Vercel AI SDK, calling the AI provider straight from the phone · Capacitor for the
