@@ -156,17 +156,22 @@ function gateScreen(id: "sign_in" | "unreachable" | "choose", w?: Wallet | null,
   if (id === "unreachable")
     return { id, title: "Sign in with publik", body: message ?? "publik is not reachable. Check your connection.", note, buttons: [{ action: "retry", label: "Retry" }] };
   if (id === "sign_in") {
-    // After the first try the person is usually signed in already, and publik's page then shows "Link this
-    // computer" straight away (publik's Google and GitHub sign-in land on the wallet instead).
-    const again = !!note;
+    // From a Home Screen web app iOS opens publik in Safari, and the only ways back are the small "◀ OpenQuote" at
+    // the top left or the app switcher, so the screen says so. publik's Google and GitHub sign-in also land on the
+    // wallet instead of the link page; once signed in, Open publik again shows "Link this computer" straight away.
+    // The link works from any device, so the code lets people link from their computer instead.
+    const code = linkCode(w?.claimUrl);
     return {
       id,
       title: "Sign in with publik",
-      body: again
-        ? "Signed in, but publik showed your wallet? Tap Link this phone, then Link this computer on the publik page, then Done."
-        : "This app uses your publik account. Tap Sign in with publik and sign in, then tap Done at the top to come back. The app carries on by itself.",
-      note,
-      buttons: [{ action: "sign_in", label: again ? "Link this phone" : "Sign in with publik" }],
+      body: "Tap Open publik, sign in, then tap Link this computer. To come back, tap ◀ OpenQuote at the very top left of your screen. This screen carries on by itself.",
+      note: [
+        note ? "Publik showed your wallet instead? Come back and tap Open publik again." : null,
+        code ? `Or link from your computer: publikhq.com/claim/${code}` : null,
+      ]
+        .filter(Boolean)
+        .join(" ") || null,
+      buttons: [{ action: "sign_in", label: "Open publik" }],
     };
   }
   const who = w?.handle ? `You are signed in as @${w.handle}.` : "You are signed in to publik.";
@@ -192,6 +197,11 @@ function gateScreen(id: "sign_in" | "unreachable" | "choose", w?: Wallet | null,
       { action: "own_key", label: "Use my own key" },
     ],
   };
+}
+
+/** The link code at the end of publik's claim link (publikhq.com/claim/ABCD-1234). */
+function linkCode(url?: string | null) {
+  return url?.match(/\/claim\/([A-Z0-9-]{4,})/i)?.[1] ?? null;
 }
 
 // The button the person pressed on the screen showing now.
@@ -283,7 +293,7 @@ async function gate(show: (s: PublikScreen) => void): Promise<{ signedIn: boolea
       const a = await ask(show, gateScreen("sign_in", w, signNote), c.key, signPoll ? (x) => x.claimed : undefined);
       if (a === "sign_in") {
         window.open(w.claimUrl ?? c.claim_url ?? `${ORIGIN}/wallet`, "_blank", "noopener");
-        signNote = "Signed in? Tap Done at the top of the publik page to come back here.";
+        signNote = "Waiting for publik…";
         signPoll = true;
       }
       if (a === "timeout") {
