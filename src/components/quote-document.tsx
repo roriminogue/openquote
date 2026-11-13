@@ -87,8 +87,9 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
 
         {/* Who and when */}
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-b border-(--color-border) py-6 sm:grid-cols-4">
-          <Meta label="Prepared for">{client?.name ?? "—"}</Meta>
-          <Meta label="Site">{e.siteAddress ?? "—"}</Meta>
+          {/* Left out when there's nothing to say (a quote with no client or site yet). */}
+          {client?.name && <Meta label="Prepared for">{client.name}</Meta>}
+          {e.siteAddress && <Meta label="Site">{e.siteAddress}</Meta>}
           <Meta label="Date">{dateFmt.format(send.sentAt)}</Meta>
           <Meta label="Valid until">{dateFmt.format(until)}</Meta>
         </dl>

@@ -89,6 +89,51 @@ plan): put publik's app token in `publik-app-token.txt` at the top of the repo a
 is the default, none of it runs. The pieces: `ios/App/App/Publik.swift` (iPhone app), `src/lib/publik-web.ts` (web
 version) and `functions/publik` (a Cloudflare Pages relay, since publik's API doesn't take calls from web pages).
 
+## Case study
+
+**The problem.** Small trade businesses (fencers, deck builders, carpenters) lose evenings to quoting. The job is
+clear in their head after a site visit, but turning it into a priced, itemised quote means counting posts and
+boards, looking up material prices and adding labour, often days later. Slow quotes lose jobs. The quoting tools
+that exist are built for office staff at a desk, cost a monthly fee, and mostly leave the pricing to you.
+
+**Who it's for.** A sole trader or small crew who quotes from the ute, on a phone, straight after looking at the job.
+They know their own rates; they want the counting and the paperwork done for them.
+
+**Key decisions.**
+
+- **The AI proposes, code prices.** The model breaks the job into stages and line items with quantities. It never
+  does the arithmetic. Prices come from the tradie's own rates first, then a price book of checked material prices,
+  and fences and decks are worked out by calculators (posts, rails, boards, screws) rather than guessed. Anything the
+  model had to estimate is flagged "Check price". This is what makes the totals trustworthy.
+- **Everything on the phone, no server.** The first version was a Next.js site on Vercel with a Supabase database,
+  which meant every user needed their own hosting and accounts to set up. I rebuilt it to run entirely on the
+  phone: SQLite (sql.js) in the app, the AI called straight from the phone with the user's own key, and quotes sent
+  as a PDF through the iPhone's Share sheet. It costs nothing to run, there's no account, and there's no customer
+  data on anyone's server to lose.
+- **A Home Screen web app as the main way in.** The same build ships as a native Capacitor app and as a web app on
+  Cloudflare Pages. Without a paid Apple developer account, natively installed apps stop opening after 7 days, so the
+  web version (offline with a service worker, data stored on the phone) is the one people actually use. The native
+  app stays for features the web can't do as well, like the Keychain and native PDFs.
+- **Backups instead of sync.** With no server, the phone is the only copy. The app saves a single backup file the
+  user can keep in iCloud Drive or email, restores it on another phone, and reminds them when it's been a while.
+- **A sample business to try first.** "Try it with sample quotes" loads a made-up business with four priced jobs, so
+  anyone can see the whole flow without setting anything up or paying for AI.
+
+**What didn't work.** I listed the app on [publik](https://publikhq.com), a marketplace with its own sign-in and
+AI billing. Getting it working needed a relay (its API doesn't accept calls from web pages), and its Google sign-in
+couldn't return to a Home Screen app on the iPhone, so signing in kept stranding people in Safari. It added friction
+for no real gain, so I took it out. The code is still in the repo, switched off.
+
+**What I learnt.**
+
+- Treat the model as a planner, not a calculator. Splitting "what's in the job" from "what it costs" made the
+  output checkable and the prices consistent.
+- Removing the server removed whole categories of work: accounts, hosting bills, data protection, outages.
+- Phone-first means testing on a real phone. The on-screen keyboard, safe areas, Share sheet and Home Screen
+  behaviour all differ from a desktop browser and from the Simulator.
+- Distribution on the iPhone is a product decision, not a detail. How people install the app shaped the
+  architecture more than any feature did.
+
 ## For developers
 
 Prerequisites: Node 22+. For the iPhone app, a Mac with Xcode.
