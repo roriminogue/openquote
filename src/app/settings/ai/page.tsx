@@ -2,10 +2,11 @@ import { MetadataList, MetadataListItem } from "@astryxdesign/core/MetadataList"
 import { Skeleton } from "@astryxdesign/core/Skeleton";
 import { Text } from "@astryxdesign/core/Text";
 import { and, eq, gte, sql } from "drizzle-orm";
-import type { Metadata } from "next";
+import { useQuery } from "@/lib/data";
 import { Suspense } from "react";
 import { db, schema } from "@/db";
 import { requireMember } from "@/lib/auth";
+import { publikKey } from "@/lib/publik";
 import { PROVIDER_INFO } from "@/lib/ai/providers";
 import { startOfMonth } from "@/lib/dates";
 import { removeAiKey } from "./actions";
@@ -13,14 +14,12 @@ import { Money } from "@/components/money";
 import { Intro, SettingsSection } from "../parts";
 import { AiSettingsForm, RemoveKey } from "./form";
 
-export const metadata: Metadata = { title: "AI settings" };
-
 export default function AiSettingsPage() {
   return (
     <>
       <Intro>
-        OpenQuote AU uses your own AI provider account. Your key is encrypted, never leaves the server, and you pay the
-        provider directly.
+        OpenQuote AU prices jobs with AI. Use your publik plan (no key needed), or your own provider account: your key
+        stays in this iPhone&rsquo;s Keychain and you pay the provider directly.
       </Intro>
       <Suspense
         fallback={
@@ -35,32 +34,35 @@ export default function AiSettingsPage() {
   );
 }
 
-async function AiSettings() {
-  const member = await requireMember();
-  const [settings] = await db.select().from(schema.aiSettings).where(eq(schema.aiSettings.orgId, member.orgId));
-  const provider = settings?.provider ?? "anthropic";
+function AiSettings() {
+  const { member, settings, usage, publikReady } = useQuery("ai-settings", async () => {
+    const member = await requireMember();
+    const [settings] = await db.select().from(schema.aiSettings).where(eq(schema.aiSettings.orgId, member.orgId));
+    // "This month" starts at midnight on the 1st in Australian eastern time, not in UTC.
+    const [usage] = await db
+      .select({
+        calls: sql<number>`count(*)`,
+        tokens: sql<number>`coalesce(sum(${schema.aiUsage.inputTokens} + ${schema.aiUsage.outputTokens}), 0)`,
+        costMicroUsd: sql<number>`coalesce(sum(${schema.aiUsage.costMicroUsd}), 0)`,
+      })
+      .from(schema.aiUsage)
+      .where(and(eq(schema.aiUsage.orgId, member.orgId), gte(schema.aiUsage.createdAt, startOfMonth())));
+    return { member, settings, usage, publikReady: !!(await publikKey()) };
+  });
+  const provider = settings?.provider ?? "publik";
   const info = PROVIDER_INFO[provider];
-  const hasInstanceKey = !!(info.envKey && process.env[info.envKey]);
   const canEdit = member.role !== "member";
 
-  // "This month" starts at midnight on the 1st in Australian eastern time, not in UTC.
-  const monthStart = startOfMonth();
-  const [usage] = await db
-    .select({
-      calls: sql<number>`count(*)::int`,
-      tokens: sql<number>`coalesce(sum(${schema.aiUsage.inputTokens} + ${schema.aiUsage.outputTokens}), 0)::int`,
-      costMicroUsd: sql<number>`coalesce(sum(${schema.aiUsage.costMicroUsd}), 0)::bigint`,
-    })
-    .from(schema.aiUsage)
-    .where(and(eq(schema.aiUsage.orgId, member.orgId), gte(schema.aiUsage.createdAt, monthStart)));
-
-  const keyStatus = settings?.apiKeyLast4
-    ? `Your key ending ${settings.apiKeyLast4}`
-    : !info.needsKey && settings
-      ? "No key needed"
-      : hasInstanceKey
-        ? "Using this install's shared key"
-        : "No key yet: AI features are off";
+  const keyStatus =
+    provider === "publik"
+      ? publikReady
+        ? "Signed in with publik"
+        : "Not signed in with publik: AI features are off"
+      : settings?.apiKeyLast4
+        ? `Your key ending ${settings.apiKeyLast4}`
+        : !info.needsKey && settings
+          ? "No key needed"
+          : "No key yet: AI features are off";
 
   const stats: [string, React.ReactNode, string][] = [
     ["Calls this month", usage.calls.toLocaleString("en-AU"), "Estimates and edits"],
@@ -71,7 +73,7 @@ async function AiSettings() {
         US
         <Money cents={Math.round(Number(usage.costMicroUsd) / 10_000)} />
       </>,
-      "Billed by your provider",
+      provider === "publik" ? "Estimated, at provider prices" : "Billed by your provider",
     ],
   ];
 
@@ -105,7 +107,7 @@ async function AiSettings() {
           <MetadataListItem label="Provider">
             <Text>{info.label}</Text>
           </MetadataListItem>
-          <MetadataListItem label="API key">
+          <MetadataListItem label={provider === "publik" ? "Account" : "API key"}>
             <div className="flex flex-col items-start gap-1">
               <Text color={keyStatus.startsWith("No key") ? "accent" : "primary"}>{keyStatus}</Text>
               {canEdit && settings?.apiKeyLast4 && (
@@ -122,6 +124,7 @@ async function AiSettings() {
         <AiSettingsForm
           initial={{
             provider,
+            baseUrl: settings?.baseUrl ?? "",
             hasSavedKey: !!settings?.apiKeyLast4,
             smartModel: settings?.smartModel ?? "",
             fastModel: settings?.fastModel ?? "",

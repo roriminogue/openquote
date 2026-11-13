@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PageTitle } from "@/components/page-title";
 import { requireMember } from "@/lib/auth";
+import { useQuery } from "@/lib/data";
+import { useSearchParams } from "@/lib/navigation";
 import { resolveAiConfig } from "@/lib/ai/config";
 import { PROVIDER_INFO } from "@/lib/ai/providers";
 import { getOrg, gstRatePct, hasEstimates, markupSettings } from "@/lib/estimate/queries";
@@ -10,34 +11,36 @@ import { listRates } from "@/lib/rates";
 import { voiceHints } from "@/lib/voice/terms";
 import { NewEstimate } from "./new-estimate";
 
-export const metadata: Metadata = { title: "New estimate" };
-
-export default function NewEstimatePage({ searchParams }: PageProps<"/estimates/new">) {
+export default function NewEstimatePage() {
   return (
     <>
       <div className="mx-auto max-w-[50rem]">
         <PageTitle title="New estimate" description="Describe the job and it’s priced line by line, using your rates first." />
       </div>
       <Suspense>
-        <Loader searchParams={searchParams} />
+        <Loader />
       </Suspense>
     </>
   );
 }
 
-async function Loader({ searchParams }: Pick<PageProps<"/estimates/new">, "searchParams">) {
-  const member = await requireMember();
-  const [org, ai, sp, projects, clients, experienced, rates] = await Promise.all([
-    getOrg(member.orgId),
-    resolveAiConfig(member.orgId),
-    searchParams,
-    listProjects(member.orgId),
-    listClients(member.orgId),
-    hasEstimates(member.orgId),
-    listRates(member.orgId),
-  ]);
-  const describe = typeof sp.describe === "string" ? sp.describe.slice(0, 500) : "";
-  const initialProject = typeof sp.project === "string" ? (projects.find((p) => p.id === sp.project) ?? null) : null;
+function Loader() {
+  const sp = useSearchParams();
+  const { member, org, ai, projects, clients, experienced, rates } = useQuery("new-estimate", async () => {
+    const member = await requireMember();
+    const [org, ai, projects, clients, experienced, rates] = await Promise.all([
+      getOrg(member.orgId),
+      resolveAiConfig(member.orgId),
+      listProjects(member.orgId),
+      listClients(member.orgId),
+      hasEstimates(member.orgId),
+      listRates(member.orgId),
+    ]);
+    return { member, org, ai, projects, clients, experienced, rates };
+  });
+  const describe = (sp.get("describe") ?? "").slice(0, 500);
+  const projectId = sp.get("project");
+  const initialProject = projectId ? (projects.find((p) => p.id === projectId) ?? null) : null;
 
   return (
     <NewEstimate

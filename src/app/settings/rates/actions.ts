@@ -1,6 +1,4 @@
-"use server";
-
-import { refresh } from "next/cache";
+import { refresh } from "@/lib/data";
 import type { ActionResult } from "@/app/actions/records";
 import { requireMember } from "@/lib/auth";
 import {

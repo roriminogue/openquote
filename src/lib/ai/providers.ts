@@ -1,14 +1,13 @@
-// Provider catalogue for bring-your-own-key AI (SPEC.md §7a). No SDKs here: checking a key only needs each
-// provider's free "list models" endpoint, which also tells us which model ids the key can use.
+// Provider catalogue (SPEC.md §7a). Publik is the default: the person signs in with publik and pays publik per use,
+// with no key to paste. The rest are bring-your-own-key. No SDKs here: checking a key only needs each provider's
+// free "list models" endpoint, which also tells us which model ids the key can use.
 
-export const PROVIDERS = ["anthropic", "openai", "google", "openrouter", "ollama"] as const;
+export const PROVIDERS = ["publik", "anthropic", "openai", "google", "openrouter", "ollama"] as const;
 export type Provider = (typeof PROVIDERS)[number];
 
 type ProviderInfo = {
   label: string;
   needsKey: boolean;
-  /** Env var holding an instance-wide key, used when a business hasn't saved its own. */
-  envKey?: string;
   defaultBaseUrl?: string;
   /** Model defaults; null means the user must choose from the provider's list. */
   defaultSmartModel: string | null;
@@ -17,11 +16,21 @@ type ProviderInfo = {
   advanced?: boolean;
 };
 
+export const PUBLIK_BASE_URL = "https://publikhq.com/api/v1";
+
 export const PROVIDER_INFO: Record<Provider, ProviderInfo> = {
+  publik: {
+    label: "Publik",
+    needsKey: false,
+    defaultBaseUrl: PUBLIK_BASE_URL,
+    // Publik picks the model behind each tier; never send it a vendor model name.
+    defaultSmartModel: "publik-smart",
+    defaultFastModel: "publik-fast",
+    keyHint: "",
+  },
   anthropic: {
     label: "Anthropic (Claude)",
     needsKey: true,
-    envKey: "ANTHROPIC_API_KEY",
     defaultSmartModel: "claude-sonnet-5-5",
     defaultFastModel: "claude-haiku-5-5",
     keyHint: "sk-ant-…",
@@ -29,7 +38,6 @@ export const PROVIDER_INFO: Record<Provider, ProviderInfo> = {
   openai: {
     label: "OpenAI",
     needsKey: true,
-    envKey: "OPENAI_API_KEY",
     defaultSmartModel: null,
     defaultFastModel: null,
     keyHint: "sk-…",
@@ -37,7 +45,6 @@ export const PROVIDER_INFO: Record<Provider, ProviderInfo> = {
   google: {
     label: "Google (Gemini)",
     needsKey: true,
-    envKey: "GOOGLE_GENERATIVE_AI_API_KEY",
     defaultSmartModel: null,
     defaultFastModel: null,
     keyHint: "AIza…",
@@ -45,7 +52,6 @@ export const PROVIDER_INFO: Record<Provider, ProviderInfo> = {
   openrouter: {
     label: "OpenRouter",
     needsKey: true,
-    envKey: "OPENROUTER_API_KEY",
     defaultBaseUrl: "https://openrouter.ai/api/v1",
     defaultSmartModel: null,
     defaultFastModel: null,
@@ -63,13 +69,9 @@ export const PROVIDER_INFO: Record<Provider, ProviderInfo> = {
   },
 };
 
-/**
- * Where the server calls a provider. Fixed per install: businesses can't change it, so a shared (instance) key is
- * never sent to an address someone typed in, and nobody can point the server at other machines on its network.
- * Whoever runs the install can set OLLAMA_BASE_URL for a self-hosted Ollama.
- */
-export function providerBaseUrl(provider: Provider, env: Record<string, string | undefined> = process.env): string | null {
-  if (provider === "ollama") return (env.OLLAMA_BASE_URL?.trim() || PROVIDER_INFO.ollama.defaultBaseUrl!).replace(/\/+$/, "");
+/** Where the app calls a provider. Ollama can be on another computer on the same Wi-Fi (Settings → AI). */
+export function providerBaseUrl(provider: Provider, saved?: string | null): string | null {
+  if (provider === "ollama") return (saved?.trim() || PROVIDER_INFO.ollama.defaultBaseUrl!).replace(/\/+$/, "");
   return PROVIDER_INFO[provider].defaultBaseUrl ?? null;
 }
 
@@ -93,9 +95,11 @@ export async function listModels(
 
   try {
     switch (provider) {
+      case "publik":
+        return { ok: true, models: [PROVIDER_INFO.publik.defaultSmartModel!, "publik-balanced", PROVIDER_INFO.publik.defaultFastModel!] };
       case "anthropic": {
         const res = await fetchImpl("https://api.anthropic.com/v1/models?limit=1000", {
-          headers: { "x-api-key": apiKey!, "anthropic-version": "2023-06-01" },
+          headers: { "x-api-key": apiKey!, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
         });
         if (!res.ok) return { ok: false, error: await describeError(res) };
         const body = (await res.json()) as { data: { id: string }[] };

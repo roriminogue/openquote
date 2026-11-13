@@ -8,11 +8,14 @@ import { PROVIDER_INFO } from "./providers";
 
 export class AiNotConfiguredError extends Error {
   constructor() {
-    super("No AI key is set up. Add one in Settings → AI.");
+    super("AI isn't set up yet. Sign in with publik or add your own key in Settings → AI.");
   }
 }
 
-/** Builds the language model for an org's "smart" or "fast" tier from its resolved AI config. */
+/**
+ * Builds the language model for the business's "smart" or "fast" tier. Calls go straight from the phone to the
+ * provider; each provider allows that (Anthropic needs its browser-access header).
+ */
 export function languageModel(config: AiConfig, tier: "smart" | "fast"): { model: LanguageModel; modelId: string } {
   const modelId = tier === "smart" ? config.smartModel : config.fastModel;
   if (config.source === "none" || !modelId) throw new AiNotConfiguredError();
@@ -20,8 +23,17 @@ export function languageModel(config: AiConfig, tier: "smart" | "fast"): { model
   const baseURL = config.baseUrl ?? PROVIDER_INFO[config.provider].defaultBaseUrl;
 
   switch (config.provider) {
+    case "publik":
+      // publik API speaks the OpenAI Chat Completions dialect, with the install's key as the bearer.
+      return {
+        model: createOpenAICompatible({ name: "publik", baseURL: baseURL!, apiKey, supportsStructuredOutputs: true })(modelId),
+        modelId,
+      };
     case "anthropic":
-      return { model: createAnthropic({ apiKey })(modelId), modelId };
+      return {
+        model: createAnthropic({ apiKey, headers: { "anthropic-dangerous-direct-browser-access": "true" } })(modelId),
+        modelId,
+      };
     case "openai":
       return { model: createOpenAI({ apiKey })(modelId), modelId };
     case "google":

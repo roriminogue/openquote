@@ -1,24 +1,25 @@
+import reactHooks from "eslint-plugin-react-hooks";
 import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import tseslint from "typescript-eslint";
 
-const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  // Override default ignores of eslint-config-next.
+export default defineConfig([
+  ...tseslint.configs.recommended,
+  reactHooks.configs.flat["recommended-latest"] ?? reactHooks.configs["recommended-latest"],
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    },
+  },
   globalIgnores([
-    // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
+    "dist/**",
     // Native iPhone build output.
     "ios/build/**",
+    "ios/build-sim/**",
+    // Left over from the Next.js version.
+    ".next/**",
     "ios/App/App/public/**",
     // Built by `npx astryx theme build` from openquoteTheme.ts, plus the descriptor in the shape the CLI expects.
     "src/themes/openquote/openquote.*",
     "src/themes/openquote/*.doc.mjs",
   ]),
 ]);
-
-export default eslintConfig;

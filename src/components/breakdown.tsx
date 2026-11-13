@@ -1,5 +1,3 @@
-"use client";
-
 import { Text } from "@astryxdesign/core/Text";
 import { useState } from "react";
 import { Money } from "./money";

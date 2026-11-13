@@ -1,11 +1,8 @@
-"use server";
-
 import { eq } from "drizzle-orm";
-import { refresh } from "next/cache";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { requireMember } from "@/lib/auth";
-import { decryptSecret, encryptSecret, lastFour } from "@/lib/crypto";
+import { deleteApiKey, getApiKey, lastFour, setApiKey } from "@/lib/ai/keys";
 import { PROVIDER_INFO, PROVIDERS, checkModel, listModels, providerBaseUrl } from "@/lib/ai/providers";
 
 export type SaveState = {
@@ -23,26 +20,20 @@ const optional = z
 const Input = z.object({
   provider: z.enum(PROVIDERS),
   apiKey: optional,
+  baseUrl: optional,
   smartModel: optional,
   fastModel: optional,
   transcription: z.enum(["off", "openai", "local"]),
 });
 
-// Throws for plain members; the UI hides these actions from them.
-async function requireAdmin() {
-  const member = await requireMember();
-  if (member.role === "member") throw new Error("Only owners and admins can change AI settings.");
-  return member;
-}
-
 /** Checks the key against the provider (free model-list call), validates the models, then saves. */
 export async function saveAiSettings(_prev: SaveState, formData: FormData): Promise<SaveState> {
   const member = await requireMember();
-  if (member.role === "member") return { status: "error", message: "Only owners and admins can change AI settings." };
   const field = (name: string) => String(formData.get(name) ?? "");
   const parsed = Input.safeParse({
     provider: field("provider"),
     apiKey: field("apiKey"),
+    baseUrl: field("baseUrl"),
     smartModel: field("smartModel"),
     fastModel: field("fastModel"),
     transcription: field("transcription") || "off",
@@ -51,13 +42,11 @@ export async function saveAiSettings(_prev: SaveState, formData: FormData): Prom
   const input = parsed.data;
   const info = PROVIDER_INFO[input.provider];
 
-  const [existing] = await db.select().from(schema.aiSettings).where(eq(schema.aiSettings.orgId, member.orgId));
-  const keepExistingKey = !input.apiKey && existing?.provider === input.provider && !!existing.apiKeyCiphertext;
-  const envKey = info.envKey ? process.env[info.envKey] : undefined;
-  const keyToTest =
-    input.apiKey ?? (keepExistingKey ? decryptSecret(existing!.apiKeyCiphertext!) : null) ?? envKey ?? null;
+  const savedKey = info.needsKey ? await getApiKey(input.provider) : null;
+  const keyToTest = input.apiKey ?? savedKey;
+  const baseUrl = input.provider === "ollama" ? input.baseUrl : null;
 
-  const listed = await listModels(input.provider, { apiKey: keyToTest, baseUrl: providerBaseUrl(input.provider) });
+  const listed = await listModels(input.provider, { apiKey: keyToTest, baseUrl: providerBaseUrl(input.provider, baseUrl) });
   if (!listed.ok) return { status: "error", message: listed.error };
 
   const smartModel = input.smartModel ?? info.defaultSmartModel;
@@ -68,35 +57,35 @@ export async function saveAiSettings(_prev: SaveState, formData: FormData): Prom
   const modelProblem = checkModel(smartModel, listed.models) ?? checkModel(fastModel, listed.models);
   if (modelProblem) return { status: "error", message: modelProblem, models: listed.models };
 
-  const key = input.apiKey
-    ? { apiKeyCiphertext: encryptSecret(input.apiKey), apiKeyLast4: lastFour(input.apiKey) }
-    : keepExistingKey
-      ? {}
-      : { apiKeyCiphertext: null, apiKeyLast4: null };
+  if (input.apiKey) await setApiKey(input.provider, input.apiKey);
   const values = {
     provider: input.provider,
-    // Addresses are fixed per install (see providerBaseUrl); clear any saved by older versions.
-    baseUrl: null,
+    baseUrl,
+    apiKeyLast4: info.needsKey && keyToTest ? lastFour(keyToTest) : null,
     smartModel: input.smartModel,
     fastModel: input.fastModel,
     transcription: input.transcription,
     updatedAt: new Date(),
-    ...key,
   };
   await db
     .insert(schema.aiSettings)
     .values({ orgId: member.orgId, ...values })
     .onConflictDoUpdate({ target: schema.aiSettings.orgId, set: values });
 
-  refresh();
-  return { status: "saved", message: "Saved. The key works and both models are available.", models: listed.models };
+  return {
+    status: "saved",
+    message: input.provider === "publik" ? "Saved. Quotes use your publik plan." : "Saved. The key works and both models are available.",
+    models: listed.models,
+  };
 }
 
 export async function removeAiKey() {
-  const member = await requireAdmin();
+  const member = await requireMember();
+  const [row] = await db.select().from(schema.aiSettings).where(eq(schema.aiSettings.orgId, member.orgId));
+  if (!row) return;
+  await deleteApiKey(row.provider);
   await db
     .update(schema.aiSettings)
-    .set({ apiKeyCiphertext: null, apiKeyLast4: null, updatedAt: new Date() })
+    .set({ apiKeyLast4: null, updatedAt: new Date() })
     .where(eq(schema.aiSettings.orgId, member.orgId));
-  refresh();
 }

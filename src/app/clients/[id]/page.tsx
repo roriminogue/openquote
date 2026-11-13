@@ -1,18 +1,17 @@
 import { Skeleton } from "@astryxdesign/core/Skeleton";
-import type { Metadata } from "next";
 import { BackLink } from "@/components/back-link";
-import { notFound } from "next/navigation";
+import { notFound } from "@/lib/navigation";
 import { Suspense } from "react";
+import { useParams } from "react-router";
 import { requireMember } from "@/lib/auth";
+import { useQuery } from "@/lib/data";
 import { listEstimates } from "@/lib/estimate/queries";
 import { getClient, listClients, listProjects } from "@/lib/projects";
 import { ClientView } from "@/components/views/client-view";
 import { deleteClientRecord } from "@/app/actions/delete";
 import { DeleteRecord } from "@/components/delete-record";
 
-export const metadata: Metadata = { title: "Client" };
-
-export default function ClientPage({ params }: PageProps<"/clients/[id]">) {
+export default function ClientPage() {
   return (
     <>
       <BackLink href="/clients" label="Clients" />
@@ -23,23 +22,27 @@ export default function ClientPage({ params }: PageProps<"/clients/[id]">) {
           </div>
         }
       >
-        <Client params={params} />
+        <Client />
       </Suspense>
     </>
   );
 }
 
-async function Client({ params }: Pick<PageProps<"/clients/[id]">, "params">) {
-  const { id } = await params;
-  if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
-  const member = await requireMember();
-  const client = await getClient(member.orgId, id);
-  if (!client) notFound();
-  const [allProjects, estimates, clients] = await Promise.all([
-    listProjects(member.orgId),
-    listEstimates(member.orgId, { clientId: id }),
-    listClients(member.orgId),
-  ]);
+function Client() {
+  const id = useParams().id ?? "";
+  const loaded = useQuery(`client:${id}`, async () => {
+    const member = await requireMember();
+    const client = await getClient(member.orgId, id);
+    if (!client) return null;
+    const [allProjects, estimates, clients] = await Promise.all([
+      listProjects(member.orgId),
+      listEstimates(member.orgId, { clientId: id }),
+      listClients(member.orgId),
+    ]);
+    return { client, allProjects, estimates, clients };
+  });
+  if (!loaded) notFound();
+  const { client, allProjects, estimates, clients } = loaded;
   return (
     <>
       <ClientView client={client} allProjects={allProjects} estimates={estimates} clients={clients} />

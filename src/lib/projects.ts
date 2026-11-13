@@ -43,7 +43,7 @@ export async function listProjects(orgId: string): Promise<ProjectOption[]> {
       clientId: schema.clients.id,
       clientName: schema.clients.name,
       clientAddress: schema.clients.address,
-      lastUsedAt: sql<Date>`greatest(${schema.projects.createdAt}, coalesce(${lastEstimate.at}, ${schema.projects.createdAt}))`,
+      lastUsedAt: sql<number>`max(${schema.projects.createdAt}, coalesce(${lastEstimate.at}, ${schema.projects.createdAt}))`,
     })
     .from(schema.projects)
     .innerJoin(schema.clients, eq(schema.clients.id, schema.projects.clientId))

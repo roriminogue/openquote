@@ -1,5 +1,3 @@
-"use client";
-
 import { Icon } from "@astryxdesign/core/Icon";
 import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { Mic } from "lucide-react";
@@ -103,6 +101,7 @@ export function useDictation({
       <ToggleButton
         label={status === "listening" ? `Stop talking (${elapsedFmt(elapsed)})` : "Talk instead of typing"}
         isPressed={status === "listening"}
+        size="sm"
         onPressedChange={() => toggle()}
         isDisabled={status === "starting" || status === "tidying"}
         icon={<Icon icon={Mic} />}

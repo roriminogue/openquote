@@ -1,0 +1,4 @@
+/* Figtree ships inside the app (no font download), under the family name the theme reads. */
+:root {
+  --font-figtree: "Figtree Variable";
+}

@@ -52,3 +52,11 @@ next-env.d.ts
 
 # test bench output
 /.bench/
+
+# Simulator builds and the web build
+ios/build-sim/
+ios/*.log
+dist/
+
+# Data exported from the web version (real business data: never commit)
+/exports/

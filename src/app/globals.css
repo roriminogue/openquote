@@ -8,8 +8,12 @@
 @import "@astryxdesign/core/reset.css";
 @import "@astryxdesign/core/astryx.css";
 @import "../themes/openquote/openquote.css";
+@import "./fonts.css";
 @import "@astryxdesign/core/tailwind-theme.css";
 @import "tailwindcss/utilities.css" layer(utilities);
+/* Class names come from src only, never the iOS build output. */
+@source not "../../ios";
+@source not "../../dist";
 
 /* The saved Light/Dark choice is put on <html> before first paint (see THEME_SCRIPT in components/theme.tsx). Until
    React wakes up, the themed wrapper has no choice of its own, so it follows the page's. */
@@ -128,8 +132,18 @@ dd {
 }
 
 @media print {
+  /* The page margins come from the iPhone's PDF code (OpenQuoteNative.swift sharePdf); margins set here as well
+     would shrink the page WebKit lays out without changing the page count it reports, cutting off the end. */
   @page {
-    margin: 16mm 14mm;
+    margin: 0;
+  }
+  /* Flex columns never split across pages in WebKit, so the page itself is plain blocks when printed. */
+  html,
+  body,
+  #root {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
   }
   .no-print,
   .astryx-app-shell-header,

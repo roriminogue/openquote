@@ -1,5 +1,3 @@
-"use client";
-
 import { useSyncExternalStore } from "react";
 import { DATE_TIME, TIME_ZONE, dateFormat } from "@/lib/dates";
 

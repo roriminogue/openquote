@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-AU" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#262626" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" href="/icons/icon-192.png" />
+    <title>OpenQuote AU</title>
+    <script>
+      // The saved Light or Dark choice, applied before the first paint (see src/components/theme.tsx).
+      try {
+        var t = localStorage.getItem("oq-theme");
+        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    </script>
+  </head>
+  <body class="min-h-full flex flex-col">
+    <div id="root" class="flex min-h-full flex-1 flex-col"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,8 +1,0 @@
-# Database, auth and file storage are Supabase (see .env.example). Mailpit catches app email in dev.
-services:
-  mailpit:
-    image: axllent/mailpit:v1.27
-    ports:
-      - "1025:1025" # SMTP
-      - "8025:8025" # web inbox for viewing sent proposals/reminders
-

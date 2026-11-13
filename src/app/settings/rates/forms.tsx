@@ -1,5 +1,3 @@
-"use client";
-
 import { InputGroup, InputGroupText } from "@astryxdesign/core/InputGroup";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Switch } from "@astryxdesign/core/Switch";

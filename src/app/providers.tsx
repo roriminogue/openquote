@@ -1,9 +1,7 @@
-"use client";
-
 import { InternationalizationProvider } from "@astryxdesign/core/i18n";
 import { LinkProvider } from "@astryxdesign/core/Link";
 import { Theme } from "@astryxdesign/core/theme";
-import Link from "next/link";
+import Link from "@/lib/link";
 import { useThemeChoice } from "@/components/theme";
 // The theme's CSS is imported once, in globals.css, where the cascade layer order is declared. Importing it from
 // JavaScript as well would load it ahead of that declaration and let Tailwind's reset override every component.

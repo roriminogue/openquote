@@ -1,20 +1,18 @@
 import { Suspense } from "react";
-import { AppShell } from "@/components/app-shell";
+import { Outlet } from "react-router";
 import { PageTitle } from "@/components/page-title";
-import { SettingsTabs, SettingsTabsFor } from "./tabs";
+import { SettingsTabs } from "./tabs";
 
-export default function SettingsLayout({ children }: LayoutProps<"/settings">) {
+export default function SettingsLayout() {
   return (
-    <AppShell>
-      <div className="max-w-[56rem]">
-        <PageTitle title="Settings" />
-        <div className="mt-5">
-          <Suspense fallback={<SettingsTabsFor pathname="" />}>
-            <SettingsTabs />
-          </Suspense>
-        </div>
-        {children}
+    <div className="max-w-[56rem]">
+      <PageTitle title="Settings" />
+      <div className="mt-5">
+        <SettingsTabs />
       </div>
-    </AppShell>
+      <Suspense>
+        <Outlet />
+      </Suspense>
+    </div>
   );
 }

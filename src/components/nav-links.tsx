@@ -1,11 +1,9 @@
-"use client";
-
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import { SideNav, SideNavItem, SideNavSection } from "@astryxdesign/core/SideNav";
 import { FileText, FolderOpen, Plus, Settings, Users, type LucideIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "@/lib/link";
+import { usePathname } from "@/lib/navigation";
 
 type NavLink = { href: string; label: string; icon: LucideIcon; section?: string };
 
@@ -82,7 +80,9 @@ export function TabBar({ pathname }: { pathname: string }) {
   return (
     <nav
       aria-label="Main"
-      className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-(--color-border) bg-(--color-background-surface) pb-[env(safe-area-inset-bottom)] md:hidden"
+      // Even room above and below: the home indicator's strip counts toward the room underneath. Hidden while the
+      // keyboard is up (src/lib/keyboard.ts).
+      className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-(--color-border) bg-(--color-background-surface) pt-3 pb-[max(0.625rem,calc(env(safe-area-inset-bottom)-0.75rem))] md:hidden in-data-keyboard:hidden"
     >
       <div className="mx-auto grid max-w-md grid-cols-5 items-center px-1">
         {tab(work[0])}

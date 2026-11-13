@@ -1,11 +1,8 @@
-"use server";
-
 import { eq } from "drizzle-orm";
-import { refresh } from "next/cache";
+import { refresh } from "@/lib/data";
 import { db, schema } from "@/db";
 import { requireMember } from "@/lib/auth";
 import { BusinessInput } from "@/lib/business-schema";
-import { supabaseEnv } from "@/lib/supabase/env";
 
 export type BusinessState = { status: "idle" | "error" | "saved"; message?: string; field?: string };
 
@@ -33,14 +30,11 @@ export async function saveBusiness(_prev: BusinessState, formData: FormData): Pr
   return { status: "saved", message: "Saved. Your quotes will show these details." };
 }
 
-/** Stores the public URL of a logo the browser uploaded to this business's folder in the logos bucket. */
+/** Stores the logo (a data: URL made by the business form), or removes it. */
 export async function setLogo(url: string | null): Promise<{ ok: boolean; error?: string }> {
   const member = await requireMember();
   if (member.role === "member") return { ok: false, error: ADMIN_ONLY };
-  if (url !== null) {
-    const prefix = `${supabaseEnv().url}/storage/v1/object/public/logos/${member.orgId}/`;
-    if (!url.startsWith(prefix)) return { ok: false, error: "That logo didn't upload properly. Try again." };
-  }
+  if (url !== null && !/^data:image\/(png|jpeg|webp);base64,/.test(url)) return { ok: false, error: "That logo couldn't be saved. Try again." };
   await db.update(schema.organisations).set({ logoUrl: url }).where(eq(schema.organisations.id, member.orgId));
   refresh();
   return { ok: true };

@@ -1,9 +1,7 @@
-"use client";
-
 import { Button } from "@astryxdesign/core/Button";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Pencil, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import { useState, type FormEvent } from "react";
 import { addClient, addProject, editClient, editProject } from "@/app/actions/records";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";

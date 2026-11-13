@@ -1,20 +1,19 @@
-"use client";
-
 import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { ChatComposer } from "@astryxdesign/core/Chat";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
+import { TextArea } from "@astryxdesign/core/TextArea";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { MapPin, Square } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/navigation";
 import { useRef, useState } from "react";
 import { Breakdown } from "@/components/breakdown";
 import { Money } from "@/components/money";
 import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";
+import { generateEstimate } from "@/lib/estimate/run";
 import { useDictation } from "./dictation";
 import { ProjectField } from "./project-flow";
 
@@ -76,17 +75,18 @@ export function NewEstimate({
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const abortRef = useRef<AbortController | null>(null);
   const previewRef = useRef<HTMLElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const busy = phase.kind === "streaming" || phase.kind === "saving";
   const dictation = useDictation({ value: description, onChange: setDescription, hints: voiceHints, canTidy: !!ai });
   const canPrice = !!ai && !busy && !dictation.busy;
 
-  // Only the Price button and its shortcut call this. The sheets opened from this page (pick a project, add a
+  // Only the Price button calls this. The sheets opened from this page (pick a project, add a
   // client) keep their own forms, so nothing in them can start pricing.
   async function generate() {
     if (!canPrice) return;
     if (description.trim().length < 10) {
       setPhase({ kind: "error", message: "Describe the job in a bit more detail." });
-      document.getElementById("description")?.focus();
+      descriptionRef.current?.focus();
       return;
     }
     const controller = new AbortController();
@@ -97,50 +97,31 @@ export function NewEstimate({
     let number: number | undefined;
     let draft: PartialDraft = {};
     try {
-      const res = await fetch("/api/estimates/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ description, projectId: project?.id ?? null, siteAddress: project?.siteAddress ? null : siteAddress || null }),
-        signal: controller.signal,
-      });
-      if (!res.ok || !res.body) {
-        const body = await res.json().catch(() => null);
-        setPhase({ kind: "error", message: body?.error ?? "Couldn’t start. Try again." });
-        return;
-      }
-
-      const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
-      let buffer = "";
-      for (;;) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += value;
-        let cut: number;
-        while ((cut = buffer.indexOf("\n\n")) >= 0) {
-          const block = buffer.slice(0, cut);
-          buffer = buffer.slice(cut + 2);
-          const event = /^event: (.+)$/m.exec(block)?.[1];
-          const data = JSON.parse(/^data: (.*)$/m.exec(block)?.[1] ?? "null");
-          if (event === "estimate") {
-            number = data.number;
+      const result = await generateEstimate(
+        { description, projectId: project?.id ?? null, siteAddress: project?.siteAddress ? null : siteAddress || null },
+        {
+          estimate: (e) => {
+            number = e.number;
             setPhase({ kind: "streaming", number, draft });
-          } else if (event === "partial") {
-            draft = data.draft ?? draft;
+          },
+          partial: (d) => {
+            draft = d ?? draft;
             setPhase({ kind: "streaming", number, draft });
-          } else if (event === "done") {
-            setPhase({ kind: "saving", number, draft });
-            router.push(`/estimates/${data.estimateId}`);
-            return;
-          } else if (event === "error") {
-            setPhase({ kind: "error", message: data.message });
-            return;
-          }
-        }
+          },
+        },
+        controller.signal,
+      );
+      if (result.ok) {
+        setPhase({ kind: "saving", number, draft });
+        router.push(`/estimates/${result.estimateId}`);
+      } else if (result.aborted) {
+        setPhase({ kind: "idle" });
+      } else {
+        setPhase({ kind: "error", message: result.error });
       }
-      setPhase({ kind: "error", message: "The connection closed before the estimate finished. Try again." });
     } catch (err) {
-      if ((err as Error).name === "AbortError") setPhase({ kind: "idle" });
-      else setPhase({ kind: "error", message: "Lost the connection. Check your signal and try again." });
+      console.error(err);
+      setPhase({ kind: "error", message: "Generating the estimate failed. Try again." });
     }
   }
 
@@ -150,8 +131,8 @@ export function NewEstimate({
         <div className="mb-5">
           <Banner
             status="warning"
-            title="Add an AI key first"
-            description="OpenQuote AU prices jobs with your own AI provider account."
+            title="Set up AI first"
+            description="OpenQuote AU prices jobs with AI: use your publik plan, or your own provider key."
           />
           <div className="mt-3 sm:w-48">
             <Button label="Set up AI" variant="secondary" size="lg" width="100%" href="/settings/ai" />
@@ -159,83 +140,42 @@ export function NewEstimate({
         </div>
       )}
 
-      <ChatComposer
-        // The page holds the words and prices on its own button, so the composer's built-in submit does nothing.
-        onSubmit={() => {}}
-        status={phase.kind === "error" ? { type: "error", message: phase.message } : undefined}
-        input={
-          <>
-            <textarea
-              id="description"
-              name="description"
-              rows={4}
-              maxLength={8000}
-              value={description}
-              onChange={(e) => {
-                setDescription(e.target.value);
-                // An old "describe it in more detail" or provider error shouldn't sit there once they've fixed it.
-                if (phase.kind === "error") setPhase({ kind: "idle" });
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                  e.preventDefault();
-                  generate();
-                }
-              }}
-              disabled={busy}
-              readOnly={dictation.busy}
-              aria-label="Describe the job"
-              aria-describedby={ai ? "description-hint" : undefined}
-              placeholder={
-                dictation.supported
-                  ? "Describe the job, or tap Talk: size, materials, access, finish. Whatever you’d tell a mate on the phone."
-                  : "Describe the job: size, materials, access, finish. Whatever you’d tell a mate on the phone."
-              }
-              className="block min-h-28 w-full resize-none bg-transparent px-1 text-base leading-relaxed text-(--color-text-primary) caret-(--color-accent) outline-none placeholder:text-(--color-text-secondary) disabled:opacity-60 sm:text-(length:--text-body-size)"
-            />
-            {dictation.statusLine && (
-              <div aria-live="polite" className="px-1 pt-1">
-                {dictation.statusLine}
-              </div>
-            )}
-          </>
-        }
-        footerActions={
-          <>
-            {!busy && dictation.button}
-            {ai && (
-              <span
-                id="description-hint"
-                className="hidden min-w-0 truncate px-1 text-(length:--text-supporting-size) text-(--color-text-secondary) sm:inline"
-              >
-                {ai.provider}
-              </span>
-            )}
-          </>
-        }
-        sendButton={
-          busy ? (
-            <Button
-              label="Stop"
-              variant="secondary"
-              icon={<Icon icon={Square} fill="currentColor" />}
-              onClick={() => abortRef.current?.abort()}
-            />
-          ) : (
-            <Button
-              label="Price this job"
-              variant="primary"
-              isDisabled={!ai || dictation.busy}
-              onClick={generate}
-              endContent={
-                <span aria-hidden className="hidden text-(length:--text-supporting-size) opacity-70 sm:inline">
-                  ⌘↵
-                </span>
-              }
-            />
-          )
-        }
-      />
+      {/* The job, said plainly: a labelled box like the fields under it, with Talk beside its label. */}
+      <div>
+        <div className="mb-1.5 flex min-h-8 items-center justify-between gap-3">
+          <Text as="div" type="label" color="secondary" weight="medium" aria-hidden>
+            The job
+          </Text>
+          {!busy && dictation.button}
+        </div>
+        <TextArea
+          ref={descriptionRef}
+          label="The job"
+          isLabelHidden
+          htmlName="description"
+          rows={6}
+          value={description}
+          onChange={(value) => {
+            setDescription(value.slice(0, 8000));
+            // An old "describe it in more detail" or provider error shouldn't sit there once they've fixed it.
+            if (phase.kind === "error") setPhase({ kind: "idle" });
+          }}
+          isDisabled={busy}
+          isReadOnly={dictation.busy}
+          placeholder={
+            dictation.supported
+              ? "Size, materials, access, finish. Type it, or tap Talk and say it like you would to a mate."
+              : "Size, materials, access, finish. Whatever you’d tell a mate on the phone."
+          }
+          status={phase.kind === "error" ? { type: "error", message: phase.message } : undefined}
+          width="100%"
+        />
+        {dictation.statusLine && (
+          <div aria-live="polite" className="pt-1.5">
+            {dictation.statusLine}
+          </div>
+        )}
+      </div>
 
       <div className="mt-5 grid items-start gap-5 sm:grid-cols-2 sm:gap-4">
         <ProjectField projects={projects} clients={clients} value={project} onChange={setProject} disabled={busy} />
@@ -263,6 +203,21 @@ export function NewEstimate({
             autoComplete="off"
             width="100%"
           />
+        )}
+      </div>
+
+      <div className="mt-6">
+        {busy ? (
+          <Button
+            label="Stop"
+            variant="secondary"
+            size="lg"
+            width="100%"
+            icon={<Icon icon={Square} fill="currentColor" />}
+            onClick={() => abortRef.current?.abort()}
+          />
+        ) : (
+          <Button label="Price this job" variant="primary" size="lg" width="100%" isDisabled={!ai || dictation.busy} onClick={generate} />
         )}
       </div>
 

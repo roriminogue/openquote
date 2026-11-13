@@ -1,30 +1,27 @@
-import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
-import { connection } from "next/server";
+import { asc } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { createClient } from "@/lib/supabase/server";
+import type { UserRole } from "@/db/schema";
 
-/** The signed-in Supabase Auth user, or null. Verified against the Auth server's signing keys. */
-export async function getAuthUser() {
-  // Session checks compare token expiry with the current time, so they must only run at request time.
-  await connection();
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
-  if (!claims) return null;
-  return { id: claims.sub, email: claims.email as string | undefined };
+// One business, one person, on this phone. There is no account to look up: the person is whoever holds the phone
+// (the app opens behind Sign in with publik, see lib/publik.ts). "Member" keeps the shape the rest of the code
+// was written against, so every query still filters by orgId.
+
+export type Member = { id: string; orgId: string; name: string; email: string; role: UserRole };
+
+/** The business on this phone, or null before onboarding. */
+export async function getMember(): Promise<Member | null> {
+  const [org] = await db
+    .select({ id: schema.organisations.id, ownerName: schema.organisations.ownerName, email: schema.organisations.email })
+    .from(schema.organisations)
+    .orderBy(asc(schema.organisations.createdAt))
+    .limit(1);
+  if (!org) return null;
+  return { id: org.id, orgId: org.id, name: org.ownerName, email: org.email ?? "", role: "owner" };
 }
 
-/**
- * The signed-in member and their organisation. Redirects to /login when signed out and to /onboarding when the
- * account isn't attached to an organisation yet. Drizzle connects as the database owner and bypasses RLS, so
- * every query made with it must filter by `member.orgId`.
- */
-export async function requireMember() {
-  const user = await getAuthUser();
-  if (!user) redirect("/login");
-
-  const [member] = await db.select().from(schema.users).where(eq(schema.users.id, user.id));
-  if (!member) redirect("/onboarding");
+/** The business on this phone. The app only shows signed-in screens once onboarding has made one. */
+export async function requireMember(): Promise<Member> {
+  const member = await getMember();
+  if (!member) throw new Error("Set up your business first.");
   return member;
 }

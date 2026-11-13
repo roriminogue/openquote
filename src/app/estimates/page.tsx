@@ -3,15 +3,13 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { List, ListItem } from "@astryxdesign/core/List";
 import { Skeleton } from "@astryxdesign/core/Skeleton";
 import { Text } from "@astryxdesign/core/Text";
-import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EstimateRows } from "@/components/estimate-rows";
 import { NewEstimateButton } from "@/components/new-estimate-button";
 import { PageTitle } from "@/components/page-title";
 import { requireMember } from "@/lib/auth";
+import { useQuery } from "@/lib/data";
 import { listEstimates } from "@/lib/estimate/queries";
-
-export const metadata: Metadata = { title: "Estimates" };
 
 export default function EstimatesPage() {
   return (
@@ -24,9 +22,8 @@ export default function EstimatesPage() {
   );
 }
 
-async function EstimateList() {
-  const member = await requireMember();
-  const rows = await listEstimates(member.orgId);
+function EstimateList() {
+  const rows = useQuery("estimates", async () => listEstimates((await requireMember()).orgId));
 
   if (!rows.length) return <FirstEstimate />;
 

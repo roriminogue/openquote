@@ -1,43 +1,35 @@
-// MVP data model — see SPEC.md §4. Money is integer cents, always ex-GST.
-// Every table has RLS enabled; the policies live in drizzle/0002_supabase_policies_storage.sql.
-import {
-  boolean,
-  date,
-  index,
-  integer,
-  jsonb,
-  numeric,
-  pgEnum,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-} from "drizzle-orm/pg-core";
-import { authUsers } from "drizzle-orm/supabase";
+// Data model — see SPEC.md §4. Money is integer cents, always ex-GST.
+// Everything lives in one SQLite database on the phone (see db/index.ts): one business, one person, no server.
+import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
-const id = () => uuid("id").primaryKey().defaultRandom();
-const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
-const pct = (name: string) => numeric(name, { precision: 6, scale: 2, mode: "number" });
+const id = () =>
+  text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID());
+const ref = (name: string) => text(name);
+const createdAt = () =>
+  integer("created_at", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date());
+const updatedAt = () =>
+  integer("updated_at", { mode: "timestamp_ms" })
+    .notNull()
+    .$defaultFn(() => new Date());
+const bool = (name: string) => integer(name, { mode: "boolean" });
+const pct = (name: string) => real(name);
+const json = <T>(name: string) => text(name, { mode: "json" }).$type<T>();
 
-// ── Enums ────────────────────────────────────────────────────────────────────
-export const finishLevel = pgEnum("finish_level", ["basic", "standard", "premium"]);
-export const userRole = pgEnum("user_role", ["owner", "admin", "member"]);
-export const rateType = pgEnum("rate_type", ["labour", "material"]);
-export const lineType = pgEnum("line_type", ["material", "labour", "subbie", "other"]);
-export const lineSource = pgEnum("line_source", ["ai", "rate_rule", "kit", "supplier", "manual", "price_book"]);
-export const estimateStatus = pgEnum("estimate_status", [
-  "draft",
-  "sent",
-  "accepted",
-  "declined",
-  "invoiced",
-  "archived",
-]);
-export const generationMode = pgEnum("generation_mode", ["auto", "quick", "thorough"]);
-export const versionAuthor = pgEnum("version_author", ["user", "ai"]);
-export const attachmentKind = pgEnum("attachment_kind", ["image", "video", "pdf", "sheet", "audio"]);
-export const proposalEventType = pgEnum("proposal_event_type", [
+// ── Value sets ───────────────────────────────────────────────────────────────
+export const FINISH_LEVELS = ["basic", "standard", "premium"] as const;
+export const USER_ROLES = ["owner", "admin", "member"] as const;
+export const RATE_TYPES = ["labour", "material"] as const;
+export const LINE_TYPES = ["material", "labour", "subbie", "other"] as const;
+export const LINE_SOURCES = ["ai", "rate_rule", "kit", "supplier", "manual", "price_book"] as const;
+export const ESTIMATE_STATUSES = ["draft", "sent", "accepted", "declined", "invoiced", "archived"] as const;
+export const GENERATION_MODES = ["auto", "quick", "thorough"] as const;
+export const VERSION_AUTHORS = ["user", "ai"] as const;
+export const ATTACHMENT_KINDS = ["image", "video", "pdf", "sheet", "audio"] as const;
+export const PROPOSAL_EVENT_TYPES = [
   "viewed",
   "downloaded",
   "accepted",
@@ -46,28 +38,33 @@ export const proposalEventType = pgEnum("proposal_event_type", [
   "bounced",
   "replied",
   "unsubscribed",
-]);
-export const scheduledEmailKind = pgEnum("scheduled_email_kind", ["follow_up", "payment_reminder"]);
-export const scheduledEmailStatus = pgEnum("scheduled_email_status", ["pending", "sent", "cancelled"]);
-export const invoiceStatus = pgEnum("invoice_status", ["draft", "sent", "paid", "void"]);
-export const aiProvider = pgEnum("ai_provider", ["anthropic", "openai", "google", "openrouter", "ollama"]);
-export const clientKind = pgEnum("client_kind", ["individual", "company"]);
-export const projectStatus = pgEnum("project_status", ["quoting", "active", "on_hold", "completed", "cancelled"]);
-export const transcriptionMode = pgEnum("transcription_mode", ["off", "openai", "local"]);
+] as const;
+export const INVOICE_STATUSES = ["draft", "sent", "paid", "void"] as const;
+export const AI_PROVIDERS = ["publik", "anthropic", "openai", "google", "openrouter", "ollama"] as const;
+export const CLIENT_KINDS = ["individual", "company"] as const;
+export const PROJECT_STATUSES = ["quoting", "active", "on_hold", "completed", "cancelled"] as const;
+export const TRANSCRIPTION_MODES = ["off", "openai", "local"] as const;
 
-// ── Organisation & users ────────────────────────────────────────────────────
-export const organisations = pgTable("organisations", {
+export type UserRole = (typeof USER_ROLES)[number];
+
+// ── The business ────────────────────────────────────────────────────────────
+export const organisations = sqliteTable("organisations", {
   id: id(),
   name: text("name").notNull(),
+  /** The person using the app: shown in Settings → Account. */
+  ownerName: text("owner_name").notNull().default(""),
   abn: text("abn"),
+  /** The logo as a data: URL, so it travels with the database and backups. */
   logoUrl: text("logo_url"),
   email: text("email"),
   phone: text("phone"),
   address: text("address"),
-  gstRegistered: boolean("gst_registered").notNull().default(true),
+  gstRegistered: bool("gst_registered").notNull().default(true),
   gstRate: pct("gst_rate").notNull().default(10),
-  trades: text("trades").array().notNull().default([]),
-  finishLevel: finishLevel("finish_level").notNull().default("standard"),
+  trades: json<string[]>("trades")
+    .notNull()
+    .$defaultFn(() => []),
+  finishLevel: text("finish_level", { enum: FINISH_LEVELS }).notNull().default("standard"),
   postcode: text("postcode"),
   defaultMarkupPct: pct("default_markup_pct").notNull().default(20),
   // Optional per-type overrides; null falls back to defaultMarkupPct.
@@ -82,94 +79,82 @@ export const organisations = pgTable("organisations", {
   nextInvoiceNo: integer("next_invoice_no").notNull().default(1),
   defaultDueDays: integer("default_due_days").notNull().default(14),
   createdAt: createdAt(),
-}).enableRLS();
-
-// One row per Supabase Auth user; id is the auth.users id.
-export const users = pgTable(
-  "users",
-  {
-    id: uuid("id")
-      .primaryKey()
-      .references(() => authUsers.id, { onDelete: "cascade" }),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    email: text("email").notNull().unique(),
-    role: userRole("role").notNull().default("owner"),
-    createdAt: createdAt(),
-  },
-  (t) => [index("users_org_id_idx").on(t.orgId)],
-).enableRLS();
+});
 
 // ── AI settings ─────────────────────────────────────────────────────────────
-export const rateRules = pgTable(
+export const rateRules = sqliteTable(
   "rate_rules",
   {
     id: id(),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
+    orgId: ref("org_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     rateCents: integer("rate_cents").notNull(),
     unit: text("unit").notNull(),
-    type: rateType("type").notNull(),
+    type: text("type", { enum: RATE_TYPES }).notNull(),
     createdAt: createdAt(),
   },
   (t) => [index("rate_rules_org_id_idx").on(t.orgId)],
-).enableRLS();
+);
 
-export const aiInstructions = pgTable(
+export const aiInstructions = sqliteTable(
   "ai_instructions",
   {
     id: id(),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
+    orgId: ref("org_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
     text: text("text").notNull(),
     createdAt: createdAt(),
   },
   (t) => [index("ai_instructions_org_id_idx").on(t.orgId)],
-).enableRLS();
+);
 
-// Bring-your-own-key AI config (SPEC.md §7a). One row per org; when absent the instance env key is used.
-// Server-only: RLS on with no policies, and the key is AES-256-GCM encrypted with ENCRYPTION_KEY.
-export const aiSettings = pgTable("ai_settings", {
-  orgId: uuid("org_id")
+// Which AI the app uses (SPEC.md §7a). One row per business. A typed-in key is never stored here: it lives in the
+// iPhone Keychain (lib/ai/keys.ts); this row only keeps its last four characters for display.
+export const aiSettings = sqliteTable("ai_settings", {
+  orgId: ref("org_id")
     .primaryKey()
     .references(() => organisations.id, { onDelete: "cascade" }),
-  provider: aiProvider("provider").notNull().default("anthropic"),
-  apiKeyCiphertext: text("api_key_ciphertext"), // base64(iv | tag | ciphertext); null = use instance key
+  provider: text("provider", { enum: AI_PROVIDERS }).notNull().default("publik"),
   apiKeyLast4: text("api_key_last4"),
   baseUrl: text("base_url"), // OpenRouter / Ollama endpoint
   smartModel: text("smart_model"), // null = provider default
   fastModel: text("fast_model"),
-  transcription: transcriptionMode("transcription").notNull().default("off"),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-}).enableRLS();
+  transcription: text("transcription", { enum: TRANSCRIPTION_MODES }).notNull().default("off"),
+  updatedAt: updatedAt(),
+});
 
-// One row per LLM call, so each business can see what its own key is spending.
-export const aiUsage = pgTable(
+// One row per AI call, so the business can see what it's spending.
+export const aiUsage = sqliteTable(
   "ai_usage",
   {
     id: id(),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
-    estimateId: uuid("estimate_id").references(() => estimates.id, { onDelete: "set null" }),
-    operation: text("operation").notNull(), // e.g. "generate", "refine", "classify"
-    provider: aiProvider("provider").notNull(),
+    orgId: ref("org_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    estimateId: ref("estimate_id").references(() => estimates.id, { onDelete: "set null" }),
+    operation: text("operation").notNull(), // e.g. "generate", "tidy_dictation"
+    provider: text("provider", { enum: AI_PROVIDERS }).notNull(),
     model: text("model").notNull(),
     inputTokens: integer("input_tokens").notNull().default(0),
     outputTokens: integer("output_tokens").notNull().default(0),
     costMicroUsd: integer("cost_micro_usd"), // null when the model's price is unknown
     createdAt: createdAt(),
   },
-  (t) => [
-    index("ai_usage_org_created_idx").on(t.orgId, t.createdAt),
-    index("ai_usage_estimate_id_idx").on(t.estimateId),
-  ],
-).enableRLS();
+  (t) => [index("ai_usage_org_created_idx").on(t.orgId, t.createdAt), index("ai_usage_estimate_id_idx").on(t.estimateId)],
+);
 
 // ── Clients ─────────────────────────────────────────────────────────────────
-export const clients = pgTable(
+export const clients = sqliteTable(
   "clients",
   {
     id: id(),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
-    kind: clientKind("kind").notNull().default("individual"),
+    orgId: ref("org_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    kind: text("kind", { enum: CLIENT_KINDS }).notNull().default("individual"),
     name: text("name").notNull(), // person's name, or business name for a company
     contactName: text("contact_name"), // company's main contact
     abn: text("abn"),
@@ -180,42 +165,46 @@ export const clients = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("clients_org_id_idx").on(t.orgId)],
-).enableRLS();
+);
 
-export const clientContacts = pgTable(
+export const clientContacts = sqliteTable(
   "client_contacts",
   {
     id: id(),
-    clientId: uuid("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+    clientId: ref("client_id")
+      .notNull()
+      .references(() => clients.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     email: text("email"),
     phone: text("phone"),
     role: text("role"),
   },
   (t) => [index("client_contacts_client_id_idx").on(t.clientId)],
-).enableRLS();
+);
 
-// A job site: groups the estimates, invoices and (later) job for one piece of work for one client.
-export const projects = pgTable(
+// A job site: groups the estimates and invoices for one piece of work for one client.
+export const projects = sqliteTable(
   "projects",
   {
     id: id(),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
+    orgId: ref("org_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
     number: integer("number").notNull(), // rendered as PRJ-0001
     name: text("name").notNull(),
-    clientId: uuid("client_id")
+    clientId: ref("client_id")
       .notNull()
       .references(() => clients.id, { onDelete: "restrict" }),
     siteAddress: text("site_address"),
-    status: projectStatus("status").notNull().default("quoting"),
-    startDate: date("start_date"),
-    endDate: date("end_date"),
+    status: text("status", { enum: PROJECT_STATUSES }).notNull().default("quoting"),
+    startDate: text("start_date"), // YYYY-MM-DD
+    endDate: text("end_date"),
     notes: text("notes"),
     createdAt: createdAt(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: updatedAt(),
   },
   (t) => [uniqueIndex("projects_org_number_idx").on(t.orgId, t.number), index("projects_client_id_idx").on(t.clientId)],
-).enableRLS();
+);
 
 // ── Estimates ───────────────────────────────────────────────────────────────
 export type DisplayOptions = {
@@ -231,160 +220,172 @@ export type DisplayOptions = {
 /** An upgrade or cost-saving option the client can be offered alongside the main estimate. */
 export type EstimateAlternative = { kind: "upgrade" | "saving"; title: string; detail: string };
 
-export const estimates = pgTable(
+export const estimates = sqliteTable(
   "estimates",
   {
     id: id(),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
-    clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
-    projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+    orgId: ref("org_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    clientId: ref("client_id").references(() => clients.id, { onDelete: "set null" }),
+    projectId: ref("project_id").references(() => projects.id, { onDelete: "set null" }),
     number: integer("number").notNull(), // rendered as EST-1001
     title: text("title").notNull().default("Untitled estimate"),
     siteAddress: text("site_address"),
-    status: estimateStatus("status").notNull().default("draft"),
+    status: text("status", { enum: ESTIMATE_STATUSES }).notNull().default("draft"),
     description: text("description").notNull().default(""),
-    generationMode: generationMode("generation_mode").notNull().default("auto"),
+    generationMode: text("generation_mode", { enum: GENERATION_MODES }).notNull().default("auto"),
     markupPct: pct("markup_pct"), // null = use org defaults
-    gstExempt: boolean("gst_exempt").notNull().default(false),
+    gstExempt: bool("gst_exempt").notNull().default(false),
     currentVersion: integer("current_version").notNull().default(1),
-    displayOptions: jsonb("display_options").$type<DisplayOptions>(),
+    displayOptions: json<DisplayOptions>("display_options"),
     // Filled by AI generation (SPEC.md §5); all editable afterwards.
     summary: text("summary"),
-    scope: jsonb("scope").$type<string[]>(),
-    assumptions: jsonb("assumptions").$type<string[]>(),
-    exclusions: jsonb("exclusions").$type<string[]>(),
-    alternatives: jsonb("alternatives").$type<EstimateAlternative[]>(),
+    scope: json<string[]>("scope"),
+    assumptions: json<string[]>("assumptions"),
+    exclusions: json<string[]>("exclusions"),
+    alternatives: json<EstimateAlternative[]>("alternatives"),
     createdAt: createdAt(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: updatedAt(),
   },
   (t) => [
     uniqueIndex("estimates_org_number_idx").on(t.orgId, t.number),
     index("estimates_client_id_idx").on(t.clientId),
     index("estimates_project_id_idx").on(t.projectId),
   ],
-).enableRLS();
+);
 
 // Immutable snapshot of groups + lines, written on every AI/user change and on send.
-export const estimateVersions = pgTable(
+export const estimateVersions = sqliteTable(
   "estimate_versions",
   {
     id: id(),
-    estimateId: uuid("estimate_id").notNull().references(() => estimates.id, { onDelete: "cascade" }),
+    estimateId: ref("estimate_id")
+      .notNull()
+      .references(() => estimates.id, { onDelete: "cascade" }),
     version: integer("version").notNull(),
-    snapshot: jsonb("snapshot").notNull(),
-    createdBy: versionAuthor("created_by").notNull(),
+    snapshot: json<unknown>("snapshot").notNull(),
+    createdBy: text("created_by", { enum: VERSION_AUTHORS }).notNull(),
     reason: text("reason"),
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex("estimate_versions_idx").on(t.estimateId, t.version)],
-).enableRLS();
+);
 
-export const lineGroups = pgTable(
+export const lineGroups = sqliteTable(
   "line_groups",
   {
     id: id(),
-    estimateId: uuid("estimate_id").notNull().references(() => estimates.id, { onDelete: "cascade" }),
+    estimateId: ref("estimate_id")
+      .notNull()
+      .references(() => estimates.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     sort: integer("sort").notNull().default(0),
   },
   (t) => [index("line_groups_estimate_id_idx").on(t.estimateId)],
-).enableRLS();
+);
 
-export const lineItems = pgTable(
+export const lineItems = sqliteTable(
   "line_items",
   {
     id: id(),
-    groupId: uuid("group_id").notNull().references(() => lineGroups.id, { onDelete: "cascade" }),
+    groupId: ref("group_id")
+      .notNull()
+      .references(() => lineGroups.id, { onDelete: "cascade" }),
     description: text("description").notNull(),
-    type: lineType("type").notNull(),
-    qty: numeric("qty", { precision: 12, scale: 3, mode: "number" }).notNull(),
+    type: text("type", { enum: LINE_TYPES }).notNull(),
+    qty: real("qty").notNull(),
     unit: text("unit").notNull(),
     unitCostCents: integer("unit_cost_cents").notNull(),
     markupPct: pct("markup_pct"), // null = estimate/org markup
     sort: integer("sort").notNull().default(0),
     notes: text("notes"),
-    source: lineSource("source").notNull().default("manual"),
+    source: text("source", { enum: LINE_SOURCES }).notNull().default("manual"),
     sourceRef: text("source_ref"), // e.g. rate_rule id, or price book item id
   },
   (t) => [index("line_items_group_id_idx").on(t.groupId)],
-).enableRLS();
+);
 
 // Polymorphic: owner_type is "estimate" | "client" | "org"
-export const attachments = pgTable(
+export const attachments = sqliteTable(
   "attachments",
   {
     id: id(),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
+    orgId: ref("org_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
     ownerType: text("owner_type").notNull(),
-    ownerId: uuid("owner_id").notNull(),
-    kind: attachmentKind("kind").notNull(),
+    ownerId: text("owner_id").notNull(),
+    kind: text("kind", { enum: ATTACHMENT_KINDS }).notNull(),
     url: text("url").notNull(),
     filename: text("filename").notNull(),
     extractedText: text("extracted_text"),
     createdAt: createdAt(),
   },
   (t) => [index("attachments_org_id_idx").on(t.orgId)],
-).enableRLS();
+);
 
-// ── Proposals ───────────────────────────────────────────────────────────────
-export const proposalSends = pgTable(
+// ── Sending quotes ──────────────────────────────────────────────────────────
+// A quote goes out as a PDF from the phone's Share sheet. Each share is recorded here, and the tradie's own
+// Accepted / Declined answer is a proposal event (there is no client page on the phone version).
+export const proposalSends = sqliteTable(
   "proposal_sends",
   {
     id: id(),
-    estimateId: uuid("estimate_id").notNull().references(() => estimates.id, { onDelete: "cascade" }),
+    estimateId: ref("estimate_id")
+      .notNull()
+      .references(() => estimates.id, { onDelete: "cascade" }),
     version: integer("version").notNull(),
-    toEmail: text("to_email"), // null when shared as a link (text, WhatsApp) rather than emailed
-    cc: text("cc").array().notNull().default([]),
-    token: text("token").notNull().unique(), // public link /p/:token
+    toEmail: text("to_email"),
+    cc: json<string[]>("cc")
+      .notNull()
+      .$defaultFn(() => []),
+    token: text("token").notNull().unique(),
     message: text("message"),
-    followUpsEnabled: boolean("follow_ups_enabled").notNull().default(false),
+    followUpsEnabled: bool("follow_ups_enabled").notNull().default(false),
     sentAt: createdAt(),
   },
   (t) => [index("proposal_sends_estimate_id_idx").on(t.estimateId)],
-).enableRLS();
+);
 
-export const proposalEvents = pgTable(
+export const proposalEvents = sqliteTable(
   "proposal_events",
   {
     id: id(),
-    sendId: uuid("send_id").notNull().references(() => proposalSends.id, { onDelete: "cascade" }),
-    type: proposalEventType("type").notNull(),
+    sendId: ref("send_id")
+      .notNull()
+      .references(() => proposalSends.id, { onDelete: "cascade" }),
+    type: text("type", { enum: PROPOSAL_EVENT_TYPES }).notNull(),
     actorName: text("actor_name"),
     actorEmail: text("actor_email"),
     actorPosition: text("actor_position"),
     signatureSvg: text("signature_svg"),
     reason: text("reason"),
-    // What the client answered: the estimate version on their screen and its total inc GST.
+    // What the client answered: the estimate version and its total inc GST.
     estimateVersion: integer("estimate_version"),
     totalCents: integer("total_cents"),
     at: createdAt(),
   },
   (t) => [index("proposal_events_send_id_idx").on(t.sendId)],
-).enableRLS();
-
-export const scheduledEmails = pgTable("scheduled_emails", {
-  id: id(),
-  kind: scheduledEmailKind("kind").notNull(),
-  refId: uuid("ref_id").notNull(), // proposal_send id or invoice id
-  sendAt: timestamp("send_at", { withTimezone: true }).notNull(),
-  status: scheduledEmailStatus("status").notNull().default("pending"),
-}).enableRLS();
+);
 
 // ── Invoices ────────────────────────────────────────────────────────────────
-export const invoices = pgTable(
+export const invoices = sqliteTable(
   "invoices",
   {
     id: id(),
-    orgId: uuid("org_id").notNull().references(() => organisations.id, { onDelete: "cascade" }),
-    clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
-    estimateId: uuid("estimate_id").references(() => estimates.id, { onDelete: "set null" }),
+    orgId: ref("org_id")
+      .notNull()
+      .references(() => organisations.id, { onDelete: "cascade" }),
+    clientId: ref("client_id").references(() => clients.id, { onDelete: "set null" }),
+    estimateId: ref("estimate_id").references(() => estimates.id, { onDelete: "set null" }),
     number: integer("number").notNull(), // rendered as INV-0001
-    status: invoiceStatus("status").notNull().default("draft"),
-    dueDate: date("due_date"),
-    lines: jsonb("lines").notNull(), // snapshot at time of invoicing
+    status: text("status", { enum: INVOICE_STATUSES }).notNull().default("draft"),
+    dueDate: text("due_date"),
+    lines: json<unknown>("lines").notNull(), // snapshot at time of invoicing
     totalCents: integer("total_cents").notNull(),
-    paidAt: timestamp("paid_at", { withTimezone: true }),
-    externalRef: text("external_ref"), // e.g. Xero invoice id
+    paidAt: integer("paid_at", { mode: "timestamp_ms" }),
+    externalRef: text("external_ref"),
     createdAt: createdAt(),
   },
   (t) => [
@@ -392,4 +393,4 @@ export const invoices = pgTable(
     index("invoices_client_id_idx").on(t.clientId),
     index("invoices_estimate_id_idx").on(t.estimateId),
   ],
-).enableRLS();
+);
