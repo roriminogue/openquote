@@ -35,8 +35,8 @@ xcrun devicectl device install app --device "$DEVICE" "$APP"
 
 stop_app() {
   local pid
-  pid=$(xcrun devicectl device info processes --device "$DEVICE" 2>/dev/null | grep -F "/App.app/" | awk '{print $1}' | head -1)
-  [ -z "$pid" ] || xcrun devicectl device process terminate --device "$DEVICE" --pid "$pid" >/dev/null 2>&1 || true
+  pid=$(xcrun devicectl device info processes --device "$DEVICE" 2>/dev/null | grep -F "/App.app/App" | awk '{print $1}' | head -1)
+  [ -z "$pid" ] || xcrun devicectl device process terminate --device "$DEVICE" --pid "$pid" --kill >/dev/null 2>&1 || true
 }
 
 if [ -n "$DATA" ]; then
@@ -51,5 +51,5 @@ if [ -n "$DATA" ]; then
 fi
 
 echo "Opening…"
-xcrun devicectl device process launch --device "$DEVICE" "$BUNDLE_ID" >/dev/null 2>&1 || echo "Installed. Open OpenQuote AU on the phone (you may need to trust the developer first)."
+xcrun devicectl device process launch --terminate-existing --device "$DEVICE" "$BUNDLE_ID" >/dev/null 2>&1 || echo "Installed. Open OpenQuote AU on the phone (you may need to trust the developer first)."
 echo "Done."
