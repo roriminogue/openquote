@@ -69,17 +69,37 @@ html[data-pointer] :focus-visible {
   }
 }
 
+/* The job box on New estimate, in the manner of Claude's and ChatGPT's prompt boxes: rounded, white with a hairline
+   and a soft lift in light mode, a shade lighter than the page in dark mode (never darker, which looked sunk in). */
+.prompt-box {
+  border-radius: 1.75rem;
+  border: 1px solid light-dark(#e2e2e2, #3a3a3a);
+  background: light-dark(#ffffff, #303030);
+  box-shadow:
+    0 1px 2px light-dark(rgb(0 0 0 / 0.04), transparent),
+    0 6px 20px light-dark(rgb(0 0 0 / 0.05), transparent);
+  transition: border-color 150ms ease;
+}
+.prompt-box:focus-within {
+  border-color: light-dark(#c9c9c9, #4f4f4f);
+}
+.prompt-box[data-error] {
+  border-color: var(--color-border-error);
+}
+
 .voice-bars {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  height: 14px;
+  justify-content: center;
+  gap: 2.5px;
+  width: 18px;
+  height: 16px;
 }
 
 .voice-bars > span {
-  width: 2px;
+  width: 2.5px;
   height: 100%;
-  border-radius: 1px;
+  border-radius: 2px;
   background: var(--color-accent);
   transform: scaleY(0.35);
   transform-origin: center;

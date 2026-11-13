@@ -1,5 +1,3 @@
-import { Icon } from "@astryxdesign/core/Icon";
-import { ToggleButton } from "@astryxdesign/core/ToggleButton";
 import { Mic } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { dictationKind, startDictation, type Dictation, type DictationKind } from "@/lib/voice/dictation";
@@ -95,29 +93,31 @@ export function useDictation({
     status,
     busy: status !== "idle",
     toggle,
-    // A quiet toggle in the composer's footer, not a button shouting for attention. While listening it stays
-    // pressed, four orange bars move (the live state) and the label becomes Stop with a running time.
+    // A quiet text button in the prompt box: a mic and "Talk". While listening there's no pressed background, just
+    // four small moving bars where the mic was and "Stop" with a running time; tap it again to stop.
     button: kind ? (
-      <ToggleButton
-        label={status === "listening" ? `Stop talking (${elapsedFmt(elapsed)})` : "Talk instead of typing"}
-        isPressed={status === "listening"}
-        size="sm"
-        onPressedChange={() => toggle()}
-        isDisabled={status === "starting" || status === "tidying"}
-        icon={<Icon icon={Mic} />}
-        pressedIcon={
+      <button
+        type="button"
+        aria-pressed={status === "listening"}
+        aria-label={status === "listening" ? `Stop talking (${elapsedFmt(elapsed)})` : "Talk instead of typing"}
+        onClick={() => toggle()}
+        disabled={status === "starting" || status === "tidying"}
+        className="inline-flex h-9 items-center gap-2 rounded-full px-3 text-(length:--text-body-size) font-medium text-(--color-text-primary) outline-offset-2 transition-opacity active:opacity-60 disabled:opacity-50"
+      >
+        {status === "listening" ? (
           <span aria-hidden className="voice-bars">
             <span />
             <span />
             <span />
             <span />
           </span>
-        }
-      >
+        ) : (
+          <Mic aria-hidden className="size-[18px]" strokeWidth={2} />
+        )}
         {status === "listening" ? (
-          <>
+          <span>
             Stop <span className="font-normal tabular-nums text-(--color-text-secondary)">{elapsedFmt(elapsed)}</span>
-          </>
+          </span>
         ) : status === "starting" ? (
           "Starting…"
         ) : status === "tidying" ? (
@@ -125,7 +125,7 @@ export function useDictation({
         ) : (
           "Talk"
         )}
-      </ToggleButton>
+      </button>
     ) : null,
     statusLine:
       status === "listening" ? (
