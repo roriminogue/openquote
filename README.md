@@ -24,7 +24,7 @@ client as a PDF from your phone.
 
 ## Get it on your iPhone
 
-**The easy way (no computer, never expires):** open **https://openquote-app.vercel.app** in Safari on your iPhone,
+**The easy way (no computer, never expires):** open **https://openquote-au.pages.dev** in Safari on your iPhone,
 tap **•••** → **Share** → **View More** → **Add to Home Screen**, and leave **Open as Web App** on. OpenQuote then has
 its own icon and opens full screen like any other app, even with no signal. Your quotes are saved on your phone,
 not on a server.
