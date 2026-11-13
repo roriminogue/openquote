@@ -4,7 +4,7 @@ import { isNative } from "@/db/storage";
 import { publikKey } from "@/lib/publik";
 import { webPublikBaseUrl } from "@/lib/publik-web";
 import { getApiKey } from "./keys";
-import { PROVIDER_INFO, providerBaseUrl, type Provider } from "./providers";
+import { effectiveProvider, PROVIDER_INFO, providerBaseUrl, type Provider } from "./providers";
 
 export type AiConfig = {
   provider: Provider;
@@ -16,10 +16,10 @@ export type AiConfig = {
   source: "business" | "none";
 };
 
-/** Which provider, key and models the business's AI calls use (SPEC.md §7a). Publik unless changed in Settings → AI. */
+/** Which provider, key and models the business's AI calls use (SPEC.md §7a): the one picked in Settings → AI. */
 export async function resolveAiConfig(orgId: string): Promise<AiConfig> {
   const [row] = await db.select().from(schema.aiSettings).where(eq(schema.aiSettings.orgId, orgId));
-  const provider = row?.provider ?? "publik";
+  const provider = effectiveProvider(row?.provider);
   const info = PROVIDER_INFO[provider];
   const models = {
     smartModel: row?.smartModel ?? info.defaultSmartModel,

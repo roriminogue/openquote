@@ -2,8 +2,18 @@
 // with no key to paste. The rest are bring-your-own-key. No SDKs here: checking a key only needs each provider's
 // free "list models" endpoint, which also tells us which model ids the key can use.
 
+import { PUBLIK_ENABLED } from "@/lib/publik-token";
+
 export const PROVIDERS = ["publik", "anthropic", "openai", "google", "openrouter", "ollama"] as const;
 export type Provider = (typeof PROVIDERS)[number];
+
+/** The providers this build offers: publik only when it carries publik's app token (lib/publik-token.ts). */
+export const AVAILABLE_PROVIDERS: Provider[] = PROVIDERS.filter((p) => p !== "publik" || PUBLIK_ENABLED);
+/** The provider before the person picks one in Settings → AI. */
+export const DEFAULT_PROVIDER: Provider = PUBLIK_ENABLED ? "publik" : "anthropic";
+/** The saved provider, or the default when none is saved (or it's publik and this build has no publik). */
+export const effectiveProvider = (saved?: Provider | null): Provider =>
+  saved && (saved !== "publik" || PUBLIK_ENABLED) ? saved : DEFAULT_PROVIDER;
 
 type ProviderInfo = {
   label: string;

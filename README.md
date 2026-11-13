@@ -14,8 +14,7 @@ client as a PDF from your phone.
   it accepted or declined when the client answers.
 - **Everything stays on your phone.** No account to make and no server holding your quotes. They're saved on the
   phone, and the app reminds you to back them up to a file.
-- **Costs nothing to run.** Pay only for the AI you use: with your own AI key (a few cents a quote), or a publik
-  plan.
+- **Costs nothing to run.** Pay only for the AI you use, with your own AI key: a few cents a quote.
 
 <p>
   <img src="docs/screenshots/2-new-estimate.jpg" width="200" alt="New estimate: describe the job or tap Talk, then Price this job">
@@ -37,11 +36,11 @@ Apple makes apps installed this way stop opening after 7 days, so you plug in an
 
 **The first time you open it:**
 
-1. **Sign in with publik.** Tap the button, sign in to [publik](https://publikhq.com) in the browser that opens
-   (free), and come back: the app carries on by itself.
-2. **Choose how to pay for AI:** **Connect your plan** (pay per quote from your publik credit, no key needed) or
-   **Use my own key** (add an Anthropic, OpenAI, Google or OpenRouter key in **Settings → AI**).
-3. **Set up your business:** name, ABN, logo and contact details in **Settings → Business**, and your labour rate and
+1. **Set up your business:** your name and business name.
+2. **Add your AI key** in **Settings → AI**: an Anthropic key is recommended
+   ([get one here](https://console.anthropic.com/settings/keys)); OpenAI, Google and OpenRouter keys work too. You pay
+   the AI company directly, usually a few cents a quote.
+3. **Fill in your details:** ABN, logo and contact details in **Settings → Business**, and your labour rate and
    materials in **Settings → Rates and pricing**. They go on every quote.
 
 To move your quotes between phones or versions: **Settings → Your data → Back up to a file**, then **Restore from a
@@ -53,7 +52,7 @@ file** on the other.
 |---|---|
 | OpenQuote AU | Free (AGPL-3.0) |
 | Running it | Nothing: there's no server or database to pay for |
-| AI | Your own key, pay-as-you-go (typically a few cents per estimate), or a publik plan |
+| AI | Your own key, pay-as-you-go (typically a few cents per estimate) |
 
 **Prices are a starting point for Melbourne, Victoria (checked October 2026).** The built-in price book covers
 fencing, decking and carpentry materials. Labour times haven't been checked by a tradie yet. Your own rates in
@@ -69,13 +68,11 @@ database in that app's own storage on the phone.
 **What leaves your phone, and only when you do it:**
 
 - **Pricing a job:** your job description, site address and rates go to the AI service you chose (Anthropic,
-  OpenAI, Google, OpenRouter, your own Ollama, or publik) to be priced. Nothing else is sent.
+  OpenAI, Google, OpenRouter or your own Ollama) to be priced. Nothing else is sent.
 - **Sharing:** the quote PDFs and backup files you choose to send.
-- **Sign in with publik** (only in the publik version): publik learns that you use the app and counts app opens.
-  It never sees your quotes.
 
 **Who else is involved:** the Home Screen version's files are served by Cloudflare Pages, which sees that the app
-was loaded, like any website, and passes publik requests on without keeping them. Nobody else gets anything: no
+was loaded, like any website. Nobody else gets anything: no
 analytics, no ads, no tracking.
 
 **Backups:** **Settings → Your data → Back up to a file** saves everything to one file you can keep in iCloud
@@ -83,17 +80,12 @@ Drive, Files or email; **Restore from a file** brings it back on the same phone 
 when it's been a while. AI keys are never put in backups: in the iPhone app they're in the Keychain, in the Home
 Screen version in that app's storage.
 
-## Sign in with publik
+## Optional: Sign in with publik
 
-OpenQuote AU is listed on publik at **https://publikhq.com/openquote-au**. It opens behind **Sign in with publik**,
-and people can pay for AI with their publik plan instead of their own key. That's switched on by publik's app token in
-`publik-app-token.txt` at the top of the repo (public by design: it identifies the app and only mints capped keys for
-it). Without that file (in a fork, say) the app opens straight away and uses each person's own AI key.
-
-- **iPhone app:** `ios/App/App/Publik.swift` (publik's Swift module).
-- **Web version:** `src/lib/publik-web.ts`, the same steps in the browser. Publik's API doesn't take calls from web
-  pages, so the web version goes through a small relay on its own site, `functions/publik` (a Cloudflare Pages
-  function that passes requests to publikhq.com/api/v1 and keeps nothing).
+The code can also run as a [publik](https://publikhq.com) app (Sign in with publik, and pay for AI with a publik
+plan): put publik's app token in `publik-app-token.txt` at the top of the repo and rebuild. Without that file, which
+is the default, none of it runs. The pieces: `ios/App/App/Publik.swift` (iPhone app), `src/lib/publik-web.ts` (web
+version) and `functions/publik` (a Cloudflare Pages relay, since publik's API doesn't take calls from web pages).
 
 ## For developers
 
