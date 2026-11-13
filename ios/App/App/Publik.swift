@@ -33,11 +33,14 @@ enum Publik {
     enum Provider { case own(baseURL: String, apiKey: String), publik(baseURL: String, apiKey: String), needsOwnKey }
     struct PublikError: LocalizedError { let message: String; var errorDescription: String? { message } }
 
-    /// PUBLIK_APP_TOKEN, else the bundle resource, else publik-app-token.txt next to the binary (a command-line tool).
+    /// PUBLIK_APP_TOKEN, else the bundle resource (the app's built web files carry it: public/publik-app-token.txt),
+    /// else publik-app-token.txt next to the binary (a command-line tool).
     static var appToken: String {
         if let env = ProcessInfo.processInfo.environment["PUBLIK_APP_TOKEN"]?.trimmingCharacters(in: .whitespacesAndNewlines), !env.isEmpty { return env }
         let beside = Bundle.main.executableURL?.deletingLastPathComponent().appendingPathComponent("publik-app-token.txt")
-        guard let url = Bundle.main.url(forResource: "publik-app-token", withExtension: "txt") ?? beside, let text = try? String(contentsOf: url, encoding: .utf8) else { return "" }
+        let bundled = Bundle.main.url(forResource: "publik-app-token", withExtension: "txt")
+            ?? Bundle.main.url(forResource: "publik-app-token", withExtension: "txt", subdirectory: "public")
+        guard let url = bundled ?? beside, let text = try? String(contentsOf: url, encoding: .utf8) else { return "" }
         return text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     /// The phone's name, read on the main thread at start-up (see OpenQuoteNative.load).

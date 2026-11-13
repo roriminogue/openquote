@@ -1,7 +1,8 @@
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { existsSync, readFileSync } from "node:fs";
+import { defineConfig, type Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // The whole app is built into dist/ and shipped inside the iPhone app (capacitor.config.ts). There is no server:
@@ -10,8 +11,19 @@ import { VitePWA } from "vite-plugin-pwa";
 // The same build is also the Home Screen web version (vercel.json, scripts/deploy-web.sh). Its service worker keeps
 // a copy of the whole app on the phone, so after the first visit it opens instantly and with no signal. (Inside the
 // iPhone app there's no service worker support, so the worker simply never starts there.)
+// publik's app token (publik-app-token.txt, public by design) also goes into the build, so the iPhone app can read it
+// from its bundled web files (ios/App/App/Publik.swift). The web version reads it in lib/publik-web.ts.
+const publikToken = (): Plugin => ({
+  name: "publik-app-token",
+  generateBundle() {
+    if (existsSync("publik-app-token.txt"))
+      this.emitFile({ type: "asset", fileName: "publik-app-token.txt", source: readFileSync("publik-app-token.txt", "utf8") });
+  },
+});
+
 export default defineConfig({
   plugins: [
+    publikToken(),
     react(),
     tailwindcss(),
     VitePWA({
@@ -36,6 +48,6 @@ export default defineConfig({
   server: {
     port: 5173,
     watch: { ignored: ["**/ios/**", "**/dist/**"] },
-    proxy: { "/publik": { target: "https://publikhq.com", changeOrigin: true, rewrite: (p) => p.replace(/^\/publik/, "/api/v1") } },
+    proxy: { "^/publik/": { target: "https://publikhq.com", changeOrigin: true, rewrite: (p) => p.replace(/^\/publik/, "/api/v1") } },
   },
 });
