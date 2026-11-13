@@ -129,7 +129,7 @@ enum Publik {
     static func gateScreen(_ id: String, _ w: Wallet? = nil, note: String? = nil, message: String? = nil) -> Screen {
         if id == "unreachable" { return Screen(id: id, title: "Sign in with publik", body: message ?? "publik is not reachable. Check your connection.", note: note, buttons: [("retry", "Retry")]) }
         if id == "sign_in" {
-            return Screen(id: id, title: "Sign in with publik", body: "This app uses your publik account. Click Sign in with publik, then sign in in your browser. This window continues when you are signed in.",
+            return Screen(id: id, title: "Sign in with publik", body: "This app uses your publik account. Tap Sign in with publik and sign in. You come straight back here when you're done.",
                           note: note, buttons: [("sign_in", "Sign in with publik")])
         }
         let who = w?.handle.map { "You are signed in as @\($0)." } ?? "You are signed in to publik."
@@ -182,9 +182,9 @@ enum Publik {
             if !w.claimed {
                 let a = await ask(ui, gateScreen("sign_in", w, note: signNote), key: c.key, until: signPoll ? signedIn : nil)
                 if a == "sign_in", let url = URL(string: w.claimURL ?? c.claim_url ?? "\(origin)/wallet") {
-                    ui.open(url); signNote = "Waiting for you to sign in in your browser."; signPoll = true
+                    ui.open(url); signNote = "Waiting for you to sign in to publik."; signPoll = true
                 }
-                if a == "timeout" { signNote = "No sign-in after 10 minutes. Click Sign in with publik to try again."; signPoll = false }
+                if a == "timeout" { signNote = "No sign-in after 10 minutes. Tap Sign in with publik to try again."; signPoll = false }
                 continue
             }
             var choice = usesAI ? readCredential()?.choice : nil
@@ -192,8 +192,8 @@ enum Publik {
                 if hasPlan(w) { planNote = nil; planPoll = false } // the plan is there: Connect your plan
                 let a = await ask(ui, gateScreen("choose", w, note: planNote), key: c.key, until: planPoll ? hasPlan : nil)
                 planNote = nil; planPoll = false
-                if a == "get_plan", let url = URL(string: w.topUpURL) { ui.open(url); planNote = "Waiting for your plan. Finish in your browser."; planPoll = true }
-                if a == "timeout" { planNote = "No plan after 10 minutes. Click Get a plan to try again." }
+                if a == "get_plan", let url = URL(string: w.topUpURL) { ui.open(url); planNote = "Waiting for your plan. Finish on the publik page."; planPoll = true }
+                if a == "timeout" { planNote = "No plan after 10 minutes. Tap Get a plan to try again." }
                 guard a == "connect" || a == "own_key" else { continue } // "done": the plan is there; the next screen is Connect your plan
                 choice = a == "connect" ? "publik" : "own_key"
                 setChoice(choice)
