@@ -4,7 +4,9 @@ Free, open-source AI quoting for tradies, on your iPhone. Describe a job the way
 and OpenQuote AU breaks it into stages and prices every line with your own rates. Edit it, then send it to your
 client as a PDF from your phone.
 
-**Try it:** open **https://openquote-au.pages.dev** in Safari on your iPhone and add it to your Home Screen.
+**Try it:** open **https://openquote-au.pages.dev** (on your phone or computer) and tap **Try it with sample quotes**
+to look around a made-up business with four priced jobs. No sign-up or AI key needed. To use it for real, add it to
+your iPhone's Home Screen and set up your own business.
 
 - **Price a job in under a minute.** Stages, quantities, labour and materials, with your rates used first.
 - **Real prices, not guesses.** A built-in price book of checked material prices, and calculators that work out

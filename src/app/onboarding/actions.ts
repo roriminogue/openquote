@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { getMember } from "@/lib/auth";
+import { loadDemo } from "@/lib/demo";
 import { navigateTo } from "@/lib/navigation";
 
 const Onboarding = z.object({
@@ -9,6 +10,12 @@ const Onboarding = z.object({
 });
 
 export type OnboardingState = { error: string | null };
+
+/** Fills the app with the sample business (lib/demo.ts), then opens Estimates. */
+export async function startDemo() {
+  if (!(await getMember())) await loadDemo();
+  navigateTo("/estimates", { replace: true });
+}
 
 /** Creates the business on this phone, then opens Estimates. */
 export async function createOrganisation(_prev: OnboardingState, formData: FormData): Promise<OnboardingState> {
