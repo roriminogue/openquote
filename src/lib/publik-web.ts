@@ -14,6 +14,10 @@ import type { PublikScreen } from "./publik";
 export const APP_SLUG = "openquote-au";
 const APP_VERSION = "1.0.0";
 const RELAY = "/publik";
+// publik API paths. The relay on this site (functions/publik) maps /publik/<x> to publikhq.com/api/v1/<x>.
+const INSTALLS = "/api/v1/installs";
+const WALLET = "/api/v1/wallet";
+const TELEMETRY = "/api/v1/telemetry";
 const ORIGIN = "https://publikhq.com";
 const CREDENTIAL = "oq-publik-credential";
 const TELEMETRY_ID = "oq-publik-telemetry-id";
@@ -64,7 +68,7 @@ class Unreachable extends Error {}
 async function call(method: "GET" | "POST", path: string, { body, key, timeout = 20_000 }: { body?: unknown; key?: string; timeout?: number } = {}) {
   let res: Response;
   try {
-    res = await fetch(`${RELAY}/${path}`, {
+    res = await fetch(`${RELAY}/${path.replace(/^\/api\/v1\//, "")}`, {
       method,
       headers: { "content-type": "application/json", ...(key ? { authorization: `Bearer ${key}` } : {}) },
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -95,7 +99,7 @@ async function provision(): Promise<Credential> {
   let installId = prior?.install_id ?? crypto.randomUUID();
   const { os, device } = platform();
   for (let i = 0; i < 2; i++) {
-    const { status, body } = await call("POST", "installs", {
+    const { status, body } = await call("POST", INSTALLS, {
       body: {
         app_token: APP_TOKEN,
         app_slug: APP_SLUG,
@@ -130,7 +134,7 @@ async function provision(): Promise<Credential> {
 
 /** GET /wallet. */
 async function readWallet(key: string): Promise<{ status: number; wallet: Wallet | null; message?: string }> {
-  const { status, body } = await call("GET", "wallet", { key, timeout: 15_000 });
+  const { status, body } = await call("GET", WALLET, { key, timeout: 15_000 });
   if (status !== 200 || typeof body.claim_state !== "string") return { status, wallet: null, message: errorOf(body).message };
   const plan = (body.plan ?? {}) as { kind?: string; label?: string };
   return {
@@ -310,7 +314,7 @@ function telemetryInstallId() {
 async function sendEvent(event: "app_opened" | "active_session") {
   if (navigator.doNotTrack === "1" || (globalThis as { GlobalPrivacyControl?: boolean }).GlobalPrivacyControl) return;
   const key = readCredential()?.key;
-  await call("POST", "telemetry", {
+  await call("POST", TELEMETRY, {
     key,
     timeout: 5000,
     body: { v: 1, app: APP_SLUG, install_id: telemetryInstallId(), event, app_version: APP_VERSION, os: platform().os },
