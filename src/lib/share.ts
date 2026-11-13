@@ -14,7 +14,11 @@ const native = registerPlugin<Native>("OpenQuoteNative");
  * Web version: opens the Share sheet with a PDF made beforehand (lib/pdf-web.ts), and the message. Call it straight
  * from the tap, with the PDF already made: the Share sheet only opens from a fresh tap. True once it was sent.
  */
-export async function shareMadePdf(fileName: string, pdf: Uint8Array, text?: string): Promise<{ completed: boolean }> {
+export async function shareMadePdf(
+  fileName: string,
+  pdf: Uint8Array,
+  text?: string,
+): Promise<{ completed: boolean; openedOnly?: boolean }> {
   const file = new File([pdf as BlobPart], `${fileName.replace(/[\\/:*?"<>|]/g, "-")}.pdf`, { type: "application/pdf" });
   if (navigator.canShare?.({ files: [file] })) {
     try {
@@ -26,11 +30,12 @@ export async function shareMadePdf(fileName: string, pdf: Uint8Array, text?: str
       if ((e as Error)?.name === "NotAllowedError") throw e;
     }
   }
-  // No Share sheet (a computer's browser): open the PDF in a new tab to save or print from there.
+  // No Share sheet (a computer's browser): open the PDF in a new tab to save, print or attach from there. Nothing was
+  // sent yet, so the caller asks before marking the quote as sent.
   const url = URL.createObjectURL(file);
   window.open(url, "_blank");
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
-  return { completed: true };
+  return { completed: false, openedOnly: true };
 }
 
 /** Turns the screen showing now (with its print styles) into an A4 PDF and opens the Share sheet. */

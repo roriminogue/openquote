@@ -65,6 +65,9 @@ function Quote() {
     };
   }, [web, q]);
   const making = web && !made && !error;
+  // On a computer the PDF opens in a new tab instead of a Share sheet: ask before counting it as sent.
+  const [opened, setOpened] = useState(false);
+  const [markedSent, setMarkedSent] = useState(false);
 
   async function share() {
     setError(null);
@@ -74,6 +77,7 @@ function Quote() {
       const shared = web ? await shareMadePdf(name, made!, message) : await sharePdf(name, message);
       // Counts as sent once it actually went somewhere (not when the Share sheet was closed).
       if (detail && shared.completed) await shareEstimate((await requireMember()).orgId, id, detail);
+      if (detail && "openedOnly" in shared && shared.openedOnly) setOpened(true);
     } catch (e) {
       setError((e as Error)?.message || "Couldn't make the PDF. Try again.");
     } finally {
@@ -95,6 +99,28 @@ function Quote() {
             isDisabled={making}
           />
         </div>
+        {opened && detail && (
+          <div className="mx-auto mt-2 max-w-3xl">
+            <Banner
+              status={markedSent ? "success" : "info"}
+              title={markedSent ? "Marked as sent." : "The PDF opened in a new tab."}
+              description={markedSent ? undefined : "Save it or attach it to an email. Sent it to the client?"}
+              endContent={
+                markedSent ? undefined : (
+                  <Button
+                    label="Mark as sent"
+                    size="sm"
+                    variant="primary"
+                    onClick={async () => {
+                      await shareEstimate((await requireMember()).orgId, id, detail);
+                      setMarkedSent(true);
+                    }}
+                  />
+                )
+              }
+            />
+          </div>
+        )}
         {error && (
           <div className="mx-auto mt-2 max-w-3xl">
             <Banner status="error" title={error} />
