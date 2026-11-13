@@ -164,9 +164,9 @@ function gateScreen(id: "sign_in" | "unreachable" | "choose", w?: Wallet | null,
     return {
       id,
       title: "Sign in with publik",
-      body: "Tap Open publik, sign in, then tap Link this computer. To come back, tap ◀ OpenQuote at the very top left of your screen. This screen carries on by itself.",
+      body: `Tap Open publik, sign in, then tap Link this computer. To come back, ${backHint()}. This screen carries on by itself.`,
       note: [
-        note ? "Publik showed your wallet instead? Come back and tap Open publik again." : null,
+        note ? "Publik showed your wallet instead? Come back and tap Open publik again: this time it goes straight to Link this computer." : null,
         code ? `Or link from your computer: publikhq.com/claim/${code}` : null,
       ]
         .filter(Boolean)
@@ -197,6 +197,18 @@ function gateScreen(id: "sign_in" | "unreachable" | "choose", w?: Wallet | null,
       { action: "own_key", label: "Use my own key" },
     ],
   };
+}
+
+/**
+ * How to get back from publik's page. From a Home Screen web app iOS opens it in the Safari app, and the way back is
+ * the small "◀ OpenQuote" at the top left; in Safari itself it's a new tab, and Back returns here.
+ */
+function backHint() {
+  const standalone =
+    (navigator as { standalone?: boolean }).standalone === true || window.matchMedia?.("(display-mode: standalone)").matches;
+  return standalone
+    ? "tap ◀ OpenQuote at the very top left of your screen"
+    : "tap the Back arrow (◀) at the bottom left of Safari";
 }
 
 /** The link code at the end of publik's claim link (publikhq.com/claim/ABCD-1234). */
