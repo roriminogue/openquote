@@ -7,7 +7,22 @@
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#262626" />
     <meta name="format-detection" content="telephone=no" />
     <link rel="icon" href="/icons/icon-192.png" />
+    <!-- Added to the Home Screen from Safari, it opens full screen like an app, with its own icon and name. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="OpenQuote" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>OpenQuote AU</title>
+    <style>
+      /* Before the app's own styles arrive: the page colour, and the icon in the middle instead of a blank screen. */
+      html { background: #ffffff; }
+      @media (prefers-color-scheme: dark) { html:not([data-theme="light"]) { background: #262626; } }
+      html[data-theme="dark"] { background: #262626; }
+      .boot { position: fixed; inset: 0; display: grid; place-items: center; }
+      .boot img { width: 72px; height: 72px; border-radius: 16px; }
+    </style>
     <script>
       // The saved Light or Dark choice, applied before the first paint (see src/components/theme.tsx).
       try {
@@ -17,7 +32,7 @@
     </script>
   </head>
   <body class="min-h-full flex flex-col">
-    <div id="root" class="flex min-h-full flex-1 flex-col"></div>
+    <div id="root" class="flex min-h-full flex-1 flex-col"><div class="boot" aria-hidden="true"><img src="/apple-touch-icon.png" alt="" /></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
