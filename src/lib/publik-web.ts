@@ -159,7 +159,7 @@ function gateScreen(id: "sign_in" | "unreachable" | "choose", w?: Wallet | null,
     return {
       id,
       title: "Sign in with publik",
-      body: "This app uses your publik account. Tap Sign in with publik, then sign in in your browser. This app continues when you are signed in.",
+      body: "This app uses your publik account. Tap Sign in with publik and sign in, then tap Done at the top to come back. The app carries on by itself.",
       note,
       buttons: [{ action: "sign_in", label: "Sign in with publik" }],
     };
@@ -194,7 +194,21 @@ export function webPress(action: string | null) {
   press?.(action);
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** Waits `ms`, or less when the person comes back to the app (from publik's page), so it moves on straight away. */
+function waitOrReturn(ms: number) {
+  return new Promise<void>((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onShow);
+      window.removeEventListener("focus", done);
+      resolve();
+    };
+    const onShow = () => document.visibilityState === "visible" && done();
+    const timer = setTimeout(done, ms);
+    document.addEventListener("visibilitychange", onShow);
+    window.addEventListener("focus", done);
+  });
+}
 
 /** Shows a screen; with `until`, also polls GET /wallet every 3 s for at most 10 minutes. */
 async function ask(show: (s: PublikScreen) => void, screen: PublikScreen, key = "", until?: (w: Wallet) => boolean): Promise<string> {
@@ -206,7 +220,7 @@ async function ask(show: (s: PublikScreen) => void, screen: PublikScreen, key = 
   const polled = until
     ? (async () => {
         for (let i = 0; i < 200 && !stop; i++) {
-          await sleep(3000);
+          await waitOrReturn(3000);
           if (stop) break;
           const w = await readWallet(key).then((r) => r.wallet).catch(() => null);
           if (w && until(w)) return "done";
@@ -263,7 +277,7 @@ async function gate(show: (s: PublikScreen) => void): Promise<{ signedIn: boolea
       const a = await ask(show, gateScreen("sign_in", w, signNote), c.key, signPoll ? (x) => x.claimed : undefined);
       if (a === "sign_in") {
         window.open(w.claimUrl ?? c.claim_url ?? `${ORIGIN}/wallet`, "_blank", "noopener");
-        signNote = "Waiting for you to sign in in your browser.";
+        signNote = "Signed in? Tap Done at the top of the publik page to come back here.";
         signPoll = true;
       }
       if (a === "timeout") {
@@ -283,7 +297,7 @@ async function gate(show: (s: PublikScreen) => void): Promise<{ signedIn: boolea
       planPoll = false;
       if (a === "get_plan") {
         window.open(w.topUpUrl, "_blank", "noopener");
-        planNote = "Waiting for your plan. Finish in your browser.";
+        planNote = "Got your plan? Tap Done at the top of the publik page to come back here.";
         planPoll = true;
       }
       if (a === "timeout") planNote = "No plan after 10 minutes. Tap Get a plan to try again.";

@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Capacitor
 import Foundation
 import Security
@@ -88,6 +89,7 @@ public class OpenQuoteNativePlugin: CAPPlugin, CAPBridgedPlugin {
         gateTask?.cancel()
         gateTask = Task {
             let result = await Publik.ensureSignedIn(gate)
+            gate.closeBrowser()
             await MainActor.run { self.notifyListeners("publikScreen", data: ["id": "done"]) }
             call.resolve(["signedIn": true, "configured": true, "choice": result.choice ?? NSNull(), "handle": result.wallet.handle ?? NSNull()])
         }
@@ -169,15 +171,25 @@ public class OpenQuoteNativePlugin: CAPPlugin, CAPBridgedPlugin {
 }
 
 /// Shows publik's gate screens in the web UI and waits for the button the person presses.
-final class PublikGateBridge: PublikGateUI, @unchecked Sendable {
+/// publik's pages (sign in, get a plan) open in Apple's sign-in sheet inside the app, which shares the person's
+/// Safari sign-ins, instead of switching to Safari. The gate checks publik every 3 seconds; as soon as it moves on
+/// (signed in, or the plan arrived) the sheet closes by itself and the next screen is already there.
+final class PublikGateBridge: NSObject, PublikGateUI, ASWebAuthenticationPresentationContextProviding, @unchecked Sendable {
     private weak var plugin: OpenQuoteNativePlugin?
     private var pick: CheckedContinuation<String?, Never>?
     private let lock = NSLock()
+    private var session: ASWebAuthenticationSession?
+    /// The screen title the sheet was opened from: a screen with another title means the gate moved on.
+    private var openedFrom: String?
 
     init(plugin: OpenQuoteNativePlugin) { self.plugin = plugin }
 
     func show(_ screen: Publik.Screen) async -> String? {
-        await withTaskCancellationHandler {
+        DispatchQueue.main.async {
+            if let from = self.openedFrom, from != screen.title { self.closeBrowser() }
+            self.currentTitle = screen.title
+        }
+        return await withTaskCancellationHandler {
             await withCheckedContinuation { (c: CheckedContinuation<String?, Never>) in
                 lock.lock()
                 pick?.resume(returning: nil)
@@ -199,6 +211,34 @@ final class PublikGateBridge: PublikGateUI, @unchecked Sendable {
     }
 
     func open(_ url: URL) {
-        DispatchQueue.main.async { UIApplication.shared.open(url) }
+        DispatchQueue.main.async {
+            self.session?.cancel()
+            // The callback scheme is never used: the sheet is closed when publik says the step is done.
+            let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "openquote-au") { [weak self] _, _ in
+                self?.session = nil
+                self?.openedFrom = nil
+            }
+            session.presentationContextProvider = self
+            session.prefersEphemeralWebBrowserSession = false // keep the person's publik sign-in from Safari
+            self.openedFrom = self.currentTitle
+            self.session = session
+            if !session.start() { UIApplication.shared.open(url) }
+        }
+    }
+
+    /// Closes publik's sheet if it's open (the step it was for is done).
+    func closeBrowser() {
+        DispatchQueue.main.async {
+            self.session?.cancel()
+            self.session = nil
+            self.openedFrom = nil
+        }
+    }
+
+    /// The title of the screen showing now (set by emitScreen).
+    var currentTitle: String?
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        plugin?.bridge?.viewController?.view.window ?? ASPresentationAnchor()
     }
 }
