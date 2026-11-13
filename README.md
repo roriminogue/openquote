@@ -24,11 +24,17 @@ client as a PDF from your phone.
 
 ## Get it on your iPhone
 
-You need a Mac with Xcode (free), your iPhone and a USB cable. No paid Apple account: a free Apple ID works, but
+**The easy way (no computer, never expires):** open **https://openquote-app.vercel.app** in Safari on your iPhone,
+tap **•••** → **Share** → **View More** → **Add to Home Screen**, and leave **Open as Web App** on. OpenQuote then has
+its own icon and opens full screen like any other app, even with no signal. Your quotes are saved on your phone,
+not on a server.
+
+**The native app (needs a Mac):** a Mac with Xcode (free), your iPhone and a USB cable. A free Apple ID works, but
 Apple makes apps installed this way stop opening after 7 days, so you plug in and run the install again each week
 (your data stays). Step-by-step instructions: [ios/README.md](ios/README.md).
 
-Once it's installed, set up your business, then add your AI key in **Settings → AI** (or sign in with publik).
+Either way, set up your business, then add your AI key in **Settings → AI** (or sign in with publik). To move your
+quotes from one to the other: **Settings → Account → Back up to a file**, then **Restore from a file** in the other.
 
 ## What it costs
 
