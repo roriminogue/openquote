@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { getMember } from "@/lib/auth";
-import { loadDemo } from "@/lib/demo";
+import { forgetDemo, loadDemo } from "@/lib/demo";
 import { navigateTo } from "@/lib/navigation";
 
 const Onboarding = z.object({
@@ -23,6 +23,7 @@ export async function createOrganisation(_prev: OnboardingState, formData: FormD
   if (!input.success) return { error: input.error.issues[0].message };
   if (!(await getMember())) {
     await db.insert(schema.organisations).values({ name: input.data.business, ownerName: input.data.name });
+    forgetDemo();
   }
   navigateTo("/estimates", { replace: true });
   return { error: null };

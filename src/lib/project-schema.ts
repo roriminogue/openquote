@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { phoneField } from "./business-schema";
 
 // Validation and shapes for projects and clients. Pure: safe to import from client components and tests.
 
@@ -25,7 +26,7 @@ export const ClientInput = z
       .trim()
       .transform((v) => v || null)
       .pipe(z.email("That email doesn't look right.").nullable()),
-    phone: optionalText,
+    phone: phoneField(200),
     abn: optionalText,
     address: optionalText,
   })

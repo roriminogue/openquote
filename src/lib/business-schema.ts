@@ -9,13 +9,21 @@ const optional = (max: number, message?: string) =>
     .max(max, message)
     .transform((v) => v || null);
 
+/** A phone number: digits, spaces, + ( ) - only, with at least 6 digits. Blank is fine. */
+export const phoneField = (max = 40) =>
+  optional(max).refine(
+    (v) => v === null || (/^[\d\s+()-]+$/.test(v) && v.replace(/\D/g, "").length >= 6),
+    "That phone number doesn't look right.",
+  );
+
 export const BusinessInput = z.object({
+  ownerName: z.string().trim().max(80, "Keep your name under 80 characters.").default(""),
   name: z.string().trim().min(1, "Enter your business name.").max(120, "Keep the business name under 120 characters."),
   abn: optional(20)
     .transform((v) => (v ? v.replace(/\s/g, "") : null))
     .refine((v) => v === null || /^\d{11}$/.test(v), "An ABN is 11 digits."),
   email: optional(200).pipe(z.email("That email doesn't look right.").nullable()),
-  phone: optional(40),
+  phone: phoneField(),
   address: optional(300),
   termsMd: optional(5000, "Keep the terms under 5,000 characters."),
   quoteValidDays: z.coerce

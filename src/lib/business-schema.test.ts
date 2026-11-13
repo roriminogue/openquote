@@ -16,6 +16,16 @@ describe("BusinessInput", () => {
   });
 });
 
+describe("phone numbers", () => {
+  it("takes real numbers and blank, rejects junk", () => {
+    expect(BusinessInput.parse({ ...base, phone: "0400 000 000" }).phone).toBe("0400 000 000");
+    expect(BusinessInput.parse({ ...base, phone: "+61 (2) 9876-5432" }).phone).toBe("+61 (2) 9876-5432");
+    expect(BusinessInput.parse({ ...base, phone: "" }).phone).toBeNull();
+    expect(BusinessInput.safeParse({ ...base, phone: "abc" }).error?.issues[0].message).toBe("That phone number doesn't look right.");
+    expect(BusinessInput.safeParse({ ...base, phone: "123" }).success).toBe(false);
+  });
+});
+
 describe("formatAbn", () => {
   it("groups the digits", () => {
     expect(formatAbn("12345678901")).toBe("12 345 678 901");
