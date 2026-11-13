@@ -4,7 +4,6 @@ import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
-import { TextArea } from "@astryxdesign/core/TextArea";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { MapPin, Square } from "lucide-react";
 import { useRouter } from "@/lib/navigation";
@@ -140,42 +139,57 @@ export function NewEstimate({
         </div>
       )}
 
-      {/* The job, said plainly: a labelled box like the fields under it, with Talk beside its label. */}
-      <div>
-        <div className="mb-1.5 flex min-h-8 items-center justify-between gap-3">
-          <Text as="div" type="label" color="secondary" weight="medium" aria-hidden>
-            The job
-          </Text>
-          {!busy && dictation.button}
-        </div>
-        <TextArea
+      {/* The prompt box, in the manner of Claude's and ChatGPT's: the words on top, Talk and Price along the bottom.
+          It sits a shade lighter than the page in dark mode (and white with a hairline in light), never darker. */}
+      <div className="prompt-box" data-error={phase.kind === "error" || undefined}>
+        <textarea
           ref={descriptionRef}
-          label="The job"
-          isLabelHidden
-          htmlName="description"
-          rows={6}
+          id="description"
+          name="description"
+          rows={4}
           value={description}
-          onChange={(value) => {
-            setDescription(value.slice(0, 8000));
+          onChange={(e) => {
+            setDescription(e.target.value.slice(0, 8000));
             // An old "describe it in more detail" or provider error shouldn't sit there once they've fixed it.
             if (phase.kind === "error") setPhase({ kind: "idle" });
           }}
-          isDisabled={busy}
-          isReadOnly={dictation.busy}
+          disabled={busy}
+          readOnly={dictation.busy}
+          aria-label="Describe the job"
+          aria-invalid={phase.kind === "error" || undefined}
+          aria-describedby={phase.kind === "error" ? "description-error" : undefined}
           placeholder={
             dictation.supported
-              ? "Size, materials, access, finish. Type it, or tap Talk and say it like you would to a mate."
-              : "Size, materials, access, finish. Whatever you’d tell a mate on the phone."
+              ? "Describe the job, or tap Talk: size, materials, access, finish."
+              : "Describe the job: size, materials, access, finish."
           }
-          status={phase.kind === "error" ? { type: "error", message: phase.message } : undefined}
-          width="100%"
+          className="block min-h-28 w-full resize-none rounded-t-[1.75rem] bg-transparent px-5 pt-4 pb-1 text-base leading-relaxed text-(--color-text-primary) caret-(--color-accent) outline-none placeholder:text-(--color-text-secondary) disabled:opacity-60"
         />
-        {dictation.statusLine && (
-          <div aria-live="polite" className="pt-1.5">
-            {dictation.statusLine}
-          </div>
-        )}
+        <div className="flex items-center justify-between gap-2 px-2.5 pb-2.5">
+          <div className="min-w-0">{!busy && dictation.button}</div>
+          {busy ? (
+            <Button
+              label="Stop"
+              variant="secondary"
+              className="rounded-full!"
+              icon={<Icon icon={Square} fill="currentColor" />}
+              onClick={() => abortRef.current?.abort()}
+            />
+          ) : (
+            <Button label="Price this job" variant="primary" className="rounded-full!" isDisabled={!ai || dictation.busy} onClick={generate} />
+          )}
+        </div>
       </div>
+      {phase.kind === "error" && (
+        <p id="description-error" role="alert" className="mt-2 px-2 text-(length:--text-supporting-size) text-(--color-text-error)">
+          {phase.message}
+        </p>
+      )}
+      {dictation.statusLine && (
+        <div aria-live="polite" className="mt-2 px-2">
+          {dictation.statusLine}
+        </div>
+      )}
 
       <div className="mt-5 grid items-start gap-5 sm:grid-cols-2 sm:gap-4">
         <ProjectField projects={projects} clients={clients} value={project} onChange={setProject} disabled={busy} />
@@ -203,21 +217,6 @@ export function NewEstimate({
             autoComplete="off"
             width="100%"
           />
-        )}
-      </div>
-
-      <div className="mt-6">
-        {busy ? (
-          <Button
-            label="Stop"
-            variant="secondary"
-            size="lg"
-            width="100%"
-            icon={<Icon icon={Square} fill="currentColor" />}
-            onClick={() => abortRef.current?.abort()}
-          />
-        ) : (
-          <Button label="Price this job" variant="primary" size="lg" width="100%" isDisabled={!ai || dictation.busy} onClick={generate} />
         )}
       </div>
 
