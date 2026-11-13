@@ -1,6 +1,8 @@
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { isNative } from "@/db/storage";
 import { publikKey } from "@/lib/publik";
+import { webPublikBaseUrl } from "@/lib/publik-web";
 import { getApiKey } from "./keys";
 import { PROVIDER_INFO, providerBaseUrl, type Provider } from "./providers";
 
@@ -23,7 +25,8 @@ export async function resolveAiConfig(orgId: string): Promise<AiConfig> {
     smartModel: row?.smartModel ?? info.defaultSmartModel,
     fastModel: row?.fastModel ?? info.defaultFastModel,
   };
-  const baseUrl = providerBaseUrl(provider, row?.baseUrl);
+  // The web version reaches publik API through its own site's relay (publik doesn't take calls from web pages).
+  const baseUrl = provider === "publik" && !isNative() ? webPublikBaseUrl() : providerBaseUrl(provider, row?.baseUrl);
 
   const apiKey = provider === "publik" ? await publikKey() : info.needsKey ? await getApiKey(provider) : null;
   const ready = provider === "publik" || info.needsKey ? !!apiKey : !!row;

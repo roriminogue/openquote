@@ -59,6 +59,18 @@ the iPhone's Keychain and never go into backups.
 (`DATABASE_URL` in `.env.local`) and writes a backup to `exports/`. Install with
 `./ios/install-on-iphone.sh --data "exports/<name> from web.oqbackup"` to start with it on the phone.
 
+## Sign in with publik
+
+When OpenQuote AU is listed on [publik](https://publikhq.com), it opens behind **Sign in with publik**, and people
+can pay for AI with their publik plan instead of their own key. It switches on once publik's app token is in
+`publik-app-token.txt` at the top of the repo (publik issues it when the app is listed; committing it is intended).
+Without that file the app opens straight away and uses each person's own AI key.
+
+- **iPhone app:** `ios/App/App/Publik.swift` (publik's Swift module).
+- **Web version:** `src/lib/publik-web.ts`, the same steps in the browser. Publik's API doesn't take calls from web
+  pages, so the web version goes through a small relay on its own site, `functions/publik` (a Cloudflare Pages
+  function that passes requests to publikhq.com/api/v1 and keeps nothing).
+
 ## For developers
 
 Prerequisites: Node 22+. For the iPhone app, a Mac with Xcode.

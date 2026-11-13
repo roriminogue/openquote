@@ -19,4 +19,5 @@ cat > "$OUT/_headers" <<'TXT'
 /sw.js
   Cache-Control: no-cache
 TXT
+# Run from the repo so Cloudflare also picks up functions/ (the relay to publik API, functions/publik).
 npx wrangler pages deploy "$OUT" --project-name openquote-au --branch main --commit-dirty=true 2>&1 | grep -E "Deployment complete|https://|ERROR" || true
