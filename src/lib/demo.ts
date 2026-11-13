@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { db, resetDatabase, schema } from "@/db";
 import type { EstimateAlternative } from "@/db/schema";
 import { markDecision, shareEstimate } from "./proposals";
@@ -194,13 +195,36 @@ export async function loadDemo() {
         })),
       );
     }
-    if (job.then) await shareEstimate(org.id, estimate.id, "groups");
-    if (job.then === "accepted" || job.then === "declined") await markDecision(org.id, estimate.id, job.then);
+    if (job.then) {
+      await shareEstimate(org.id, estimate.id, "groups");
+      if (job.then === "accepted" || job.then === "declined") await markDecision(org.id, estimate.id, job.then);
+      // Sent the day after it was priced, answered two days later (not all "today").
+      const sentAt = new Date(at.getTime() + day);
+      const sends = await db
+        .update(schema.proposalSends)
+        .set({ sentAt })
+        .where(eq(schema.proposalSends.estimateId, estimate.id))
+        .returning({ id: schema.proposalSends.id });
+      for (const send of sends)
+        await db
+          .update(schema.proposalEvents)
+          .set({ at: new Date(at.getTime() + 3 * day) })
+          .where(eq(schema.proposalEvents.sendId, send.id));
+    }
   }
   try {
     localStorage.setItem(DEMO, "1");
   } catch {
     // the banner just won't show
+  }
+}
+
+/** Forgets that the app holds the demo (a backup was restored over it). */
+export function forgetDemo() {
+  try {
+    localStorage.removeItem(DEMO);
+  } catch {
+    // nothing to clear
   }
 }
 

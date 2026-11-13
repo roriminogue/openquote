@@ -33,6 +33,7 @@ function Business() {
       <BusinessForm
         canEdit={canEdit}
         initial={{
+          ownerName: org.ownerName,
           name: org.name,
           abn: formatAbn(org.abn) ?? "",
           email: org.email ?? "",

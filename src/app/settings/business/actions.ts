@@ -13,6 +13,7 @@ export async function saveBusiness(_prev: BusinessState, formData: FormData): Pr
   if (member.role === "member") return { status: "error", message: ADMIN_ONLY };
   const f = (k: string) => String(formData.get(k) ?? "");
   const parsed = BusinessInput.safeParse({
+    ownerName: f("ownerName"),
     name: f("name"),
     abn: f("abn"),
     email: f("email"),

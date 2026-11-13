@@ -13,6 +13,7 @@ import { getOrg } from "@/lib/estimate/queries";
 import { requireMember } from "@/lib/auth";
 import { useQuery } from "@/lib/data";
 import { ago, backUpNow, useLastBackup } from "@/lib/backup";
+import { forgetDemo } from "@/lib/demo";
 import { SettingsSection } from "../parts";
 
 export default function AccountPage() {
@@ -84,6 +85,7 @@ function Backup() {
     setBusy(true);
     try {
       await replaceDatabase(new Uint8Array(await file.arrayBuffer()));
+      forgetDemo(); // a real backup replaced the sample quotes: no "sample quotes" banner (or its Start fresh)
       setStatus({ kind: "success", text: "Restored. Everything from the backup is back." });
     } catch (e) {
       setStatus({ kind: "error", text: (e as Error)?.message || "Couldn't restore that file." });

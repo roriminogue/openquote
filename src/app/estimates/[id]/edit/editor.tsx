@@ -212,7 +212,7 @@ export function EstimateEditor({
     const bad = lines.flatMap((ls, gi) => ls.map((l, li) => (l ? null : [gi, li]))).find(Boolean);
     if (bad) {
       setError(
-        `Check the numbers in stage ${bad[0] + 1}, line ${bad[1] + 1}: quantity, cost and markup must be numbers.`,
+        `Check the numbers in stage ${bad[0] + 1}, line ${bad[1] + 1}: quantity, cost and markup must be numbers, 0 or more.`,
       );
       document.getElementById(`${groups[bad[0]].lines[bad[1]].key}-qty`)?.focus();
       return;

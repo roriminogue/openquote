@@ -14,6 +14,7 @@ import { Fields, SettingsSection } from "../parts";
 import { saveBusiness, setLogo, type BusinessState } from "./actions";
 
 export type BusinessDetails = {
+  ownerName: string;
   name: string;
   abn: string;
   email: string;
@@ -135,6 +136,16 @@ export function BusinessForm({
       <form action={action} noValidate>
         <SettingsSection id="details" title="Business details">
           <Fields>
+            <TextField
+              name="ownerName"
+              label="Your name"
+              defaultValue={initial.ownerName}
+              isOptional
+              isDisabled={off}
+              status={bad("ownerName")}
+              autoComplete="name"
+              autoCapitalize="words"
+            />
             <TextField
               name="name"
               label="Business name"
