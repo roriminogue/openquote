@@ -23,14 +23,14 @@ export function setUpKeyboard() {
       up = true;
       root.setAttribute("data-keyboard", "");
     }),
-    Keyboard.addListener("keyboardDidShow", () => reveal()),
+    Keyboard.addListener("keyboardDidShow", () => revealIn(window.innerHeight)),
     Keyboard.addListener("keyboardWillHide", () => {
       up = false;
       root.removeAttribute("data-keyboard");
     }),
   ];
   // Moving to another field while the keyboard is up (the arrows, or a tap).
-  const onFocus = () => up && requestAnimationFrame(() => reveal());
+  const onFocus = () => up && requestAnimationFrame(() => revealIn(window.innerHeight));
   document.addEventListener("focusin", onFocus);
 
   return () => {
@@ -42,12 +42,12 @@ export function setUpKeyboard() {
 const GAP = 16; // room between the field and the keyboard
 const TOP = 72; // never push a field's top under the top bar
 
-function reveal() {
+/** Scrolls the focused field into view if it's under the keyboard. `visible` is the height above the keyboard. */
+function revealIn(visible: number) {
   const field = document.activeElement;
   if (!(field instanceof HTMLElement) || !field.matches("input, textarea, select, [contenteditable]")) return;
   const box = field.getBoundingClientRect();
-  // The web view now ends at the keyboard's top, so the window's height is the visible height.
-  const hidden = box.bottom - (window.innerHeight - GAP);
+  const hidden = box.bottom - (visible - GAP);
   if (hidden <= 0) return;
   const by = Math.max(0, Math.min(hidden, box.top - TOP));
   if (by > 0) (scroller(field) ?? window).scrollBy({ top: by, behavior: "smooth" });
@@ -63,18 +63,44 @@ function scroller(el: HTMLElement): HTMLElement | null {
 }
 
 /**
- * The Home Screen web version has no keyboard plugin. Safari shrinks the visible area when the keyboard is up, so
- * that's how we tell: the tab bar hides as it does in the app. (Safari itself still decides whether to nudge the
- * page to show the field.)
+ * The Home Screen web version has no keyboard plugin, so Safari would pan the whole page up whenever a field gets
+ * focus, even one well above the keyboard. Instead, a tap on a field that isn't focused yet focuses it without
+ * scrolling; the page then moves only if the field would be under the keyboard, and just far enough to show it.
+ * Safari shrinks the visible area while the keyboard is up, which is also how the tab bar knows to hide.
  */
 function setUpWebKeyboard() {
   const viewport = window.visualViewport;
   if (!viewport) return () => {};
   const root = document.documentElement;
-  const onResize = () => {
-    const up = window.innerHeight - viewport.height > 120;
-    root.toggleAttribute("data-keyboard", up);
+  let up = false;
+
+  const onTouchEnd = (e: TouchEvent) => {
+    const field = (e.target as Element | null)?.closest?.("input, textarea, [contenteditable]");
+    if (!(field instanceof HTMLElement) || field === document.activeElement || !typesText(field)) return;
+    e.preventDefault();
+    field.focus({ preventScroll: true });
   };
+  const onResize = () => {
+    const nowUp = window.innerHeight - viewport.height > 120;
+    root.toggleAttribute("data-keyboard", nowUp);
+    if (nowUp && !up) requestAnimationFrame(() => revealIn(viewport.height));
+    up = nowUp;
+  };
+  const onFocus = () => up && requestAnimationFrame(() => revealIn(viewport.height));
+
+  document.addEventListener("touchend", onTouchEnd, { passive: false });
+  document.addEventListener("focusin", onFocus);
   viewport.addEventListener("resize", onResize);
-  return () => viewport.removeEventListener("resize", onResize);
+  return () => {
+    document.removeEventListener("touchend", onTouchEnd);
+    document.removeEventListener("focusin", onFocus);
+    viewport.removeEventListener("resize", onResize);
+  };
+}
+
+const NOT_TEXT = new Set(["button", "checkbox", "radio", "range", "color", "file", "submit", "reset", "image", "hidden"]);
+function typesText(el: HTMLElement) {
+  if (el instanceof HTMLInputElement) return !el.disabled && !el.readOnly && !NOT_TEXT.has(el.type);
+  if (el instanceof HTMLTextAreaElement) return !el.disabled && !el.readOnly;
+  return el.isContentEditable;
 }
