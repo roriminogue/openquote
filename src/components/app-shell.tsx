@@ -1,18 +1,15 @@
 import type { ReactNode } from "react";
 import { AppShell as Shell } from "@astryxdesign/core/AppShell";
 import { TopNav } from "@astryxdesign/core/TopNav";
-import { getMember } from "@/lib/auth";
-import { useQuery } from "@/lib/data";
 import Link from "@/lib/link";
-import { AccountMenu } from "./account-menu";
 import { ActiveSideNav, ActiveTabBar } from "./nav-links";
 import { Wordmark } from "./wordmark";
 
 export { Mark, Wordmark } from "./wordmark";
 
 /**
- * Signed-in frame. On a phone: the wordmark and the account in a slim top bar, the page, and a tab bar with New in
- * the middle. From 768px the tab bar gives way to a sidebar. The shell supplies the skip link and the main landmark.
+ * The app's frame. On a phone: the wordmark in a slim top bar, the page, and a tab bar with New in the middle.
+ * There's no account to show: everything lives on this phone (Settings → Your data). From 768px the tab bar gives way to a sidebar. The shell supplies the skip link and the main landmark.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -30,7 +27,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Wordmark />
               </Link>
             }
-            endContent={<Account />}
           />
         }
         sideNav={<ActiveSideNav />}
@@ -43,10 +39,4 @@ export function AppShell({ children }: { children: ReactNode }) {
       <ActiveTabBar />
     </>
   );
-}
-
-function Account() {
-  const member = useQuery("member", getMember);
-  if (!member) return null;
-  return <AccountMenu name={member.name || "You"} />;
 }

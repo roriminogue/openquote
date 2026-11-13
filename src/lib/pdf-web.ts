@@ -16,7 +16,10 @@ const KEEP = "[data-pdf-keep]";
 const contentW = PAGE_W - 2 * MARGIN_X;
 const ptPerPx = contentW / CONTENT_W_PX;
 
-/** Makes an A4 PDF of `article` (the quote document). Takes a second or two. */
+/**
+ * Makes an A4 PDF of `article`: the quote document, or any part of a screen (Print uses the estimate page). It's
+ * drawn light whatever the app's theme, without the parts marked no-print. Takes a second or two.
+ */
 export async function quotePdf(article: HTMLElement): Promise<Uint8Array> {
   const [{ jsPDF }, pages] = await Promise.all([import("jspdf"), quotePages(article)]);
   const pdf = new jsPDF({ unit: "pt", format: "a4", compress: true });
@@ -33,7 +36,7 @@ export async function quotePages(article: HTMLElement): Promise<HTMLCanvasElemen
   const frame = await layOut(article);
   try {
     const doc = frame.contentDocument!;
-    const copy = doc.querySelector<HTMLElement>("article")!;
+    const copy = doc.querySelector<HTMLElement>("[data-pdf-root]")!;
     const top = copy.getBoundingClientRect().top;
     const height = copy.scrollHeight;
     const box = (el: Element) => el.getBoundingClientRect();
@@ -106,16 +109,24 @@ async function layOut(article: HTMLElement): Promise<HTMLIFrameElement> {
   const extra = doc.createElement("style");
   extra.textContent = `
     html, body { margin: 0; background: #fff; }
-    .no-print { display: none !important; }
-    main { max-width: none !important; padding: 0 !important; margin: 0 !important; min-height: 0 !important; }
+    .no-print, .astryx-app-shell-header, .astryx-app-shell-sidenav { display: none !important; }
+    main, [data-pdf-root], [data-pdf-root] > div { max-width: none !important; padding: 0 !important; margin: 0 !important; min-height: 0 !important; height: auto !important; overflow: visible !important; }
     article { border: 0 !important; border-radius: 0 !important; box-shadow: none !important; padding: 0 !important; }
   `;
   doc.head.append(extra);
+  // The theme's wrapper (its colours and fonts) without the rest of the screen, always light: it's paper.
   const themed = article.closest<HTMLElement>("[data-astryx-theme]");
-  const copy = (themed ?? article).cloneNode(true) as HTMLElement;
-  copy.style.minHeight = "0";
+  const wrapper = (themed?.cloneNode(false) as HTMLElement | undefined) ?? doc.createElement("div");
+  wrapper.setAttribute("data-theme", "light");
+  wrapper.style.colorScheme = "light"; // the theme's classes set dark mode's colour scheme; this wins over them
+  wrapper.style.minHeight = "0";
+  wrapper.style.background = "#fff";
+  const copy = article.cloneNode(true) as HTMLElement;
+  copy.setAttribute("data-pdf-root", "");
+  wrapper.append(copy);
   doc.documentElement.setAttribute("data-theme", "light");
-  doc.body.append(copy);
+  doc.documentElement.style.colorScheme = "light";
+  doc.body.append(wrapper);
 
   await Promise.race([Promise.all(loads), new Promise((r) => setTimeout(r, 1500))]);
   await doc.fonts?.ready;

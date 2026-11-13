@@ -22,6 +22,8 @@ export async function shareMadePdf(fileName: string, pdf: Uint8Array, text?: str
       return { completed: true };
     } catch (e) {
       if ((e as Error)?.name === "AbortError") return { completed: false };
+      // The tap was too long ago for the Share sheet (the PDF took a moment): the caller asks for another tap.
+      if ((e as Error)?.name === "NotAllowedError") throw e;
     }
   }
   // No Share sheet (a computer's browser): open the PDF in a new tab to save or print from there.

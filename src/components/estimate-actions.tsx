@@ -5,7 +5,9 @@ import { Check, Copy, CopyPlus, Pencil, Printer } from "lucide-react";
 import { useRouter } from "@/lib/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { duplicateQuote } from "@/app/estimates/[id]/actions";
-import { sharePdf } from "@/lib/share";
+import { isNative } from "@/db/storage";
+import { quotePdf } from "@/lib/pdf-web";
+import { shareMadePdf, sharePdf } from "@/lib/share";
 import { SendQuoteButton, type SendTarget } from "./send-quote";
 
 /**
@@ -48,6 +50,37 @@ export function EstimateActions({
     const t = setTimeout(() => setCopied(null), 2000);
     return () => clearTimeout(t);
   }, [copied]);
+
+  // Print or PDF: the iPhone app makes the PDF natively. The web version makes it itself (Safari keeps asking
+  // "Allow printing?" otherwise) and opens the Share sheet; if making it took too long for the Share sheet to open
+  // from that tap, the button says "Share PDF" and the next tap opens it straight away.
+  const web = !isNative();
+  const pdfName = `${send?.title ?? "Estimate"} (your copy)`;
+  const [pdf, setPdf] = useState<{ of: string; bytes: Uint8Array } | null>(null);
+  const ready = pdf?.of === text ? pdf.bytes : null;
+  const [printing, setPrinting] = useState(false);
+  useEffect(() => {
+    if (web) void import("@/lib/pdf-web"); // load the PDF code early, so the first tap is quick
+  }, [web]);
+
+  async function print(e: React.MouseEvent) {
+    if (!web) return void sharePdf(pdfName);
+    setPrinting(true);
+    try {
+      let bytes = ready;
+      if (!bytes) {
+        const page = (e.currentTarget as HTMLElement).closest('main, [role="main"]') ?? document.querySelector('main, [role="main"]');
+        if (!page) return;
+        bytes = await quotePdf(page as HTMLElement);
+        setPdf({ of: text, bytes });
+      }
+      await shareMadePdf(pdfName, bytes);
+    } catch (err) {
+      if ((err as Error)?.name !== "NotAllowedError") console.error(err);
+    } finally {
+      setPrinting(false);
+    }
+  }
 
   async function copy() {
     try {
@@ -112,9 +145,21 @@ export function EstimateActions({
           </Button>
         </div>
         <div className="sm:shrink-0">
-          <Button label="Print or PDF" onClick={() => void sharePdf(`${send?.title ?? "Estimate"} (your copy)`)} icon={<Icon icon={Printer} />} width="100%">
-            <span className="sm:hidden">Print</span>
-            <span className="hidden sm:inline">Print or PDF</span>
+          <Button
+            label={printing ? "Making the PDF…" : web && ready ? "Share PDF" : "Print or PDF"}
+            onClick={(e) => void print(e)}
+            isLoading={printing}
+            icon={<Icon icon={Printer} />}
+            width="100%"
+          >
+            {web && ready ? (
+              "Share PDF"
+            ) : (
+              <>
+                <span className="sm:hidden">Print</span>
+                <span className="hidden sm:inline">Print or PDF</span>
+              </>
+            )}
           </Button>
         </div>
       </div>
