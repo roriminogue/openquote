@@ -1,4 +1,5 @@
 import type { CapacitorConfig } from "@capacitor/cli";
+import { KeyboardResize } from "@capacitor/keyboard";
 import { config as loadEnv } from "dotenv";
 
 loadEnv({ path: ".env.local", quiet: true });
@@ -13,6 +14,10 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "never",
     scheme: "OpenQuote AU",
+  },
+  plugins: {
+    // The keyboard slides up over the page instead of iOS panning the page up (see src/lib/keyboard.ts).
+    Keyboard: { resize: KeyboardResize.Native },
   },
 };
 

@@ -7,6 +7,7 @@ import { Wordmark } from "@/components/wordmark";
 import { flush, openDatabase } from "@/db";
 import { isNative } from "@/db/storage";
 import { DataProvider } from "@/lib/data";
+import { setUpKeyboard } from "@/lib/keyboard";
 import { router } from "@/routes";
 import { Providers } from "./providers";
 
@@ -28,7 +29,9 @@ export function App() {
     };
     document.addEventListener("visibilitychange", onHide);
     const pause = isNative() ? CapacitorApp.addListener("pause", () => void flush()) : null;
+    const stopKeyboard = setUpKeyboard();
     return () => {
+      stopKeyboard();
       document.removeEventListener("visibilitychange", onHide);
       void pause?.then((l) => l.remove());
     };
