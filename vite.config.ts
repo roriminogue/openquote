@@ -28,7 +28,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "script",
+      injectRegister: null, // registered in src/main.tsx, which reloads onto a new version as soon as it's ready
       manifest: false, // public/manifest.webmanifest
       workbox: {
         globPatterns: ["**/*.{js,css,html,wasm,png,svg,woff2,webmanifest}"],
