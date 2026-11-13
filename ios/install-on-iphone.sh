@@ -33,9 +33,19 @@ BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APP/Info.pli
 echo "Installing…"
 xcrun devicectl device install app --device "$DEVICE" "$APP"
 
+stop_app() {
+  local pid
+  pid=$(xcrun devicectl device info processes --device "$DEVICE" 2>/dev/null | grep -F "/App.app/" | awk '{print $1}' | head -1)
+  [ -z "$pid" ] || xcrun devicectl device process terminate --device "$DEVICE" --pid "$pid" >/dev/null 2>&1 || true
+}
+
 if [ -n "$DATA" ]; then
   echo "Copying your data onto the phone…"
-  xcrun devicectl device process terminate --device "$DEVICE" --pid "$(xcrun devicectl device info processes --device "$DEVICE" 2>/dev/null | grep -F "$BUNDLE_ID" | awk '{print $1}' | head -1)" >/dev/null 2>&1 || true
+  # The app makes its data folder the first time it opens, so open it once before copying.
+  xcrun devicectl device process launch --device "$DEVICE" "$BUNDLE_ID" >/dev/null 2>&1 || true
+  sleep 6
+  stop_app
+  sleep 2
   xcrun devicectl device copy to --device "$DEVICE" --domain-type appDataContainer --domain-identifier "$BUNDLE_ID" \
     --source "$DATA" --destination "Library/OpenQuote/openquote.sqlite" >/dev/null
 fi
