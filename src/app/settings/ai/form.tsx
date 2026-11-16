@@ -49,7 +49,7 @@ export function AiSettingsForm({ initial }: { initial: Initial }) {
             options={PROVIDER_OPTIONS}
             value={provider}
             onChange={(p) => setProvider(p as Provider)}
-            presentation="adaptive"
+            placement="below"
             width="100%"
           />
 
