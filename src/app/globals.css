@@ -174,8 +174,10 @@ dd {
   .astryx-app-shell-sidenav {
     display: none !important;
   }
+  /* Paper is white even when the app is in Dark (the quote page keeps the app's mode around the document). */
+  html,
   body {
-    background: #fff;
+    background: #fff !important;
     color: #000;
   }
 }

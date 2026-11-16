@@ -6,19 +6,20 @@ import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { KeyRound, MapPin, Square } from "lucide-react";
 import { useRouter } from "@/lib/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Breakdown } from "@/components/breakdown";
 import { Callout } from "@/components/callout";
 import { Money } from "@/components/money";
-import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
+import { formatEstimateNo, linePriceCents, resolveMarkupPct, type MarkupSettings } from "@/lib/pricing";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";
+import type { PartialPricedDraft } from "@/lib/estimate/price";
 import { generateEstimate } from "@/lib/estimate/run";
 import { PUBLIK_ENABLED } from "@/lib/publik-token";
 import { useDictation } from "./dictation";
 import { ProjectField } from "./project-flow";
 
-type PartialLine = { description?: string; type?: LineType; qty?: number; unit?: string; unitCost?: number };
-export type PartialDraft = { title?: string; groups?: { name?: string; lines?: PartialLine[] }[] };
+/** What's been priced so far while the model writes (pricePartialDraft): costs before markup, in cents. */
+export type PartialDraft = Partial<PartialPricedDraft>;
 
 type Phase =
   | { kind: "idle" }
@@ -26,23 +27,12 @@ type Phase =
   | { kind: "saving"; number?: number; draft: PartialDraft }
   | { kind: "error"; message: string };
 
-const LINE_TYPES = new Set(["material", "labour", "subbie", "other"]);
-
-/** Prices whatever the model has written so far, the same way the server will. */
+/** Adds the business's markup to what's been priced so far, the same way the saved estimate does. */
 function previewGroups(draft: PartialDraft, markup: MarkupSettings) {
-  return (draft.groups ?? [])
-    .filter((g) => g?.name)
-    .map((g) => {
-      const lines = (g.lines ?? [])
-        .filter((l): l is Required<PartialLine> =>
-          !!l?.description && typeof l.qty === "number" && typeof l.unitCost === "number" && LINE_TYPES.has(l.type as string),
-        )
-        .map((l) => {
-          const line = { type: l.type, qty: l.qty, unitCostCents: Math.round(l.unitCost * 100) };
-          return { ...l, priceCents: linePriceCents(line, resolveMarkupPct(line, markup)) };
-        });
-      return { name: g.name!, lines, priceCents: lines.reduce((s, l) => s + l.priceCents, 0) };
-    });
+  return (draft.groups ?? []).map((g) => {
+    const lines = g.lines.map((l) => ({ ...l, priceCents: linePriceCents(l, resolveMarkupPct(l, markup)) }));
+    return { name: g.name, lines, priceCents: lines.reduce((s, l) => s + l.priceCents, 0) };
+  });
 }
 
 export function NewEstimate({
@@ -259,7 +249,58 @@ function HowItWorks() {
   );
 }
 
-/** What the model has written so far, priced the way the server will price it. */
+const reducedMotion = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+/** Counts a number towards its new value (an ease-out over ~0.6 s) so the running total climbs rather than jumps. */
+function useCountUp(target: number) {
+  const [shown, setShown] = useState(target);
+  const from = useRef(target);
+  const instant = reducedMotion();
+  useEffect(() => {
+    if (instant) return;
+    const start = from.current;
+    const began = performance.now();
+    let frame = 0;
+    const step = (now: number) => {
+      const t = Math.min(1, (now - began) / 600);
+      const value = Math.round(start + (target - start) * (1 - Math.pow(1 - t, 3)));
+      from.current = value;
+      setShown(value);
+      if (t < 1) frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [target, instant]);
+  return instant ? target : shown;
+}
+
+/**
+ * Shows newly priced lines one at a time (about eight a second) rather than all at once: a deck or fence comes back
+ * from its calculator as a whole set of stages in one go, and this lets the person watch it build. Everything shows
+ * straight away with reduced motion, or once saving starts.
+ */
+function useRevealed<G extends { lines: { priceCents: number }[]; priceCents: number }>(groups: G[], all: boolean): G[] {
+  const available = groups.reduce((n, g) => n + g.lines.length, 0);
+  const [shown, setShown] = useState(0);
+  const instant = all || reducedMotion();
+  useEffect(() => {
+    if (instant || shown >= available) return;
+    const timer = window.setTimeout(() => setShown((n) => n + 1), 120);
+    return () => window.clearTimeout(timer);
+  }, [instant, shown, available]);
+  if (instant) return groups;
+  const out: G[] = [];
+  for (let i = 0, left = shown; i < groups.length && left > 0; i++) {
+    const g = groups[i];
+    const lines = g.lines.slice(0, left);
+    left -= lines.length;
+    const priceCents = lines.length < g.lines.length ? lines.reduce((sum, l) => sum + l.priceCents, 0) : g.priceCents;
+    out.push({ ...g, lines, priceCents });
+  }
+  return out;
+}
+
+/** What the model has written so far, priced the way the saved estimate will be. */
 export function LivePreview({
   draft,
   number,
@@ -273,9 +314,9 @@ export function LivePreview({
   markup: MarkupSettings;
   gstRatePct: number;
 }) {
-  const groups = previewGroups(draft, markup);
+  const groups = useRevealed(previewGroups(draft, markup), saving);
   const subtotal = groups.reduce((s, g) => s + g.priceCents, 0);
-  const total = subtotal + Math.round((subtotal * gstRatePct) / 100);
+  const total = useCountUp(subtotal + Math.round((subtotal * gstRatePct) / 100));
   const lineCount = groups.reduce((s, g) => s + g.lines.length, 0);
   const current = groups.at(-1);
 
@@ -349,7 +390,7 @@ export function LivePreview({
 
       <div className="mt-6">
         <Text as="p" type="supporting" color="secondary">
-          Draft prices. Your rate rules and final checks apply when it’s saved.
+          Priced with your rates as each line is written. Final checks run when it’s saved.
         </Text>
       </div>
     </Card>
