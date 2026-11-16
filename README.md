@@ -27,10 +27,23 @@ your iPhone's Home Screen and set up your own business.
 
 ## Get it on your iPhone
 
-**The easy way (no computer, never expires):** open **https://openquote.roriminogue.com** in Safari on your iPhone,
-tap **•••** → **Share** → **View More** → **Add to Home Screen**, and leave **Open as Web App** on. OpenQuote then has
-its own icon and opens full screen like any other app, even with no signal. Your quotes are saved on your phone,
-not on a server.
+**The easy way (no computer, never expires):** add the website to your Home Screen. OpenQuote AU then has its own
+icon and opens full screen like any other app, even with no signal. Your quotes are saved on your phone, not on a
+server.
+
+1. Open **https://openquote.roriminogue.com** on your iPhone and tap the **share button** in the address bar.
+2. Tap **View More**.
+3. Scroll down the menu and tap **Add to Home Screen**.
+4. Leave **Open as Web App** on and tap **Add**.
+
+<p>
+  <img src="docs/install/1-share.png" width="200" alt="Step 1: the share button in the address bar, circled">
+  <img src="docs/install/2-view-more.png" width="200" alt="Step 2: View More in the share menu, circled">
+  <img src="docs/install/3-add-to-home-screen.png" width="200" alt="Step 3: Add to Home Screen in the menu, circled">
+  <img src="docs/install/4-add.png" width="200" alt="Step 4: the Add button, circled">
+</p>
+
+The screenshots are from Chrome; Safari works the same way (in Safari the share button is under **•••**).
 
 **The native app (needs a Mac):** a Mac with Xcode (free), your iPhone and a USB cable. A free Apple ID works, but
 Apple makes apps installed this way stop opening after 7 days, so you plug in and run the install again each week
