@@ -26,9 +26,13 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   scrollbar-color: var(--color-border-emphasized) transparent;
+  /* No rubber-band bounce past the top or bottom: it drags the pinned header, side nav and tab bar with the page,
+     which makes the app feel like a web page. Scrolling inside the page is unchanged. */
+  overscroll-behavior-y: none;
 }
 
 body {
+  overscroll-behavior-y: none;
   touch-action: manipulation;
   background: var(--color-background-surface);
   color: var(--color-text-primary);
