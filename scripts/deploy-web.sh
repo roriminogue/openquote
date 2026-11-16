@@ -1,5 +1,5 @@
 #!/bin/bash
-# Publishes the Home Screen web version to https://openquote-au.pages.dev (Cloudflare Pages project "openquote-au",
+# Publishes the Home Screen web version to https://openquote.roriminogue.com and openquote-au.pages.dev (Cloudflare Pages project "openquote-au",
 # free, and fine for business use). People open that address in Safari and tap Share → Add to Home Screen. Their
 # quotes stay on their phone; Cloudflare only serves the app's files.
 #

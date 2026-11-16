@@ -4,7 +4,7 @@ Free, open-source AI quoting for tradies, on your iPhone. Describe a job the way
 and OpenQuote AU breaks it into stages and prices every line with your own rates. Edit it, then send it to your
 client as a PDF from your phone.
 
-**Try it:** open **https://openquote-au.pages.dev** (on your phone or computer) and tap **Try it with sample quotes**
+**Try it:** open **https://openquote.roriminogue.com** (on your phone or computer) and tap **Try it with sample quotes**
 to look around a made-up business with four priced jobs. No sign-up or AI key needed. To use it for real, add it to
 your iPhone's Home Screen and set up your own business.
 
@@ -27,7 +27,7 @@ your iPhone's Home Screen and set up your own business.
 
 ## Get it on your iPhone
 
-**The easy way (no computer, never expires):** open **https://openquote-au.pages.dev** in Safari on your iPhone,
+**The easy way (no computer, never expires):** open **https://openquote.roriminogue.com** in Safari on your iPhone,
 tap **•••** → **Share** → **View More** → **Add to Home Screen**, and leave **Open as Web App** on. OpenQuote then has
 its own icon and opens full screen like any other app, even with no signal. Your quotes are saved on your phone,
 not on a server.
