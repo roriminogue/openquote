@@ -8,12 +8,13 @@ import { getProject } from "@/lib/projects";
 import type { PartialDraft } from "@/app/estimates/new/new-estimate";
 import { generateEstimateDraft } from "./generate";
 import { createPendingEstimate, deleteEstimate, loadGenerationInputs, saveGeneratedEstimate } from "./persist";
-import { priceDraft, scopeWithCalculators, validateEstimate } from "./price";
+import { priceDraft, pricePartialDraft, scopeWithCalculators, validateEstimate } from "./price";
 import { buildGenerationPrompt } from "./prompt";
 
 // Quick-mode estimate generation (SPEC.md §5), on the phone. Reports progress through `on`:
 //   estimate {id, number}    the draft row exists
-//   partial  {draft}         the model's output so far (unvalidated), at most every 200 ms
+//   partial  {draft}         what's priced so far, at most every 200 ms: each finished fence, deck and line goes
+//                            through the same calculators, rates and price book as the saved estimate
 // and resolves with the finished estimate, or { error } with a message for the person.
 
 const PARTIAL_INTERVAL_MS = 200;
@@ -71,7 +72,7 @@ export async function generateEstimate(
         const now = Date.now();
         if (now - lastPartialAt < PARTIAL_INTERVAL_MS) return;
         lastPartialAt = now;
-        on.partial?.(partial as PartialDraft);
+        on.partial?.(pricePartialDraft(partial, aliased));
       },
     });
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { DraftLine } from "./draft";
-import { labourRateFrom, priceDraft, scopeWithCalculators, toCents, validateEstimate, type RateRule } from "./price";
+import { labourRateFrom, priceDraft, pricePartialDraft, scopeWithCalculators, toCents, validateEstimate, type RateRule } from "./price";
 
 const rules: RateRule[] = [
   { id: "R1", title: "Qualified carpenter", rateCents: 9500, unit: "hour", type: "labour" },
@@ -147,5 +147,28 @@ describe("scopeWithCalculators", () => {
   });
   it("leaves the scope alone when no calculator ran", () => {
     expect(scopeWithCalculators({ scope: ["Retile the bathroom floor"], fences: [], decks: [] })).toEqual(["Retile the bathroom floor"]);
+  });
+});
+
+describe("pricePartialDraft", () => {
+  const deck = { lengthM: 4, widthM: 3, heightMm: 600, boards: "merbau_90", hiddenFixings: false, attachedToHouse: true, steps: 2, stepWidthM: 1.2, oil: true, removeOldDeck: false, site: "normal" };
+
+  it("prices nothing until a piece is complete", () => {
+    expect(pricePartialDraft({}, rules)).toEqual({ title: undefined, groups: [] });
+    expect(pricePartialDraft({ title: "Deck", decks: [{ lengthM: 4, widthM: 3 }] }, rules).groups).toEqual([]);
+  });
+
+  it("prices a finished deck through the calculator, the same as the saved estimate", () => {
+    const partial = pricePartialDraft({ title: "Deck", decks: [deck], groups: [] }, rules);
+    const full = priceDraft({ fences: [], decks: [deck as never], groups: [] }, rules);
+    expect(partial.groups.length).toBeGreaterThan(0);
+    expect(partial.groups.map((g) => g.lines.map((l) => l.unitCostCents))).toEqual(full.map((g) => g.lines.map((l) => l.unitCostCents)));
+  });
+
+  it("counts finished lines and waits for the one being written", () => {
+    const done = line({ description: "Labour", type: "labour", qty: 2, unit: "hour", unitCost: 50, rateRuleId: "R1" });
+    const writing = { description: "Screws", type: "material", qty: 1 };
+    const partial = pricePartialDraft({ groups: [{ name: "Build", lines: [done, writing] }] }, rules);
+    expect(partial.groups).toEqual([{ name: "Build", lines: [{ description: "Labour", type: "labour", qty: 2, unitCostCents: 9500 }] }]);
   });
 });

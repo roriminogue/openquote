@@ -1,7 +1,7 @@
 import { DEFAULT_LABOUR_CENTS, priceBookItem } from "../price-book";
 import type { LineType } from "@/lib/pricing";
-import { buildDeck, buildFence, deckScope, fenceScope, type LabourRate } from "./assemblies";
-import type { EstimateDraft } from "./draft";
+import { buildDeck, buildFence, DeckSpec, deckScope, FenceSpec, fenceScope, type LabourRate } from "./assemblies";
+import { DraftLine, type EstimateDraft } from "./draft";
 
 // Stage 6 + 7 of the pipeline (SPEC.md §5): deterministic pricing and sanity checks. The model proposes, code prices.
 
@@ -74,6 +74,37 @@ export function priceDraft(draft: DraftToPrice, rateRules: RateRule[]): PricedGr
     }),
   }));
   return [...calculated, ...priced.filter((g) => g.lines.length > 0)];
+}
+
+/** A half-written draft priced so far: costs before markup, in cents. */
+export type PartialPricedDraft = {
+  title?: string;
+  groups: { name: string; lines: { description: string; type: LineType; qty: number; unitCostCents: number }[] }[];
+};
+
+/**
+ * Prices the finished parts of a half-written draft (the model's output mid-stream) exactly as priceDraft prices the
+ * whole one, so a running total only ever moves towards the real one. A fence, deck or line counts once it's complete
+ * (it passes its schema); the one still being written waits until then.
+ */
+export function pricePartialDraft(partial: unknown, rateRules: RateRule[]): PartialPricedDraft {
+  const p = (partial ?? {}) as { title?: string; fences?: unknown[]; decks?: unknown[]; groups?: { name?: string; lines?: unknown[] }[] };
+  const complete = <T>(schema: { safeParse: (v: unknown) => { success: true; data: T } | { success: false } }, items?: unknown[]) =>
+    (items ?? []).flatMap((item) => {
+      const r = schema.safeParse(item);
+      return r.success ? [r.data] : [];
+    });
+  const groups = (p.groups ?? [])
+    .filter((g) => g?.name)
+    .map((g) => ({ name: g.name!, lines: complete(DraftLine, g.lines) }));
+  const priced = priceDraft({ fences: complete(FenceSpec, p.fences), decks: complete(DeckSpec, p.decks), groups }, rateRules);
+  return {
+    title: p.title,
+    groups: priced.map((g) => ({
+      name: g.name,
+      lines: g.lines.map((l) => ({ description: l.description, type: l.type, qty: l.qty, unitCostCents: l.unitCostCents })),
+    })),
+  };
 }
 
 const WET_AREA = /\b(bathroom|ensuite|shower|laundry|wet area)\b/i;

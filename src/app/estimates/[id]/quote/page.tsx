@@ -18,19 +18,18 @@ import { shareMadePdf, sharePdf } from "@/lib/share";
 import { openquoteTheme } from "@/themes/openquote/openquote.js";
 
 /**
- * The quote as the client will get it: the document, always light (it's paper), with Share PDF on top. Once shared
+ * The quote as the client will get it: the document, always light (it's paper), on the app's own page in the app's
+ * own Light or Dark, with Back and Share PDF on top. Once shared
  * it records the send, marks a draft as sent, and opens the Share sheet with the PDF and the message from the Send
  * sheet. Reached from Send to client (?detail=…); without one it shows the quote as last sent.
  */
 export default function QuotePage() {
   return (
-    <Theme theme={openquoteTheme} mode="light">
-      <div className="min-h-dvh bg-(--color-background-surface) print:min-h-0">
-        <Suspense>
-          <Quote />
-        </Suspense>
-      </div>
-    </Theme>
+    <div className="min-h-dvh bg-(--color-background-surface) print:min-h-0 print:bg-white">
+      <Suspense>
+        <Quote />
+      </Suspense>
+    </div>
   );
 }
 
@@ -127,8 +126,11 @@ function Quote() {
           </div>
         )}
       </div>
+      {/* Only the paper is light; the bar above and the page around it stay in the app's mode. */}
       <div ref={docRef}>
-        <QuoteDocument q={q} />
+        <Theme theme={openquoteTheme} mode="light">
+          <QuoteDocument q={q} />
+        </Theme>
       </div>
     </>
   );

@@ -26,12 +26,10 @@ export const DraftGroup = z.object({
   lines: z.array(DraftLine).min(1),
 });
 
+// The parts that carry prices come first, so the running total on New estimate climbs while the model is still
+// writing; the client-facing wording follows, written to agree with what was priced.
 export const EstimateDraft = z.object({
   title: z.string().min(1).describe("Short job title, e.g. 'Merbau deck 4 × 3 m'"),
-  summary: z.string().describe("Two or three plain sentences for the client describing what's included"),
-  scope: z.array(z.string()).describe("Scope of work as short bullet points"),
-  assumptions: z.array(z.string()).describe("Assumptions the price depends on"),
-  exclusions: z.array(z.string()).describe("Things not included"),
   fences: z
     .array(FenceSpec)
     .describe("Timber paling fences in the job, priced by the fence calculator. Empty if there are none"),
@@ -39,6 +37,10 @@ export const EstimateDraft = z.object({
   groups: z
     .array(DraftGroup)
     .describe("Everything the calculators don't cover, by stage. Empty when the calculators cover the whole job"),
+  summary: z.string().describe("Two or three plain sentences for the client describing what's included"),
+  scope: z.array(z.string()).describe("Scope of work as short bullet points"),
+  assumptions: z.array(z.string()).describe("Assumptions the price depends on"),
+  exclusions: z.array(z.string()).describe("Things not included"),
   alternatives: z
     .array(
       z.object({
