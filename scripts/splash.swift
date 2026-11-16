@@ -20,8 +20,11 @@ func rgb(_ hex: Int) -> CGColor { CGColor(srgbRed: CGFloat((hex>>16)&255)/255, g
 struct Scheme { let name: String; let bg, text, secondary, accent: Int }
 let schemes = [Scheme(name: "light", bg: 0xffffff, text: 0x000000, secondary: 0x474747, accent: 0xfa7d21),
                Scheme(name: "dark", bg: 0x262626, text: 0xf2f2f2, secondary: 0xb4b4b4, accent: 0xfa7d21)]
-// Portrait CSS size and pixel ratio of each iPhone shape.
-let devices: [(Int, Int, Int)] = [(440,956,3),(420,912,3),(430,932,3),(402,874,3),(393,852,3),(428,926,3),(390,844,3),(414,896,3),(414,896,2),(375,812,3),(375,667,2)]
+// Portrait CSS size, pixel ratio and top safe area (status bar) of each iPhone shape. The Home Screen app's page starts
+// below the status bar, so its splash is centred in the area under it; the launch image puts the logo in the same
+// place (half the status bar lower than the screen's centre), or the logo jumps when the page takes over.
+// (Measured on the iPhone 17 Pro simulator: 62. The rest are each model's top safe area.)
+let devices: [(Int, Int, Int, Int)] = [(440,956,3,62),(420,912,3,62),(430,932,3,59),(402,874,3,62),(393,852,3,59),(428,926,3,47),(390,844,3,47),(414,896,3,44),(414,896,2,48),(375,812,3,44),(375,667,2,20)]
 
 let fs: CGFloat = 17, tracking: CGFloat = -0.01 * 17, lineH: CGFloat = 1.5 * 17
 func line(_ s: Scheme) -> CTLine {
@@ -34,7 +37,7 @@ func line(_ s: Scheme) -> CTLine {
   a.addAttributes([kCTFontAttributeName as NSAttributedString.Key: figtree(fs, 500), kCTForegroundColorAttributeName as NSAttributedString.Key: rgb(s.secondary), kCTKernAttributeName as NSAttributedString.Key: tracking], range: NSRange(location: 10, length: 2))
   return CTLineCreateWithAttributedString(a)
 }
-for (w, h, r) in devices { for s in schemes {
+for (w, h, r, top) in devices { for s in schemes {
   let pw = w*r, ph = h*r
   let ctx = CGContext(data: nil, width: pw, height: ph, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)!
   ctx.setFillColor(rgb(s.bg)); ctx.fill(CGRect(x: 0, y: 0, width: pw, height: ph))
@@ -45,7 +48,7 @@ for (w, h, r) in devices { for s in schemes {
   let mark: CGFloat = 22, gap: CGFloat = 8
   let groupW = mark + gap + textW
   let x0 = (CGFloat(w) - groupW) / 2
-  let cy = CGFloat(h) / 2   // centre line, measured from the bottom (CG coordinates)
+  let cy = CGFloat(h - top) / 2   // centre of the area below the status bar, measured from the bottom (CG coordinates)
   // Mark: 24-unit viewBox scaled to 22px, centred on the line.
   let k = mark / 24, mx = x0, my = cy - mark/2
   ctx.setFillColor(rgb(s.text))
