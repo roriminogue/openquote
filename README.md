@@ -95,13 +95,6 @@ Drive, Files or email; **Restore from a file** brings it back on the same phone 
 when it's been a while. AI keys are never put in backups: in the iPhone app they're in the Keychain, in the Home
 Screen version in that app's storage.
 
-## Optional: Sign in with publik
-
-The code can also run as a [publik](https://publikhq.com) app (Sign in with publik, and pay for AI with a publik
-plan): put publik's app token in `publik-app-token.txt` at the top of the repo and rebuild. Without that file, which
-is the default, none of it runs. The pieces: `ios/App/App/Publik.swift` (iPhone app), `src/lib/publik-web.ts` (web
-version) and `functions/publik` (a Cloudflare Pages relay, since publik's API doesn't take calls from web pages).
-
 ## Case study
 
 **The problem.** Small trade businesses (fencers, deck builders, carpenters) lose evenings to quoting. The job is
@@ -184,6 +177,12 @@ with publik · Vitest. Product spec and data model: [SPEC.md](SPEC.md). Design s
 - **The LLM proposes, code prices.** The model outputs structured line items; all arithmetic lives in
   `lib/pricing.ts`.
 - **Every change is a version.** AI and manual edits write an `estimate_versions` snapshot.
+
+**Optional: Sign in with publik.** The code can also run as a [publik](https://publikhq.com) app (Sign in with
+publik, and pay for AI with a publik plan): put publik's app token in `publik-app-token.txt` at the top of the repo
+and rebuild. Without that file, which is the default, none of it runs. The pieces: `ios/App/App/Publik.swift`
+(iPhone app), `src/lib/publik-web.ts` (web version) and `functions/publik` (a Cloudflare Pages relay, since publik's
+API doesn't take calls from web pages).
 
 ## Contributing
 
