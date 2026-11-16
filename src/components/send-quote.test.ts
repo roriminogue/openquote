@@ -11,5 +11,7 @@ describe("lowerFirst", () => {
     expect(lowerFirst("LED downlights")).toBe("LED downlights");
     expect(lowerFirst("A deck")).toBe("A deck");
     expect(lowerFirst("6 m fence")).toBe("6 m fence");
+    expect(lowerFirst("Colorbond fence 25 m with gate")).toBe("Colorbond fence 25 m with gate");
+    expect(lowerFirst("Hardie cladding to the east wall")).toBe("Hardie cladding to the east wall");
   });
 });

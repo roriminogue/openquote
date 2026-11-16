@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { existsSync, readFileSync } from "node:fs";
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // The whole app is built into dist/ and shipped inside the iPhone app (capacitor.config.ts). There is no server:
@@ -21,9 +21,32 @@ const publikToken = (): Plugin => ({
   },
 });
 
+// Development only: lets the local preview price jobs with a testing key from .env.local (OQ_DEV_ANTHROPIC_KEY), so
+// the whole flow can be tried without typing a key in. Answers this computer only (not phones on the Wi-Fi), and
+// doesn't exist in a build. The browser side is in src/lib/ai/keys.ts.
+const devAiKey = (): Plugin => ({
+  name: "dev-ai-key",
+  apply: "serve",
+  configureServer(server) {
+    server.middlewares.use("/__dev/ai-key", (req, res) => {
+      const local = ["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(req.socket.remoteAddress ?? "");
+      const key = loadEnv("development", process.cwd(), "OQ_DEV_").OQ_DEV_ANTHROPIC_KEY;
+      res.setHeader("cache-control", "no-store");
+      if (!local || !key) {
+        res.statusCode = 404;
+        res.end();
+        return;
+      }
+      res.setHeader("content-type", "text/plain");
+      res.end(key);
+    });
+  },
+});
+
 export default defineConfig({
   plugins: [
     publikToken(),
+    devAiKey(),
     react(),
     tailwindcss(),
     VitePWA({
