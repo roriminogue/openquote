@@ -4,17 +4,17 @@ description: Open-source AI quoting for Australian tradies, used on a phone on s
 system: Astryx (@astryxdesign/core 0.7, theme "openquote" extending theme-neutral)
 colors:
   # Each value is [light, dark]. Everything not listed comes from Astryx Neutral.
-  accent: ["#f26b1d", "#f26b1d"]
-  on-accent: ["#18181b", "#18181b"]
+  accent: ["#fa7d21", "#fa7d21"]
+  on-accent: ["#111111", "#111111"]
   accent-muted: ["#ffe6d6", "#3a1f0e"]
-  text-accent: ["#b93c0a", "#ff9a5c"]
-  icon-accent: ["#c2410c", "#ff9a5c"]
+  text-accent: ["#a8350a", "#ff9a5c"]
+  icon-accent: ["#b93c0a", "#ff9a5c"]
   # From Astryx Neutral, for reference:
   background-surface: ["#ffffff", "#262626"]
   background-card: ["#ffffff", "#1b1b1b"]
   background-muted: ["#f1f1f1", "#1b1b1b"]
-  text-primary: ["#000000", "#ffffff"]
-  text-secondary: ["#474747", "#9e9e9e"]
+  text-primary: ["#000000", "#f2f2f2"]  # ours: off-white, no glow on dark grey
+  text-secondary: ["#474747", "#b4b4b4"]  # ours: Neutral dark #9e9e9e was 4.9:1 on cards
   border: ["#00000014", "#ffffff1a"]
   border-emphasized: ["#d4d4d4", "#525252"]
   success: ["#198100", "#64af4c"]
