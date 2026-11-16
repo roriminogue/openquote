@@ -184,3 +184,15 @@ dd {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* A raised surface for callouts and the first-run panel: the prompt box's material at the container radius. */
+@layer components {
+.raised-surface {
+  border-radius: var(--radius-container);
+  border: 1px solid light-dark(#e2e2e2, #3a3a3a);
+  background: light-dark(#ffffff, #303030);
+  box-shadow:
+    0 1px 2px light-dark(rgb(0 0 0 / 0.04), transparent),
+    0 6px 20px light-dark(rgb(0 0 0 / 0.05), transparent);
+}
+}

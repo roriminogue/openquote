@@ -1,14 +1,14 @@
-import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import { MapPin, Square } from "lucide-react";
+import { KeyRound, MapPin, Square } from "lucide-react";
 import { useRouter } from "@/lib/navigation";
 import { useRef, useState } from "react";
 import { Breakdown } from "@/components/breakdown";
+import { Callout } from "@/components/callout";
 import { Money } from "@/components/money";
 import { formatEstimateNo, linePriceCents, resolveMarkupPct, type LineType, type MarkupSettings } from "@/lib/pricing";
 import type { ClientOption, ProjectOption } from "@/lib/project-schema";
@@ -129,18 +129,16 @@ export function NewEstimate({
     <div className="mx-auto mt-6 max-w-[50rem]">
       {!ai && (
         <div className="mb-5">
-          <Banner
-            status="warning"
+          <Callout
+            icon={KeyRound}
             title="Set up AI first"
             description={
               PUBLIK_ENABLED
                 ? "OpenQuote AU prices jobs with AI: use your publik plan, or your own provider key."
                 : "OpenQuote AU prices jobs with AI. Add your AI key (Anthropic, OpenAI, Google or OpenRouter) in Settings → AI."
             }
+            actions={<Button label="Set up AI" variant="secondary" size="md" width="100%" href="/settings/ai" />}
           />
-          <div className="mt-3 sm:w-48">
-            <Button label="Set up AI" variant="secondary" size="lg" width="100%" href="/settings/ai" />
-          </div>
         </div>
       )}
 

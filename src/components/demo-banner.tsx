@@ -1,6 +1,7 @@
-import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
+import { Sparkles } from "lucide-react";
 import { useState } from "react";
+import { Callout } from "@/components/callout";
 import { leaveDemo } from "@/lib/demo";
 import { navigateTo } from "@/lib/navigation";
 
@@ -9,15 +10,16 @@ export function DemoBanner() {
   const [busy, setBusy] = useState(false);
   return (
     <div className="mt-6">
-      <Banner
-        status="info"
+      <Callout
+        icon={Sparkles}
         title="These are sample quotes"
         description="A made-up business, so you can look around. Open a job to see the breakdown and the quote the client gets. To price your own jobs, start with your business and add an AI key."
-        endContent={
+        actions={
           <Button
             label={busy ? "Clearing…" : "Start with my business"}
-            variant="primary"
-            size="sm"
+            variant="secondary"
+            size="md"
+            width="100%"
             isDisabled={busy}
             onClick={async () => {
               if (!confirm("Clear the sample quotes and set up your own business?")) return;

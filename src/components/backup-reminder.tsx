@@ -1,6 +1,7 @@
-import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
+import { CloudUpload, TriangleAlert } from "lucide-react";
 import { useState } from "react";
+import { Callout } from "@/components/callout";
 import { ago, backupDue, backupStats, backUpNow, snoozeBackupReminder, useLastBackup, useSnoozedUntil } from "@/lib/backup";
 import { useQuery } from "@/lib/data";
 
@@ -20,20 +21,22 @@ export function BackupReminder({ orgId }: { orgId: string }) {
   const plural = stats.quotes === 1 ? "quote is" : "quotes are";
   return (
     <div className="mt-6">
-      <Banner
-        status={failed ? "error" : "info"}
+      <Callout
+        icon={failed ? TriangleAlert : CloudUpload}
+        tone={failed ? "error" : "neutral"}
         title={last ? `Last backup ${ago(last)}` : "Back up your quotes"}
         description={
           failed
             ? "Couldn’t make the backup. Try again."
             : `Your ${plural} only on this phone. Save a backup to iCloud Drive or Files so you can get them back if the phone is lost.`
         }
-        endContent={
-          <div className="flex gap-2">
+        actions={
+          <>
             <Button
               label="Back up now"
-              variant="primary"
-              size="sm"
+              variant="secondary"
+              size="md"
+              width="100%"
               isDisabled={busy}
               onClick={async () => {
                 setBusy(true);
@@ -47,8 +50,8 @@ export function BackupReminder({ orgId }: { orgId: string }) {
                 }
               }}
             />
-            <Button label="Not now" variant="ghost" size="sm" onClick={snoozeBackupReminder} />
-          </div>
+            <Button label="Not now" variant="ghost" size="md" width="100%" onClick={snoozeBackupReminder} />
+          </>
         }
       />
     </div>
