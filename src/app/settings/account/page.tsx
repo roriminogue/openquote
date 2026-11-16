@@ -7,7 +7,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { HardDriveDownload, HardDriveUpload } from "lucide-react";
 import { Suspense, useRef, useState } from "react";
 import { ThemeSwitch } from "@/components/theme-switch";
-import { replaceDatabase } from "@/db";
+import { MAX_BACKUP_BYTES, replaceDatabase } from "@/db";
 import { isNative } from "@/db/storage";
 import { getOrg } from "@/lib/estimate/queries";
 import { requireMember } from "@/lib/auth";
@@ -81,6 +81,10 @@ function Backup() {
 
   async function restore(file: File) {
     setStatus(null);
+    if (file.size > MAX_BACKUP_BYTES) {
+      setStatus({ kind: "error", text: "That file is too big to be an OpenQuote AU backup." });
+      return;
+    }
     if (!confirm("Replace everything on this phone with the backup? Anything added since that backup is lost.")) return;
     setBusy(true);
     try {

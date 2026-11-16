@@ -1,0 +1,22 @@
+# Security headers for the web version on Cloudflare Pages (openquote.roriminogue.com).
+#
+# Content-Security-Policy: the AI key lives in this site's storage on the phone, so the policy's main job is that,
+# even if something unexpected ever ran on the page, it couldn't send anything anywhere except this site and the AI
+# providers the app supports. No inline or third-party scripts; 'wasm-unsafe-eval' is for SQLite (sql.js);
+# inline styles are needed by the design system, which injects its theme at runtime. Ollama is reachable on this
+# computer only (http://localhost), as an https page can't call plain http elsewhere anyway. Adding an AI provider
+# means adding its API address to connect-src.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.anthropic.com https://api.openai.com https://generativelanguage.googleapis.com https://openrouter.ai http://localhost:* http://127.0.0.1:*; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-src 'self' blob:; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), geolocation=(), payment=(), usb=(), bluetooth=(), microphone=(self)
+  Strict-Transport-Security: max-age=31536000
+  Cross-Origin-Opener-Policy: same-origin
+
+# The service worker and the version stamp must always be fetched fresh.
+/sw.js
+  Cache-Control: no-cache
+/version.txt
+  Cache-Control: no-store

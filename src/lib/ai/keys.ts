@@ -1,9 +1,11 @@
 import { Capacitor, registerPlugin } from "@capacitor/core";
 import type { Provider } from "./providers";
 
-// AI keys typed into Settings → AI. On the iPhone they live in the Keychain (encrypted by iOS, never in the database
-// or a backup file), through the app's own native plugin (ios/App/App/OpenQuoteNative.swift). In a browser
-// (development only) they fall back to localStorage.
+// AI keys typed into Settings → AI. On the iPhone app they live in the Keychain (encrypted by iOS, never in the
+// database or a backup file), through the app's own native plugin (ios/App/App/OpenQuoteNative.swift). In the web
+// version (the Home Screen app) they're in this site's localStorage on the phone: never in the database or a backup,
+// and the Content-Security-Policy (public/_headers) only lets the page talk to this site and the AI providers, so
+// nothing on the page could send the key anywhere else.
 
 type Native = {
   getSecret(o: { key: string }): Promise<{ value: string | null }>;

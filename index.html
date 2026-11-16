@@ -64,13 +64,8 @@
       #splash b { font-weight: 500; color: var(--splash-dim); margin-left: 0.3em; }
       @media (prefers-reduced-motion: reduce) { #splash { transition: none; } }
     </style>
-    <script>
-      // The saved Light or Dark choice, applied before the first paint (see src/components/theme.tsx).
-      try {
-        var t = localStorage.getItem("oq-theme");
-        if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
-      } catch (e) {}
-    </script>
+    <!-- The saved Light or Dark choice, applied before the first paint. A file, not inline: see public/_headers. -->
+    <script src="/boot.js"></script>
   </head>
   <body class="min-h-full flex flex-col">
     <div id="splash" aria-hidden="true">

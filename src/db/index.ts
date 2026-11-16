@@ -44,14 +44,25 @@ export async function openMemoryDatabase(SQL?: SqlJs) {
   sqlite = prepare(new (SQL ?? (await loadSqlJs())).Database());
 }
 
-/** Replaces the whole database with a backup file's contents (Settings → Account → Restore). */
+/** Backups are a few hundred KB for years of quotes; anything far bigger isn't one. */
+export const MAX_BACKUP_BYTES = 50 * 1024 * 1024;
+
+/**
+ * Replaces the whole database with a backup file's contents (Settings → Account → Restore). A backup can come from
+ * anywhere (it's a file someone could send), so beyond checking it's ours, anything the app never creates is
+ * removed before it's used: a trigger or view hidden in a doctored file could otherwise quietly change prices or
+ * copy data whenever the app writes.
+ */
 export async function replaceDatabase(bytes: Uint8Array) {
+  if (bytes.byteLength > MAX_BACKUP_BYTES) throw new Error("That file is too big to be an OpenQuote AU backup.");
   const SQL = await loadSqlJs();
   let next: Database;
   try {
     next = new SQL.Database(bytes);
-    const found = next.exec("SELECT count(*) FROM sqlite_master WHERE name = 'organisations'")[0]?.values[0]?.[0];
+    const found = next.exec("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'organisations'")[0]
+      ?.values[0]?.[0];
     if (!found) throw new Error("not a backup");
+    stripForeignObjects(next);
   } catch {
     throw new Error("That file isn't an OpenQuote AU backup.");
   }
@@ -60,6 +71,14 @@ export async function replaceDatabase(bytes: Uint8Array) {
   sqlite = prepare(next);
   markDirty();
   await flush();
+}
+
+/** Drops every trigger and view in a restored database: the app's own schema has none (src/db/migrations). */
+export function stripForeignObjects(db: Database) {
+  const rows = db.exec("SELECT type, name FROM sqlite_master WHERE type IN ('trigger', 'view')")[0]?.values ?? [];
+  for (const [type, name] of rows) {
+    db.exec(`DROP ${type === "view" ? "VIEW" : "TRIGGER"} IF EXISTS "${String(name).replace(/"/g, '""')}"`);
+  }
 }
 
 /** Empties the database: a fresh start with no business (leaving the demo, see lib/demo.ts). */
