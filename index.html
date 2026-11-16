@@ -62,10 +62,6 @@
       #splash[data-hide] { opacity: 0; pointer-events: none; }
       #splash svg { width: 22px; height: 22px; flex-shrink: 0; }
       #splash b { font-weight: 500; color: var(--splash-dim); margin-left: 0.3em; }
-      /* iOS draws its launch image over the whole screen, status bar included, but the Home Screen app's page starts
-         below the status bar. Lifting the logo by half that (the script below measures it) keeps it exactly where
-         the launch image had it, so the hand-over shows one frame, not a jump. */
-      #splash { padding-bottom: var(--splash-lift, 0px); box-sizing: border-box; }
       @media (prefers-reduced-motion: reduce) { #splash { transition: none; } }
     </style>
     <script>
@@ -73,13 +69,6 @@
       try {
         var t = localStorage.getItem("oq-theme");
         if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
-      } catch (e) {}
-      try {
-        // The status bar's height, when the page sits below it (Home Screen app, portrait); see #splash above.
-        var standalone = navigator.standalone || matchMedia("(display-mode: standalone)").matches;
-        var gap = screen.height - window.innerHeight;
-        if (standalone && screen.height > screen.width && gap > 0 && gap < 100)
-          document.documentElement.style.setProperty("--splash-lift", gap + "px");
       } catch (e) {}
     </script>
   </head>

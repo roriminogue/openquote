@@ -43,8 +43,20 @@ const devAiKey = (): Plugin => ({
   },
 });
 
+// Each build's id, baked into the app and published as /version.txt, so a running copy can tell whether the site
+// has a newer version (src/lib/updates.ts). Not precached: it must come from the network.
+const BUILD_ID = Date.now().toString(36);
+const buildId = (): Plugin => ({
+  name: "build-id",
+  generateBundle() {
+    this.emitFile({ type: "asset", fileName: "version.txt", source: BUILD_ID });
+  },
+});
+
 export default defineConfig({
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
   plugins: [
+    buildId(),
     publikToken(),
     devAiKey(),
     react(),
