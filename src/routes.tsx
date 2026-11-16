@@ -37,16 +37,9 @@ function Root() {
       <ScrollRestoration />
       <Suspense>
         <Outlet />
-        <FirstScreenDrawn />
       </Suspense>
     </>
   );
-}
-
-/** Rendered beside the page inside its Suspense boundary, so its effect runs once the page itself is on screen. */
-function FirstScreenDrawn() {
-  useEffect(hideSplash, []);
-  return null;
 }
 
 /** The signed-in frame. Before the business is set up, everything goes to onboarding. */
