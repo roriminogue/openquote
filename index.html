@@ -15,13 +15,54 @@
     <meta name="apple-mobile-web-app-title" content="OpenQuote" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>OpenQuote AU</title>
+    <!-- What iOS shows while the Home Screen app starts: the logo on the page colour, made by scripts/splash. -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/440x956@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/440x956@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/420x912@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/420x912@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/430x932@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/430x932@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/402x874@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/402x874@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/393x852@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/393x852@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/428x926@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/428x926@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/390x844@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/390x844@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/414x896@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/414x896@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/414x896@2x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/414x896@2x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/375x812@3x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/375x812@3x-dark.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="/splash/375x667@2x-light.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="/splash/375x667@2x-dark.png" />
+    <link rel="preload" href="/fonts/figtree-latin.woff2" as="font" type="font/woff2" crossorigin />
     <style>
-      /* Before the app's own styles arrive: the page colour, and the icon in the middle instead of a blank screen. */
-      html { background: #ffffff; }
-      @media (prefers-color-scheme: dark) { html:not([data-theme="light"]) { background: #262626; } }
-      html[data-theme="dark"] { background: #262626; }
-      .boot { position: fixed; inset: 0; display: grid; place-items: center; }
-      .boot img { width: 72px; height: 72px; border-radius: 16px; }
+      /* The splash: the same logo on the same colour as iOS's launch image, kept up until the first screen is drawn
+         (src/lib/splash.ts), so opening the app shows one steady frame instead of icon, logo and blank in turn. */
+      @font-face {
+        font-family: "Figtree Splash";
+        src: url("/fonts/figtree-latin.woff2") format("woff2");
+        font-weight: 300 900;
+        font-display: block;
+      }
+      html { background: #ffffff; --splash-ink: #000000; --splash-dim: #474747; --splash-bg: #ffffff; }
+      @media (prefers-color-scheme: dark) {
+        html:not([data-theme="light"]) { background: #262626; --splash-ink: #f2f2f2; --splash-dim: #b4b4b4; --splash-bg: #262626; }
+      }
+      html[data-theme="dark"] { background: #262626; --splash-ink: #f2f2f2; --splash-dim: #b4b4b4; --splash-bg: #262626; }
+      #splash {
+        position: fixed; inset: 0; z-index: 2147483647; display: flex; align-items: center; justify-content: center;
+        gap: 8px; background: var(--splash-bg); color: var(--splash-ink); transition: opacity 180ms ease-out;
+        font: 600 17px/1.5 "Figtree Splash", -apple-system, sans-serif; letter-spacing: -0.01em;
+        -webkit-font-smoothing: antialiased;
+      }
+      #splash[data-hide] { opacity: 0; pointer-events: none; }
+      #splash svg { width: 22px; height: 22px; flex-shrink: 0; }
+      #splash b { font-weight: 500; color: var(--splash-dim); margin-left: 0.3em; }
+      @media (prefers-reduced-motion: reduce) { #splash { transition: none; } }
     </style>
     <script>
       // The saved Light or Dark choice, applied before the first paint (see src/components/theme.tsx).
@@ -32,7 +73,11 @@
     </script>
   </head>
   <body class="min-h-full flex flex-col">
-    <div id="root" class="flex min-h-full flex-1 flex-col"><div class="boot" aria-hidden="true"><img src="/apple-touch-icon.png" alt="" /></div></div>
+    <div id="splash" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><rect width="24" height="24" rx="6.5" fill="currentColor" /><path d="M7 8h10M7 12h10" stroke="var(--splash-bg)" stroke-width="2" stroke-linecap="round" /><path d="M12.5 16.5H17" stroke="#fa7d21" stroke-width="2.25" stroke-linecap="round" /></svg>
+      <span>OpenQuote<b>AU</b></span>
+    </div>
+    <div id="root" class="flex min-h-full flex-1 flex-col"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

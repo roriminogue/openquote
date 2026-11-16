@@ -8,6 +8,7 @@ import { flush, openDatabase } from "@/db";
 import { isNative } from "@/db/storage";
 import { DataProvider } from "@/lib/data";
 import { setUpKeyboard } from "@/lib/keyboard";
+import { hideSplash } from "@/lib/splash";
 import { router } from "@/routes";
 import { Providers } from "./providers";
 
@@ -23,7 +24,10 @@ export function App() {
     if (!isNative()) void navigator.storage?.persist?.().catch(() => {});
     openDatabase().then(
       () => setState("open"),
-      (e: Error) => setState(e),
+      (e: Error) => {
+        setState(e);
+        hideSplash();
+      },
     );
     // Save straight away when the app goes to the background: iOS may close it without warning after that.
     const onHide = () => {
@@ -50,9 +54,8 @@ export function App() {
         </PublikGate>
       ) : (
         <div className="grid min-h-dvh flex-1 place-items-center px-6 text-center" aria-busy={state === "opening"}>
-          {state === "opening" ? (
-            <Wordmark />
-          ) : (
+          {/* While opening, the splash in index.html covers this; it goes once the first screen is drawn. */}
+          {state === "opening" ? null : (
             <div className="flex max-w-sm flex-col items-center gap-3">
               <Wordmark />
               <p>OpenQuote AU couldn&rsquo;t open its data: {state.message}</p>

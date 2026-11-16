@@ -22,6 +22,7 @@ import { AppShell } from "@/components/app-shell";
 import { getMember } from "@/lib/auth";
 import { useQuery } from "@/lib/data";
 import { NotFoundError, RedirectError, registerNavigator } from "@/lib/navigation";
+import { hideSplash } from "@/lib/splash";
 
 // Every screen in the app. Paths are the same as the web version's, so links inside the screens didn't change.
 
@@ -36,9 +37,16 @@ function Root() {
       <ScrollRestoration />
       <Suspense>
         <Outlet />
+        <FirstScreenDrawn />
       </Suspense>
     </>
   );
+}
+
+/** Rendered beside the page inside its Suspense boundary, so its effect runs once the page itself is on screen. */
+function FirstScreenDrawn() {
+  useEffect(hideSplash, []);
+  return null;
 }
 
 /** The signed-in frame. Before the business is set up, everything goes to onboarding. */
@@ -68,6 +76,7 @@ export function NotFound() {
 
 function RouteError() {
   const error = useRouteError();
+  useEffect(hideSplash, []);
   if (error instanceof RedirectError) return <Navigate to={error.to} replace />;
   if (error instanceof NotFoundError) return <NotFound />;
   console.error(error);

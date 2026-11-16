@@ -32,6 +32,8 @@ export default defineConfig({
       manifest: false, // public/manifest.webmanifest
       workbox: {
         globPatterns: ["**/*.{js,css,html,wasm,png,svg,woff2,webmanifest}"],
+        // iOS reads its launch images itself; no need for every phone to download all 22.
+        globIgnores: ["splash/**"],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
         navigateFallback: "/index.html",
         cleanupOutdatedCaches: true,
