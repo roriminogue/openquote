@@ -24,7 +24,7 @@ the hosting (headers, what else the site serves), the code the app ships (depend
 |---|---|---|---|
 | 1 | jsPDF 3.0.4 had critical advisories (PDF injection, path traversal, DoS) | High | Fixed: upgraded to 4.2.1 |
 | 2 | No Content-Security-Policy, while the web version keeps the AI key in site storage | High | Fixed: strict policy |
-| 3 | The publik relay (`/publik/*`) was still live: an open proxy to publik's API on this domain | Medium | Fixed on the live site; old deployments still have it (see below) |
+| 3 | The publik relay (`/publik/*`) was still live: an open proxy to publik's API on this domain | Medium | Fixed: removed, and the 27 older deployments that still had it deleted |
 | 4 | The old hosted version (Vercel + Supabase, with the original data) is still online | Medium | Open: needs the owner's decision |
 | 5 | No clickjacking protection, HSTS or Permissions-Policy | Low | Fixed |
 | 6 | Dev-only key route could be read by a website using DNS rebinding while the dev server runs | Low | Fixed |
@@ -63,9 +63,10 @@ Trade-off: an Ollama server reached over https somewhere other than this compute
 answering: anyone could route publik AI calls through this domain and use up the free plan's daily function requests.
 It is removed (publik's client code stays, switched off; the README says to restore the relay first).
 
-**Still open:** every Cloudflare Pages deployment keeps its own copy of the site at a permanent address
-(`<id>.openquote-au.pages.dev`), and the 25 earlier deployments still have the relay and lack the new headers.
-Deleting the old deployments in Cloudflare closes this.
+Every Cloudflare Pages deployment also keeps its own copy of the site at a permanent address
+(`<id>.openquote-au.pages.dev`), and the 27 earlier deployments (including a `publik-web` test branch) still had the
+relay and none of the new headers. They were deleted on 16 November; their addresses now return 404. Only the live
+deployment and the `preview` branch used to test this change remain.
 
 ### 4. Old hosted version (open)
 
@@ -110,6 +111,6 @@ drops every trigger and view (the app's schema has none) and refuses files over 
 
 ## Recommendations for later
 
-- Delete the old Cloudflare deployments and the old Vercel/Supabase version (findings 3 and 4).
+- Shut down the old Vercel/Supabase version (finding 4).
 - Delete any AI key that has been pasted into a chat or shared, and use a separate key with a spending limit for testing.
 - Re-run `npm audit` before each release, and this review when a new provider, file import or server piece is added.
