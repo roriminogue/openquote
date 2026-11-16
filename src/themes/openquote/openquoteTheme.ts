@@ -25,13 +25,20 @@ export const openquoteTheme = defineTheme({
   extends: neutralTheme,
   tokens: {
     // Each pair is [light, dark].
-    "--color-accent": ["#f26b1d", "#f26b1d"],
+    // Hi-vis orange, tuned for the label on it: near-black ink reaches 7:1 (AAA), so "Price this job" reads in sun.
+    "--color-accent": ["#fa7d21", "#fa7d21"],
     // Dark ink on orange: white fails contrast at this brightness, near-black passes comfortably.
-    "--color-on-accent": ["#18181b", "#18181b"],
+    "--color-on-accent": ["#111111", "#111111"],
     "--color-accent-muted": ["#ffe6d6", "#3a1f0e"],
     // Orange as text needs to be darker on white and lighter on black to stay readable.
-    "--color-text-accent": ["#b93c0a", "#ff9a5c"],
-    "--color-icon-accent": ["#c2410c", "#ff9a5c"],
+    // (≥5.5:1 on white and on the orange tint in light; ≥6:1 on every dark surface.)
+    "--color-text-accent": ["#a8350a", "#ff9a5c"],
+    "--color-icon-accent": ["#b93c0a", "#ff9a5c"],
+
+    // Dark mode text: off-white instead of pure white (no glow on dark grey, still 12:1+), and a lighter grey for
+    // secondary text so it holds 6:1+ on cards too (Neutral's #9e9e9e fell to 4.9:1 on a raised card).
+    "--color-text-primary": ["#000000", "#f2f2f2"],
+    "--color-text-secondary": ["#474747", "#b4b4b4"],
 
     // Figtree ships inside the app (@fontsource-variable/figtree, imported in main.tsx) as "Figtree Variable", and
     // src/app/fonts.css names it --font-figtree.
