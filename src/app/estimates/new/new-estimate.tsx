@@ -23,7 +23,7 @@ export type PartialDraft = Partial<PartialPricedDraft>;
 
 type Phase =
   | { kind: "idle" }
-  | { kind: "streaming"; number?: number; draft: PartialDraft }
+  | { kind: "streaming"; number?: number; draft: PartialDraft; thinking?: string }
   | { kind: "saving"; number?: number; draft: PartialDraft }
   | { kind: "error"; message: string };
 
@@ -86,17 +86,22 @@ export function NewEstimate({
 
     let number: number | undefined;
     let draft: PartialDraft = {};
+    let thinking: string | undefined;
     try {
       const result = await generateEstimate(
         { description, projectId: project?.id ?? null, siteAddress: project?.siteAddress ? null : siteAddress || null },
         {
           estimate: (e) => {
             number = e.number;
-            setPhase({ kind: "streaming", number, draft });
+            setPhase({ kind: "streaming", number, draft, thinking });
           },
           partial: (d) => {
             draft = d ?? draft;
-            setPhase({ kind: "streaming", number, draft });
+            setPhase({ kind: "streaming", number, draft, thinking });
+          },
+          thinking: (t) => {
+            thinking = t;
+            setPhase({ kind: "streaming", number, draft, thinking });
           },
         },
         controller.signal,
@@ -215,7 +220,14 @@ export function NewEstimate({
 
       <section ref={previewRef} aria-label="Estimate preview" aria-busy={busy} className="mt-8 min-w-0 scroll-mt-20">
         {busy ? (
-          <LivePreview draft={phase.draft} number={phase.number} saving={phase.kind === "saving"} markup={markup} gstRatePct={gstRatePct} />
+          <LivePreview
+            draft={phase.draft}
+            thinking={phase.kind === "streaming" ? phase.thinking : undefined}
+            number={phase.number}
+            saving={phase.kind === "saving"}
+            markup={markup}
+            gstRatePct={gstRatePct}
+          />
         ) : firstTime ? (
           <HowItWorks />
         ) : null}
@@ -303,12 +315,15 @@ function useRevealed<G extends { lines: { priceCents: number }[]; priceCents: nu
 /** What the model has written so far, priced the way the saved estimate will be. */
 export function LivePreview({
   draft,
+  thinking,
   number,
   saving,
   markup,
   gstRatePct,
 }: {
   draft: PartialDraft;
+  /** The model's thinking summary so far, shown until the first stage is priced. */
+  thinking?: string;
   number?: number;
   saving: boolean;
   markup: MarkupSettings;
@@ -319,6 +334,10 @@ export function LivePreview({
   const total = useCountUp(subtotal + Math.round((subtotal * gstRatePct) / 100));
   const lineCount = groups.reduce((s, g) => s + g.lines.length, 0);
   const current = groups.at(-1);
+  // The summary comes in short paragraphs, one per step of its thinking; show the latest.
+  const paragraphs = (thinking ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const thought = paragraphs.at(-1);
+  const thoughtKey = paragraphs.length;
 
   return (
     <Card elevation="low">
@@ -328,13 +347,25 @@ export function LivePreview({
           <span className="relative size-2 rounded-full bg-(--color-accent)" />
         </span>
         <span className="min-w-0 truncate">
-          {saving ? "Checking prices and saving…" : current ? `Stage ${groups.length} · ${current.name}` : "Working out the stages…"}
+          {saving
+            ? "Checking prices and saving…"
+            : current
+              ? `Stage ${groups.length} · ${current.name}`
+              : thought
+                ? "Thinking it through…"
+                : "Working out the stages…"}
         </span>
       </p>
 
       <div className="mt-2">
         <Heading level={2}>{draft.title || "Reading the job…"}</Heading>
       </div>
+      {thought && !current && (
+        // The thought the model is on right now, replaced as it moves on. Not announced: it changes too often.
+        <p key={thoughtKey} className="enter mt-2 line-clamp-3 text-(length:--text-body-size) leading-snug text-(--color-text-secondary)">
+          {thought}
+        </p>
+      )}
       {number && (
         <Text as="p" type="supporting" color="secondary" hasTabularNumbers>
           {formatEstimateNo(number)}

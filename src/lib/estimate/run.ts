@@ -15,6 +15,7 @@ import { buildGenerationPrompt } from "./prompt";
 //   estimate {id, number}    the draft row exists
 //   partial  {draft}         what's priced so far, at most every 200 ms: each finished fence, deck and line goes
 //                            through the same calculators, rates and price book as the saved estimate
+//   thinking {summary}       the model's thinking summary so far, before the answer starts (Claude only)
 // and resolves with the finished estimate, or { error } with a message for the person.
 
 const PARTIAL_INTERVAL_MS = 200;
@@ -26,7 +27,11 @@ export type GenerateResult =
 
 export async function generateEstimate(
   input: GenerateInput,
-  on: { estimate?: (e: { id: string; number: number }) => void; partial?: (draft: PartialDraft) => void },
+  on: {
+    estimate?: (e: { id: string; number: number }) => void;
+    partial?: (draft: PartialDraft) => void;
+    thinking?: (summary: string) => void;
+  },
   signal?: AbortSignal,
 ): Promise<GenerateResult> {
   const description = input.description.trim();
@@ -62,6 +67,7 @@ export async function generateEstimate(
   on.estimate?.(estimate);
 
   let lastPartialAt = 0;
+  let lastThinkingAt = 0;
   try {
     const { draft, usage } = await generateEstimateDraft({
       model: model.model,
@@ -73,6 +79,12 @@ export async function generateEstimate(
         if (now - lastPartialAt < PARTIAL_INTERVAL_MS) return;
         lastPartialAt = now;
         on.partial?.(pricePartialDraft(partial, aliased));
+      },
+      onThinking: (summary) => {
+        const now = Date.now();
+        if (now - lastThinkingAt < PARTIAL_INTERVAL_MS) return;
+        lastThinkingAt = now;
+        on.thinking?.(summary);
       },
     });
 
