@@ -49,4 +49,4 @@ RULES:
 - 402: show error.message plus error.top_up_url only
 - Never print or log a key
 - Docs: https://publikhq.com/llms.txt, https://publikhq.com/developers, https://publikhq.com/skills/api.md
-- In this app: iPhone ios/App/App/Publik.swift; web src/lib/publik-web.ts through the relay functions/publik (publik's API doesn't take browser calls)
+- In this app: iPhone ios/App/App/Publik.swift; web src/lib/publik-web.ts, which needs a relay (publik's API doesn't take browser calls): the Cloudflare function functions/publik was removed in the November 2026 security audit; restore it from git history before switching publik on

@@ -29,7 +29,14 @@ const devAiKey = (): Plugin => ({
   apply: "serve",
   configureServer(server) {
     server.middlewares.use("/__dev/ai-key", (req, res) => {
-      const local = ["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(req.socket.remoteAddress ?? "");
+      // From this computer, addressed to it by name (not a website re-pointing its own domain at 127.0.0.1, which
+      // this middleware would otherwise see before Vite's own host check), and not a request from another site.
+      const host = (req.headers.host ?? "").replace(/:\d+$/, "");
+      const site = req.headers["sec-fetch-site"];
+      const local =
+        ["127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(req.socket.remoteAddress ?? "") &&
+        ["localhost", "127.0.0.1", "[::1]"].includes(host) &&
+        (site === undefined || site === "same-origin");
       const key = loadEnv("development", process.cwd(), "OQ_DEV_").OQ_DEV_ANTHROPIC_KEY;
       res.setHeader("cache-control", "no-store");
       if (!local || !key) {
@@ -81,7 +88,8 @@ export default defineConfig({
   build: { outDir: "dist", target: "es2022", chunkSizeWarningLimit: 2000 },
   // `npm run dev`, then open the address it prints. --host lets a phone on the same Wi-Fi open it too.
   // The iOS build folders hold thousands of generated files; watching them makes the dev server run out of memory.
-  // /publik is the relay to publik API (functions/publik): on the live site a Cloudflare function, here a proxy.
+  // /publik is the relay to publik API, for development only: the live site no longer has one (the Cloudflare
+  // function was removed in the November 2026 security audit, as publik is switched off).
   server: {
     port: 5173,
     watch: { ignored: ["**/ios/**", "**/dist/**"] },

@@ -181,8 +181,9 @@ with publik · Vitest. Product spec and data model: [SPEC.md](SPEC.md). Design s
 **Optional: Sign in with publik.** The code can also run as a [publik](https://publikhq.com) app (Sign in with
 publik, and pay for AI with a publik plan): put publik's app token in `publik-app-token.txt` at the top of the repo
 and rebuild. Without that file, which is the default, none of it runs. The pieces: `ios/App/App/Publik.swift`
-(iPhone app), `src/lib/publik-web.ts` (web version) and `functions/publik` (a Cloudflare Pages relay, since publik's
-API doesn't take calls from web pages).
+(iPhone app) and `src/lib/publik-web.ts` (web version). The web version also needs a relay, since publik's API
+doesn't take calls from web pages: it was a Cloudflare Pages function, `functions/publik`, removed in the
+[November 2026 security audit](docs/security-audit-2026-11.md) while publik is off; restore it from git history first.
 
 ## Contributing
 
