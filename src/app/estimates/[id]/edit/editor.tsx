@@ -333,7 +333,6 @@ export function EstimateEditor({
               </span>
               <DropdownMenu
                 aria-label={`Stage ${gi + 1} actions`}
-                presentation="adaptive"
                 placement="below"
                 alignment="end"
                 hasChevron={false}
@@ -503,7 +502,7 @@ function LineRow({
             options={TYPE_OPTIONS}
             value={l.type}
             onChange={(type) => onChange({ type: type as LineType })}
-            presentation="adaptive"
+            placement="below"
             width="100%"
             aria-label={`Type, ${where}`}
           />

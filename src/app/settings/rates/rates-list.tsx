@@ -213,7 +213,7 @@ function RateEditor({
             options={units}
             value={draft.unit}
             onChange={(unit) => setDraft((d) => ({ ...d, unit }))}
-            presentation="adaptive"
+            placement="below"
             status={bad("unit")}
             width="100%"
           />

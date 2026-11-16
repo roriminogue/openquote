@@ -106,7 +106,7 @@ export function ProjectForm({
               onChange={(clientId) => set({ clientId: clientId ?? "" })}
               hasSearch={clients.length > 8}
               searchPlaceholder="Search clients…"
-              presentation="adaptive"
+              placement="below"
               width="100%"
               status={fieldError(error, "clientId")}
             />
@@ -152,7 +152,7 @@ export function ProjectForm({
         options={STATUSES.map(([v, label]) => ({ value: v, label }))}
         value={value.status}
         onChange={(status) => set({ status: status ?? "quoting" })}
-        presentation="adaptive"
+        placement="below"
         width="100%"
       />
 
