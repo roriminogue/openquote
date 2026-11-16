@@ -25,7 +25,7 @@ the hosting (headers, what else the site serves), the code the app ships (depend
 | 1 | jsPDF 3.0.4 had critical advisories (PDF injection, path traversal, DoS) | High | Fixed: upgraded to 4.2.1 |
 | 2 | No Content-Security-Policy, while the web version keeps the AI key in site storage | High | Fixed: strict policy |
 | 3 | The publik relay (`/publik/*`) was still live: an open proxy to publik's API on this domain | Medium | Fixed: removed, and the 27 older deployments that still had it deleted |
-| 4 | The old hosted version (Vercel + Supabase, with the original data) is still online | Medium | Open: needs the owner's decision |
+| 4 | The old hosted version (Vercel + Supabase, with the original data) was still online | Medium | Fixed: data exported, Vercel projects and Supabase project paused |
 | 5 | No clickjacking protection, HSTS or Permissions-Policy | Low | Fixed |
 | 6 | Dev-only key route could be read by a website using DNS rebinding while the dev server runs | Low | Fixed |
 | 7 | Restoring a backup kept any triggers or views in the file, which could alter prices later | Low | Fixed |
@@ -68,13 +68,16 @@ Every Cloudflare Pages deployment also keeps its own copy of the site at a perma
 relay and none of the new headers. They were deleted on 16 November; their addresses now return 404. Only the live
 deployment and the `preview` branch used to test this change remain.
 
-### 4. Old hosted version (open)
+### 4. Old hosted version (fixed)
 
 `openquote-rust.vercel.app` and `openquote-app.vercel.app` still serve the earlier Next.js version, backed by the
 Supabase project `quoteai-dev`, which holds the original business data and sign-in. Supabase's advisor reports no
 exposed tables (RLS is on; the two tables without policies are closed to everyone) and only that leaked-password
-protection is off (sign-in used email codes). It isn't used any more, so the safest step is to export anything worth
-keeping (`scripts/export-from-web.ts`) and then delete the Vercel projects and pause or delete the Supabase project.
+protection is off (sign-in used email codes). It wasn't used any more, so on 16 November its data was exported (an OpenQuote backup file via
+`scripts/export-from-web.ts`, plus a JSON copy of every table, both kept off GitHub), the two Vercel projects
+(`openquote`, `openquote-app`) were paused, so their addresses answer "deployment paused" and older deployments sit
+behind Vercel sign-in, and the Supabase project was paused. Pausing can be undone; deleting them for good is the
+remaining step once nothing more is needed from them.
 
 ### 5. Other headers (fixed)
 
@@ -111,6 +114,6 @@ drops every trigger and view (the app's schema has none) and refuses files over 
 
 ## Recommendations for later
 
-- Shut down the old Vercel/Supabase version (finding 4).
+- Delete the paused Vercel projects and Supabase project for good once nothing more is needed from them (finding 4).
 - Delete any AI key that has been pasted into a chat or shared, and use a separate key with a spending limit for testing.
 - Re-run `npm audit` before each release, and this review when a new provider, file import or server piece is added.
