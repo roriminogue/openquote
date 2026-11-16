@@ -120,7 +120,12 @@ export function SendQuoteButton({ target }: { target: SendTarget }) {
   );
 }
 
-/** "Deck 6 × 4 m" → "deck 6 × 4 m", but leaves "QA test…", "LED lights…" and "iPhone…" as they are. */
+// Trade brand names a job title can start with: they keep their capital ("your quote for Colorbond fencing").
+const BRANDS = new Set(["colorbond", "zincalume", "hardie", "scyon", "modwood", "ekodeck", "trex", "weathertex", "gyprock", "dulux", "taubmans", "laminex", "caesarstone", "stratco", "lysaght"]);
+
+/** "Deck 6 × 4 m" → "deck 6 × 4 m", but leaves "QA test…", "LED lights…", "iPhone…" and "Colorbond…" as they are. */
 export function lowerFirst(title: string) {
+  const first = title.match(/^[A-Za-z]+/)?.[0].toLowerCase() ?? "";
+  if (BRANDS.has(first)) return title;
   return /^[A-Z][a-z]/.test(title) ? title.charAt(0).toLowerCase() + title.slice(1) : title;
 }

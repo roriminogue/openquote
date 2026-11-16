@@ -16,11 +16,25 @@ const slot = (provider: Provider) => `ai-key.${provider}`;
 
 export async function getApiKey(provider: Provider): Promise<string | null> {
   if (Capacitor.isNativePlatform()) return (await native.getSecret({ key: slot(provider) })).value || null;
+  let saved: string | null = null;
   try {
-    return localStorage.getItem(`oq.${slot(provider)}`);
+    saved = localStorage.getItem(`oq.${slot(provider)}`);
   } catch {
-    return null;
+    // no storage: fall through
   }
+  if (saved) return saved;
+  // Local development only (vite.config.ts devAiKey): a testing key from .env.local when none is saved. The whole
+  // branch is removed from builds.
+  if (import.meta.env.DEV && provider === "anthropic") return devKey();
+  return null;
+}
+
+let devKeyPromise: Promise<string | null> | null = null;
+function devKey() {
+  devKeyPromise ??= fetch("/__dev/ai-key")
+    .then((r) => (r.ok ? r.text() : null))
+    .catch(() => null);
+  return devKeyPromise;
 }
 
 export async function setApiKey(provider: Provider, value: string) {
