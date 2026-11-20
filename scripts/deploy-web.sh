@@ -18,6 +18,8 @@ cp -R dist/. "$OUT/"
 # without them. (With no 404.html, Cloudflare Pages answers every other address with index.html, and the app shows
 # the right screen.)
 grep -q "Content-Security-Policy" "$OUT/_headers" || { echo "dist/_headers is missing its security headers" >&2; exit 1; }
+# And nothing shaped like a key or token in what goes out.
+node scripts/check-secrets.mjs "$OUT"
 BRANCH=main
 [ "${1:-}" = "preview" ] && BRANCH=preview
 # Run from the repo root. (There are no Pages functions: the publik relay was removed in the November 2026 security
