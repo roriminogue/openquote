@@ -60,7 +60,9 @@ export async function saveGeneratedEstimate(input: {
   groups: PricedGroup[];
   usage: { provider: Provider; model: string; inputTokens: number; outputTokens: number; costMicroUsd: number | null };
 }) {
-  const { orgId, estimateId, draft, groups, usage } = input;
+  const { orgId, estimateId, draft, usage } = input;
+  // A stage the AI left empty would show on the quote at $0.
+  const groups = input.groups.filter((g) => g.lines.length > 0);
   await db.transaction(async (tx) => {
     await tx
       .update(schema.estimates)

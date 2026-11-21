@@ -71,7 +71,7 @@ export function EstimateActions({
       if (!bytes) {
         const page = (e.currentTarget as HTMLElement).closest('main, [role="main"]') ?? document.querySelector('main, [role="main"]');
         if (!page) return;
-        bytes = await quotePdf(page as HTMLElement);
+        bytes = await quotePdf(page as HTMLElement, { title: pdfName, author: send?.businessName });
         setPdf({ of: text, bytes });
       }
       await shareMadePdf(pdfName, bytes);

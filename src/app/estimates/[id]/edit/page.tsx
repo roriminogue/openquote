@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { requireMember } from "@/lib/auth";
 import { useQuery } from "@/lib/data";
 import { getEstimate, markupSettings } from "@/lib/estimate/queries";
+import { toEditGroups } from "@/lib/estimate/edit-schema";
 import { EstimateEditor, type EditorGroup } from "./editor";
 
 export default function EditEstimatePage() {
@@ -29,21 +30,7 @@ function Editor() {
   // Accepted quotes are locked.
   if (estimate.status === "accepted") redirect(`/estimates/${estimate.id}`);
 
-  const initial: EditorGroup[] = groups.map((g) => ({
-    name: g.name,
-    lines: g.lines.map((l) => ({
-      description: l.description,
-      type: l.type,
-      qty: l.qty,
-      unit: l.unit,
-      unitCostCents: l.unitCostCents,
-      // Only a line's own override is editable; the rest follow the business or estimate markup.
-      markupPct: l.markupPct !== l.defaultMarkupPct ? l.markupPct : null,
-      notes: l.notes,
-      source: l.source,
-      sourceRef: l.sourceRef,
-    })),
-  }));
+  const initial: EditorGroup[] = toEditGroups(groups);
 
   return (
     <EstimateEditor
@@ -51,6 +38,14 @@ function Editor() {
       number={estimate.number}
       initialTitle={estimate.title}
       initialGroups={initial}
+      initialWording={{
+        siteAddress: estimate.siteAddress ?? "",
+        summary: estimate.summary ?? "",
+        scope: (estimate.scope ?? []).join("\n"),
+        assumptions: (estimate.assumptions ?? []).join("\n"),
+        exclusions: (estimate.exclusions ?? []).join("\n"),
+        alternatives: estimate.alternatives ?? [],
+      }}
       markup={markupSettings(org)}
       estimateMarkupPct={estimate.markupPct}
       gstRatePct={org.gstRegistered && !estimate.gstExempt ? org.gstRate : 0}

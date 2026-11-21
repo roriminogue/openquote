@@ -1,7 +1,7 @@
 import { Heading } from "@astryxdesign/core/Heading";
 import { Text } from "@astryxdesign/core/Text";
 import { CheckCircle2, XCircle } from "lucide-react";
-import type { ReactNode } from "react";
+import { createContext, useContext, type KeyboardEvent, type ReactNode } from "react";
 import { Money } from "@/components/money";
 import { DEFAULT_TERMS, formatAbn } from "@/lib/business-schema";
 import { dateFormat } from "@/lib/dates";
@@ -10,6 +10,99 @@ import type { getQuoteDocument } from "@/lib/proposals";
 import { formatQty, keepUnits, unitLabel } from "@/lib/units";
 
 export type PublicQuote = NonNullable<Awaited<ReturnType<typeof getQuoteDocument>>>;
+
+/** A piece of the quote's wording that can be changed in place. */
+export type QuoteField =
+  | { kind: "title" }
+  | { kind: "summary" }
+  | { kind: "site" }
+  | { kind: "stage"; group: number }
+  | { kind: "line"; group: number; line: number }
+  | { kind: "point"; list: "scope" | "assumptions" | "exclusions"; index: number }
+  | { kind: "option"; index: number; part: "title" | "detail" }
+  | { kind: "terms" };
+
+/** Given while the tradie is changing the quote's words: each field calls it with its new text when they leave it. */
+export type QuoteEdit = (field: QuoteField, text: string) => void;
+
+const Editing = createContext<QuoteEdit | null>(null);
+
+/**
+ * Text that can be changed in place while editing: tap it and type. Single-line fields finish on Return; Escape
+ * puts back what was there. When not editing (and always in the PDF) it is plain text.
+ */
+function Editable({
+  field,
+  value,
+  shown,
+  label,
+  placeholder,
+  multiline = false,
+}: {
+  field: QuoteField;
+  value: string;
+  /** How the text reads when not editing (units kept together and so on). */
+  shown?: ReactNode;
+  label: string;
+  placeholder?: string;
+  multiline?: boolean;
+}) {
+  const edit = useContext(Editing);
+  if (!edit) return <>{shown ?? value}</>;
+  const keyDown = (e: KeyboardEvent<HTMLSpanElement>) => {
+    if (e.key === "Escape") {
+      e.currentTarget.textContent = value;
+      e.currentTarget.blur();
+    } else if (e.key === "Enter" && !multiline) {
+      e.preventDefault();
+      e.currentTarget.blur();
+    }
+  };
+  return (
+    <span
+      // Remounted with each saved value, so React and the typed text never disagree.
+      key={value}
+      role="textbox"
+      aria-label={label}
+      aria-multiline={multiline || undefined}
+      contentEditable="plaintext-only"
+      suppressContentEditableWarning
+      spellCheck
+      data-placeholder={placeholder}
+      data-field={fieldId(field)}
+      onKeyDown={keyDown}
+      onBlur={(e) => {
+        const raw = e.currentTarget.innerText.replace(/\u00a0/g, " ");
+        const text = (multiline ? raw.replace(/\n{3,}/g, "\n\n") : raw.replace(/\s*\n\s*/g, " ")).trim();
+        if (text !== value) edit(field, text);
+      }}
+      className="quote-editable"
+    >
+      {value}
+    </span>
+  );
+}
+
+/** A field's address on the page (`data-field`), so a new point can be focused once it's drawn. */
+export function fieldId(f: QuoteField) {
+  return Object.values(f).join("-");
+}
+
+/** "Add a point" and the like: only while editing, and never on paper. */
+function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="no-print mt-2 inline-flex h-8 items-center gap-1.5 rounded-(--radius-element) px-2 -ml-2 text-sm font-medium text-(--color-text-secondary) hover:bg-(--color-background-muted) hover:text-(--color-text-primary)"
+    >
+      <span aria-hidden className="text-base leading-none">
+        +
+      </span>
+      {label}
+    </button>
+  );
+}
 
 const dateFmt = dateFormat({ day: "numeric", month: "long", year: "numeric" });
 
@@ -28,7 +121,15 @@ function PartTitle({ id, children }: { id?: string; children: ReactNode }) {
  * The quote as the client sees it: no app chrome, a printable document with the business's branding, and one
  * clear way to say yes. On paper (or Save as PDF) the card, the buttons and the answer form drop away.
  */
-export function QuoteDocument({ q }: { q: PublicQuote }) {
+export function QuoteDocument({ q, edit }: { q: PublicQuote; edit?: QuoteEdit }) {
+  return (
+    <Editing.Provider value={edit ?? null}>
+      <Document q={q} edit={edit} />
+    </Editing.Provider>
+  );
+}
+
+function Document({ q, edit }: { q: PublicQuote; edit?: QuoteEdit }) {
   const { estimate: e, org, client, groups, totals, display, decision, send, validUntil: until, expired } = q;
   const gst = totals.gstCents > 0;
   const upgrades = (e.alternatives ?? []).filter((a) => a.kind === "upgrade");
@@ -89,17 +190,34 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-b border-(--color-border) py-6 sm:grid-cols-4">
           {/* Left out when there's nothing to say (a quote with no client or site yet). */}
           {client?.name && <Meta label="Prepared for">{client.name}</Meta>}
-          {e.siteAddress && <Meta label="Site">{e.siteAddress}</Meta>}
+          {(e.siteAddress || edit) && (
+            <Meta label="Site">
+              <Editable
+                field={{ kind: "site" }}
+                value={e.siteAddress ?? ""}
+                label="Site address"
+                placeholder="Add the site address"
+              />
+            </Meta>
+          )}
           <Meta label="Date">{dateFmt.format(send.sentAt)}</Meta>
           <Meta label="Valid until">{dateFmt.format(until)}</Meta>
         </dl>
 
         <section className="py-6">
-          <Heading level={1}>{e.title ? keepUnits(e.title) : e.title}</Heading>
-          {e.summary && (
-            <div className="mt-3 max-w-[68ch]">
+          <Heading level={1}>
+            <Editable field={{ kind: "title" }} value={e.title} shown={keepUnits(e.title)} label="Title" />
+          </Heading>
+          {(e.summary || edit) && (
+            <div className="mt-3 max-w-[68ch] whitespace-pre-line">
               <Text as="p" display="block" color="secondary">
-                {e.summary}
+                <Editable
+                  field={{ kind: "summary" }}
+                  value={e.summary ?? ""}
+                  label="Summary"
+                  placeholder="Add a summary of the job"
+                  multiline
+                />
               </Text>
             </div>
           )}
@@ -122,7 +240,9 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
                     <Text weight="semibold">
                       <span className="tabular-nums text-(--color-text-secondary)">{gi + 1}</span>
                     </Text>
-                    <Text weight="semibold">{g.name}</Text>
+                    <Text weight="semibold">
+                      <Editable field={{ kind: "stage", group: gi }} value={g.name} label={`Stage ${gi + 1} name`} />
+                    </Text>
                   </h3>
                   {display.showGroupTotals && (
                     <Text weight="semibold">
@@ -132,15 +252,22 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
                 </div>
                 {display.detail !== "total" && (
                   <ul className="mt-2 space-y-1.5">
-                    {g.lines.map((l) => (
-                      <li key={l.id} className="flex items-baseline justify-between gap-4">
+                    {g.lines.map((l, li) => (
+                      // Top-aligned: both sides' first line is the same height, so the price sits on the
+                      // description's first line (baseline alignment went by the bullet and set prices high).
+                      <li key={l.id} className="flex items-start justify-between gap-4">
                         <span className="flex gap-2.5">
                           <span
                             aria-hidden
                             className="mt-[0.6em] size-1 shrink-0 rounded-full bg-(--color-text-secondary)"
                           />
                           <Text>
-                            {keepUnits(l.description)}
+                            <Editable
+                              field={{ kind: "line", group: gi, line: li }}
+                              value={l.description}
+                              shown={keepUnits(l.description)}
+                              label={`Stage ${gi + 1}, line ${li + 1}`}
+                            />
                             {display.showQuantities && (
                               <Text type="inherit" color="secondary" hasTabularNumbers>
                                 {" "}
@@ -186,11 +313,11 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
         </section>
 
         {/* Scope */}
-        {(e.scope?.length || e.assumptions?.length || e.exclusions?.length) && (
-          <section aria-label="Scope" className="grid gap-6 border-t border-(--color-border) py-6 sm:grid-cols-3 print:block print:space-y-6">
-            <Points title="Included" items={e.scope} />
-            <Points title="Assumptions" items={e.assumptions} />
-            <Points title="Not included" items={e.exclusions} />
+        {(e.scope?.length || e.assumptions?.length || e.exclusions?.length || edit) && (
+          <section data-pdf-keep aria-label="Scope" className="grid gap-6 border-t border-(--color-border) py-6 sm:grid-cols-3 print:block print:space-y-6">
+            <Points title="Included" list="scope" items={e.scope} />
+            <Points title="Assumptions" list="assumptions" items={e.assumptions} />
+            <Points title="Not included" list="exclusions" items={e.exclusions} />
           </section>
         )}
 
@@ -198,19 +325,27 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
           <section aria-labelledby="options" className="border-t border-(--color-border) py-6">
             <PartTitle id="options">Options you can ask about</PartTitle>
             <ul className="mt-3 grid gap-3 sm:grid-cols-2 print:block print:space-y-3">
-              {[...upgrades, ...savings].map((a) => (
-                <li
-                  key={a.title}
-                  className="rounded-(--radius-element) bg-(--color-background-muted) px-4 py-3"
-                >
-                  <Text as="p" display="block" weight="medium">
-                    {a.title}
-                  </Text>
-                  <Text as="p" display="block" type="supporting">
-                    {a.detail}
-                  </Text>
-                </li>
-              ))}
+              {[...upgrades, ...savings].map((a, i) => {
+                const index = (e.alternatives ?? []).indexOf(a);
+                return (
+                  <li
+                    key={edit ? i : a.title}
+                    className="rounded-(--radius-element) bg-(--color-background-muted) px-4 py-3"
+                  >
+                    <Text as="p" display="block" weight="medium">
+                      <Editable field={{ kind: "option", index, part: "title" }} value={a.title} label="Option" />
+                    </Text>
+                    <Text as="p" display="block" type="supporting">
+                      <Editable
+                        field={{ kind: "option", index, part: "detail" }}
+                        value={a.detail}
+                        label={`${a.title}: detail`}
+                        placeholder="Add a detail"
+                      />
+                    </Text>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         )}
@@ -219,9 +354,16 @@ export function QuoteDocument({ q }: { q: PublicQuote }) {
           <PartTitle id="terms">Terms</PartTitle>
           <div className="mt-2 whitespace-pre-line">
             <Text as="p" display="block" color="secondary">
-              {org.termsMd || DEFAULT_TERMS}
+              <Editable field={{ kind: "terms" }} value={org.termsMd || DEFAULT_TERMS} label="Terms" multiline />
             </Text>
           </div>
+          {edit && (
+            <div className="no-print mt-2">
+              <Text as="p" display="block" type="supporting">
+                These are your terms for every quote.
+              </Text>
+            </div>
+          )}
           <div className="mt-2">
             <Text as="p" display="block" color="secondary">
               This quote is valid until {dateFmt.format(until)}.
@@ -314,19 +456,41 @@ function TotalRow({ label, cents }: { label: string; cents: number }) {
   );
 }
 
-function Points({ title, items }: { title: string; items: string[] | null }) {
-  if (!items?.length) return null;
+function Points({
+  title,
+  list,
+  items,
+}: {
+  title: string;
+  list: "scope" | "assumptions" | "exclusions";
+  items: string[] | null;
+}) {
+  const edit = useContext(Editing);
+  if (!items?.length && !edit) return null;
   return (
     <div>
       <PartTitle>{title}</PartTitle>
       <ul className="mt-2 space-y-1.5">
-        {items.map((it) => (
-          <li key={it} className="flex gap-2.5">
+        {(items ?? []).map((it, i) => (
+          <li key={edit ? i : it} className="flex gap-2.5">
             <span aria-hidden className="mt-[0.6em] size-1 shrink-0 rounded-full bg-(--color-text-secondary)" />
-            <Text>{it}</Text>
+            <Text>
+              <Editable
+                field={{ kind: "point", list, index: i }}
+                value={it}
+                label={`${title}, point ${i + 1}`}
+                placeholder="New point"
+              />
+            </Text>
           </li>
         ))}
       </ul>
+      {edit && (
+        <AddButton
+          label="Add a point"
+          onClick={() => edit({ kind: "point", list, index: items?.length ?? 0 }, "")}
+        />
+      )}
     </div>
   );
 }
