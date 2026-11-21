@@ -202,3 +202,38 @@ dd {
     0 6px 20px light-dark(rgb(0 0 0 / 0.05), transparent);
 }
 }
+
+/* Words on the client's quote that can be changed in place (Edit on the quote screen): a dashed underline says
+   "tap to change", and the field being typed in sits on a soft tint with the accent ring. */
+@layer components {
+.quote-editable {
+  border-radius: 3px;
+  outline: none;
+  cursor: text;
+  text-decoration: underline dashed var(--color-border-emphasized);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  transition: background-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+.quote-editable:focus {
+  text-decoration-color: transparent;
+  background: var(--color-background-muted);
+  box-shadow: 0 0 0 4px var(--color-background-muted), 0 0 0 6px var(--color-accent);
+}
+@media (hover: hover) {
+  .quote-editable:hover:not(:focus) {
+    background: var(--color-background-muted);
+    box-shadow: 0 0 0 4px var(--color-background-muted);
+  }
+}
+.quote-editable:empty {
+  display: inline-block;
+  min-width: 6ch;
+}
+.quote-editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-secondary);
+}
+}

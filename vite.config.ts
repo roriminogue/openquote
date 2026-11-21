@@ -73,7 +73,7 @@ export default defineConfig({
       injectRegister: null, // registered in src/main.tsx, which reloads onto a new version as soon as it's ready
       manifest: false, // public/manifest.webmanifest
       workbox: {
-        globPatterns: ["**/*.{js,css,html,wasm,png,svg,woff2,webmanifest}"],
+        globPatterns: ["**/*.{js,css,html,wasm,png,svg,woff2,ttf,webmanifest}"], // ttf: the PDF's fonts
         // iOS reads its launch images itself; no need for every phone to download all 22.
         globIgnores: ["splash/**"],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,

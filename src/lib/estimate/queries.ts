@@ -47,7 +47,9 @@ function buildView(org: Org, estimate: Estimate, groups: Group[], lines: Line[])
         costCents: gl.reduce((s, l) => s + l.costCents, 0),
         priceCents: gl.reduce((s, l) => s + l.priceCents, 0),
       };
-    });
+    })
+    // A stage with no lines (all of them deleted) has nothing to show: it isn't on the estimate or the quote.
+    .filter((g) => g.lines.length > 0);
   const totals = estimateTotals(views, {
     org: markup,
     estimateMarkupPct: estimate.markupPct,

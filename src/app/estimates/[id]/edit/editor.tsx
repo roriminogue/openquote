@@ -14,8 +14,9 @@ import { useRouter } from "@/lib/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackLink } from "@/components/back-link";
 import { Money } from "@/components/money";
-import type { EditLine } from "@/lib/estimate/edit-schema";
-import { parseQty } from "@/lib/estimate/edit-schema";
+import { SectionTitle } from "@/components/section-title";
+import type { EditAlternative, EditLine } from "@/lib/estimate/edit-schema";
+import { parseQty, pointsFromText } from "@/lib/estimate/edit-schema";
 import {
   estimateTotals,
   formatEstimateNo,
@@ -28,6 +29,16 @@ import { centsToDollars, dollarsToCents, RATE_UNITS } from "@/lib/rates-schema";
 import { saveEstimate, saveLineAsRate } from "./actions";
 
 export type EditorGroup = { name: string; lines: EditLine[] };
+/** The estimate's words for the client, as the editor holds them: each list as one point per line of text. */
+export type EditorWording = {
+  siteAddress: string;
+  summary: string;
+  scope: string;
+  assumptions: string;
+  exclusions: string;
+  alternatives: EditAlternative[];
+};
+type DraftOption = EditAlternative & { key: string };
 
 type DraftLine = {
   key: string;
@@ -114,6 +125,7 @@ export function EstimateEditor({
   number,
   initialTitle,
   initialGroups,
+  initialWording,
   markup,
   estimateMarkupPct,
   gstRatePct,
@@ -122,6 +134,7 @@ export function EstimateEditor({
   number: number;
   initialTitle: string;
   initialGroups: EditorGroup[];
+  initialWording: EditorWording;
   markup: MarkupSettings;
   estimateMarkupPct: number | null;
   gstRatePct: number;
@@ -132,6 +145,18 @@ export function EstimateEditor({
     initialGroups.map((g) => ({ key: key(), name: g.name, lines: g.lines.map(toDraftLine) })),
   );
   const [dirty, setDirty] = useState(false);
+  const [wording, setWordingState] = useState(initialWording);
+  const setWording = (patch: Partial<Omit<EditorWording, "alternatives">>) => {
+    setWordingState((w) => ({ ...w, ...patch }));
+    setDirty(true);
+  };
+  const [options, setOptionsState] = useState<DraftOption[]>(() =>
+    initialWording.alternatives.map((a) => ({ ...a, key: key() })),
+  );
+  const setOptions = (fn: (os: DraftOption[]) => DraftOption[]) => {
+    setOptionsState(fn);
+    setDirty(true);
+  };
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -208,19 +233,33 @@ export function EstimateEditor({
   async function save(e?: React.FormEvent) {
     e?.preventDefault();
     setError(null);
-    const lines = groups.map((g) => g.lines.map(toLine));
+    // A stage left without lines isn't saved: it would show on the quote at $0.
+    const kept = groups.filter((g) => g.lines.length > 0);
+    if (!kept.length) {
+      setError("Add at least one line before saving.");
+      return;
+    }
+    const lines = kept.map((g) => g.lines.map(toLine));
     const bad = lines.flatMap((ls, gi) => ls.map((l, li) => (l ? null : [gi, li]))).find(Boolean);
     if (bad) {
       setError(
-        `Check the numbers in stage ${bad[0] + 1}, line ${bad[1] + 1}: quantity, cost and markup must be numbers, 0 or more.`,
+        `Check the numbers in stage ${groups.indexOf(kept[bad[0]]) + 1}, line ${bad[1] + 1}: quantity, cost and markup must be numbers, 0 or more.`,
       );
-      document.getElementById(`${groups[bad[0]].lines[bad[1]].key}-qty`)?.focus();
+      document.getElementById(`${kept[bad[0]].lines[bad[1]].key}-qty`)?.focus();
       return;
     }
     setBusy(true);
     const res = await saveEstimate(estimateId, {
       title,
-      groups: groups.map((g, gi) => ({ name: g.name, lines: lines[gi] })),
+      siteAddress: wording.siteAddress,
+      summary: wording.summary,
+      scope: pointsFromText(wording.scope),
+      assumptions: pointsFromText(wording.assumptions),
+      exclusions: pointsFromText(wording.exclusions),
+      alternatives: options
+        .filter((o) => o.title.trim() || o.detail.trim())
+        .map(({ kind, title, detail }) => ({ kind, title, detail })),
+      groups: kept.map((g, gi) => ({ name: g.name, lines: lines[gi] })),
     });
     setBusy(false);
     if (!res.ok) {
@@ -249,9 +288,12 @@ export function EstimateEditor({
 
       <header className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
         <div className="min-w-0 flex-1">
-          <Text as="p" type="supporting" hasTabularNumbers>
-            Editing {formatEstimateNo(number)}
-          </Text>
+          {/* The screen's heading (each screen has an h1; the launch splash waits for it), set small. */}
+          <h1>
+            <Text type="supporting" hasTabularNumbers>
+              Editing {formatEstimateNo(number)}
+            </Text>
+          </h1>
           <div className="mt-2">
             <TextArea
               id="title"
@@ -262,6 +304,28 @@ export function EstimateEditor({
                 setTitle(next.replace(/\n/g, " "));
                 setDirty(true);
               }}
+              width="100%"
+            />
+          </div>
+          <div className="mt-4">
+            <TextInput
+              id="siteAddress"
+              label="Site address"
+              isOptional
+              value={wording.siteAddress}
+              onChange={(siteAddress) => setWording({ siteAddress })}
+              width="100%"
+            />
+          </div>
+          <div className="mt-4">
+            <TextArea
+              id="summary"
+              label="Summary"
+              description="The paragraph under the title, on the estimate and the client's quote."
+              isOptional
+              rows={4}
+              value={wording.summary}
+              onChange={(summary) => setWording({ summary })}
               width="100%"
             />
           </div>
@@ -376,6 +440,22 @@ export function EstimateEditor({
             </div>
 
             <Card padding={0}>
+              {g.lines.length === 0 && (
+                <div className="flex flex-col items-start gap-3 px-3 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                  <Text as="p" type="supporting">
+                    No lines left. This stage won’t be on the estimate or the quote.
+                  </Text>
+                  {groups.length > 1 && (
+                    <Button
+                      label="Delete stage"
+                      variant="secondary"
+                      size="sm"
+                      icon={<Icon icon={Trash2} />}
+                      onClick={() => update((gs) => gs.filter((_, i) => i !== gi))}
+                    />
+                  )}
+                </div>
+              )}
               <ul className="divide-y divide-dashed divide-(--color-border)">
                 {g.lines.map((l, li) => (
                   <LineRow
@@ -432,6 +512,97 @@ export function EstimateEditor({
           }}
         />
       </div>
+
+      <section aria-labelledby="scope-title" className="mt-12">
+        <SectionTitle id="scope-title">Scope</SectionTitle>
+        <div className="grid gap-5 lg:grid-cols-3">
+          {(
+            [
+              ["scope", "Scope of work"],
+              ["assumptions", "Assumptions"],
+              ["exclusions", "Not included"],
+            ] as const
+          ).map(([field, label]) => (
+            <TextArea
+              key={field}
+              id={field}
+              label={label}
+              description="One point per line."
+              isOptional
+              rows={5}
+              value={wording[field]}
+              onChange={(text) => setWording({ [field]: text })}
+              width="100%"
+            />
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="options-title" className="mt-12">
+        <SectionTitle id="options-title">Options to offer</SectionTitle>
+        <div className="grid gap-8 lg:grid-cols-2">
+          {(
+            [
+              ["upgrade", "Upgrades", "Add upgrade"],
+              ["saving", "Ways to save", "Add way to save"],
+            ] as const
+          ).map(([kind, label, add]) => (
+            <div key={kind}>
+              <Text as="p" weight="semibold">
+                {label}
+              </Text>
+              <ul className="mt-3 flex flex-col gap-4">
+                {options.map((o, oi) =>
+                  o.kind !== kind ? null : (
+                    <li key={o.key} className="flex items-start gap-2">
+                      <div className="flex min-w-0 flex-1 flex-col gap-2">
+                        <TextInput
+                          id={`${o.key}-title`}
+                          label={`${label}: title`}
+                          isLabelHidden
+                          value={o.title}
+                          onChange={(t) => setOptions((os) => os.map((x, i) => (i === oi ? { ...x, title: t } : x)))}
+                          placeholder="Title"
+                          width="100%"
+                        />
+                        <TextArea
+                          id={`${o.key}-detail`}
+                          label={`${label}: detail`}
+                          isLabelHidden
+                          rows={2}
+                          value={o.detail}
+                          onChange={(d) => setOptions((os) => os.map((x, i) => (i === oi ? { ...x, detail: d } : x)))}
+                          placeholder="What it means for the client, and the price difference"
+                          width="100%"
+                        />
+                      </div>
+                      <IconButton
+                        label={`Delete ${o.title || "this option"}`}
+                        variant="ghost"
+                        icon={<Icon icon={Trash2} />}
+                        onClick={() => setOptions((os) => os.filter((_, i) => i !== oi))}
+                      />
+                    </li>
+                  ),
+                )}
+              </ul>
+              <div className="-ml-2 mt-2">
+                <Button
+                  label={add}
+                  variant="ghost"
+                  size="sm"
+                  icon={<Icon icon={Plus} />}
+                  onClick={() => {
+                    const o = { key: key(), kind, title: "", detail: "" };
+                    setOptions((os) => [...os, o]);
+                    setFocusId(`${o.key}-title`);
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* Phones: the total and Save stay within thumb reach, sitting right on the tab bar (56px + its border). */}
       <div className="no-print fixed inset-x-0 bottom-[calc(3.5rem+1px+env(safe-area-inset-bottom))] z-20 flex items-center justify-between gap-3 border-t border-(--color-border) bg-(--color-background-surface) px-4 py-2.5 sm:hidden">
@@ -494,6 +665,18 @@ function LineRow({
         onChange={(description) => onChange({ description: description.replace(/\n/g, " ") })}
         placeholder="What it is"
         width="100%"
+      />
+      <TextArea
+        id={id("notes")}
+        label={`Note, ${where}`}
+        isLabelHidden
+        rows={2}
+        size="sm"
+        value={l.notes ?? ""}
+        onChange={(notes) => onChange({ notes: notes || null })}
+        placeholder="Note (optional): how it was worked out, what it covers"
+        width="100%"
+        controlClassName="text-(--color-text-secondary)"
       />
       <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-[9rem_5.5rem_6.5rem_8rem_6.5rem]">
         <div className="col-span-2 sm:col-span-1">

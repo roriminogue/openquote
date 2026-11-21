@@ -11,20 +11,32 @@ export async function saveEstimateEdits(orgId: string, estimateId: string, input
   return db.transaction(async (tx) => {
     const [estimate] = await tx
       .update(schema.estimates)
-      .set({ title: input.title, currentVersion: sql`${schema.estimates.currentVersion} + 1`, updatedAt: new Date() })
+      .set({
+        title: input.title,
+        // Wording the caller didn't send stays as it is.
+        ...(input.siteAddress !== undefined && { siteAddress: input.siteAddress || null }),
+        ...(input.summary !== undefined && { summary: input.summary || null }),
+        ...(input.scope && { scope: input.scope }),
+        ...(input.assumptions && { assumptions: input.assumptions }),
+        ...(input.exclusions && { exclusions: input.exclusions }),
+        ...(input.alternatives && { alternatives: input.alternatives }),
+        currentVersion: sql`${schema.estimates.currentVersion} + 1`,
+        updatedAt: new Date(),
+      })
       .where(and(eq(schema.estimates.id, estimateId), eq(schema.estimates.orgId, orgId), ne(schema.estimates.status, "accepted")))
       .returning({ version: schema.estimates.currentVersion });
     if (!estimate) return false;
 
-    // Line items cascade with their groups.
+    // Line items cascade with their groups. A stage left without lines isn't kept: it would show on the quote at $0.
     await tx.delete(schema.lineGroups).where(eq(schema.lineGroups.estimateId, estimateId));
+    const kept = input.groups.filter((g) => g.lines.length > 0);
     const groups = await tx
       .insert(schema.lineGroups)
-      .values(input.groups.map((g, i) => ({ estimateId, name: g.name, sort: i })))
+      .values(kept.map((g, i) => ({ estimateId, name: g.name, sort: i })))
       .returning({ id: schema.lineGroups.id, sort: schema.lineGroups.sort });
     const groupIds = groups.sort((a, b) => a.sort - b.sort).map((g) => g.id);
 
-    const lines = input.groups.flatMap((g, gi) =>
+    const lines = kept.flatMap((g, gi) =>
       g.lines.map((l, li) => ({
         groupId: groupIds[gi],
         description: l.description,
@@ -46,7 +58,7 @@ export async function saveEstimateEdits(orgId: string, estimateId: string, input
       version: estimate.version,
       createdBy: "user",
       reason: "Edited by hand",
-      snapshot: input,
+      snapshot: { ...input, groups: kept },
     });
     return true;
   });
